@@ -1,0 +1,317 @@
+{
+  "layer": "top",
+  "spacing": 8,
+  "margin-left": 0,
+  "margin-right": 0,
+  "position": "top",
+  "fixed-center": true,
+  "reload_style_on_change": true,
+  "modules-left": [
+    "niri/workspaces",
+    "group/window",
+    "mpris"
+  ],
+  "modules-center": [
+    "custom/niri-actions"
+  ],
+  "modules-right": [
+    "niri/language",
+    "custom/separator",
+    "pulseaudio",
+    "battery",
+    "backlight",
+    "custom/separator",
+    "tray",
+    "custom/separator",
+    "clock",
+    "custom/separator",
+    "idle_inhibitor"
+  ],
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": " ",
+      "deactivated": " "
+    }
+  },
+  "wlr/taskbar": {
+    "on-click": "activate",
+    "on-click-middle": "close",
+    "on-click-right": "fullscreen"
+  },
+  "niri/workspaces": {
+    "separate-outputs": true,
+    "active-only": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "I",
+      "2": "II",
+      "3": "III",
+      "4": "IV",
+      "5": "V",
+      "6": "VI",
+      "7": "VII",
+      "8": "VIII",
+      "9": "IX",
+      "10": "X"
+    }
+  },
+  "clock": {
+    "format": "{:%a %d/%m/%Y | %R}",
+    "format-alt": "{:%a %d/%m/%Y (%Z) | %R}",
+    "tooltip-format": "<span><big>{:%a %d-%m-%Y}</big>\n\n<tt><small>{calendar}</small></tt></span>",
+    "locale": "nl_BE.UTF-8",
+    "timezone": "Europe/Brussels",
+    "timezones": [
+      "Europe/Brussels",
+      "Europe/London",
+      "America/New_York",
+      "America/Mexico_City",
+      "Asia/Tokyo",
+      "Asia/Hong_Kong",
+      "Asia/Kolkata",
+      "Australia/Sydney",
+      "Africa/Cairo",
+      "GMT"
+    ],
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "left",
+      "mode-mon-col": 2,
+      "on-scroll": 1,
+      "on-click-right": "mode",
+      "format": {
+        "months": "<span color='white'><b>{}\n</b></span>",
+        "days": "<span color='white'><b>{}</b></span>",
+        "weeks": "<span color='#e6ba5a'>W{}</span>",
+        "weekdays": "<span color='#e6ba5a'><b>{}</b></span>",
+        "today": "<span background='#80a0ff' color='black'><b>{}</b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-click-forward": "tz_down",
+      "on-click-backward": "tz_up",
+      "on-click-middle": "shift_reset",
+      "on-scroll-up": "shift_down",
+      "on-scroll-down": "shift_up"
+    }
+  },
+  "cpu": {
+    "on-click": "kitty -e btop",
+    "format": "{icon} {0}%",
+    "format-icons": "",
+    "states": {
+      "warning": 50,
+      "critical": 90
+    },
+    "interval": 1
+  },
+  "memory": {
+    "on-click": "kitty -e btop",
+    "format": "{icon} {0}%",
+    "format-icons": "󰍜",
+    "states": {
+      "warning": 50,
+      "critical": 80
+    }
+  },
+  "disk": {
+    "unit": "GB",
+    "path": "/home",
+    "format": " {}%",
+    "format-icons": [
+      "",
+      "󱓽"
+    ],
+    "states": {
+      "warning": 30,
+      "critical": 15
+    }
+  },
+  "temperature": {
+    "interval": 1,
+    "critical-threshold": 80,
+    "format-critical": " {temperatureC}°C",
+    "format": " {temperatureC}°C"
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "tooltip": false,
+    "format-muted": "󰝟 ",
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-middle": "kitty -T pulsemixer -e pulsemixer",
+    "on-click-right": "pavucontrol",
+    "scroll-step": 5,
+    "format-icons": {
+      "headphone": "",
+      "hands-free": "",
+      "headset": "",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [
+        "",
+        "󰕾",
+        ""
+      ]
+    }
+  },
+  "mpris": {
+    "player": "spotify",
+    "format": "{player_icon} {status_icon} {artist} - {title}",
+    "title-len": 25,
+    "artist-len": 15,
+    "album-len": 15,
+    "player-icons": {
+      "default": "▶",
+      "mpv": "🎵",
+      "spotify": "<span foreground='#7d312c'>  </span> "
+    },
+    "status-icons": {
+      "paused": ""
+    }
+  },
+  "custom/hypr-actions": {
+    "format": " ",
+    "tooltip": false,
+    "on-click-backward": "rofi -show drun",
+    "on-click-forward": "hyprctl dispatch workspace previous",
+    "on-double-click": "hyprctl dispatch fullscreen 1",
+    "on-click-middle": "hyprctl dispatch layoutmsg swapwithmaster master",
+    "on-click-right": "hyprctl dispatch killactive"
+  },
+  "custom/niri-actions": {
+    "format": " ",
+    "tooltip": false,
+    "on-click-backward": "rofi -show drun",
+    "on-click-forward": "niri msg action focus-workspace-previous",
+    "on-double-click": "niri msg action maximize-column",
+    "on-click-middle": "niri msg action move-column-left",
+    "on-click-right": "niri msg action close-window"
+  },
+  "custom/separator": {
+    //"format": "  ",
+    "format": "  ",
+    "tooltip": false
+  },
+  "niri/language": {
+    "on-click": "niri msg action switch-layout next"
+  },
+  "hyprland/window": {
+    "format": "{initialTitle}",
+    //"format": "{initialClass}",
+    "separate-outputs": true,
+    "icon": true,
+    "icon-size": 20
+  },
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󱅫<span foreground='#7d312c'></span>",
+      "none": "",
+      "dnd-notification": "<span foreground='#7d312c'><sup></sup> </span>",
+      "dnd-none": "",
+      "inhibited-notification": "<span foreground='#7d312c'><sup></sup></span>",
+      "inhibited-none": "",
+      "dnd-inhibited-notification": "<span foreground='#7d312c'><sup></sup> </span>",
+      "dnd-inhibited-none": ""
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+  "tray": {
+    "spacing": 5,
+  },
+  "backlight": {
+    "format": "{icon} {percent}%",
+    "format-icons": [
+      "",
+      ""
+    ]
+  },
+  "battery": {
+    "states": {
+      "good": 95,
+      "warning": 30,
+      "critical": 20
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-plugged": " {capacity}%",
+    "format-alt": "{time} {icon}",
+    "format-icons": [
+      "󰂎",
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ]
+  },
+  "custom/emacs-clock": {
+    "format": "{icon}{0}",
+    "interval": 20,
+    "return-type": "json",
+    "on-click": "hyprctl dispatch togglespecialworkspace",
+    "on-click-right": "hyprctl dispatch togglefloating",
+    "on-click-middle": "hyprctl dispatch fullscreenstate 0 3",
+    "on-click-forward": "/home/jp/.config/waybar/scripts/hyprmover",
+    "on-click-backward": "hyprctl dispatch layoutmsg orientationnext",
+    "format-icons": {
+      "clocking": "󱃑 ",
+      "nothing": "󰅶 "
+    },
+    "exec": "/home/jp/.config/waybar/scripts/emacs-clock.sh"
+  },
+  "custom/pacman": {
+    "format": "{icon}{0}",
+    "return-type": "json",
+    "format-icons": {
+      "pending-updates": " ",
+      "updated": ""
+    },
+    "on-click": "kitty -e yay",
+    "exec": "/home/jp/.config/waybar/scripts/waybar-updates"
+  },
+  "group/power": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "children-class": "not-power",
+      "transition-left-to-right": false
+    },
+    "modules": [
+      "cpu",
+      "memory",
+      "custom/pacman"
+    ]
+  },
+  "group/window": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 500,
+      "children-class": "group-invisible",
+      "transition-left-to-right": true
+    },
+    "modules": [
+      "hyprland/window",
+      "custom/separator",
+      "cpu",
+      "custom/separator",
+      "memory",
+      "custom/separator",
+      "custom/pacman"
+    ]
+  }
+}

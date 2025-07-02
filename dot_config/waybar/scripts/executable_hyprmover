@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+workspaceNumber=$(printf "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n%s\n%s\n%s\n%s" $(seq 1 9) "Special" "Move Workspace Left" "Move Workspace Right" "Exit" | rofi -dmenu -only-match -i -p "Move to workspace: " -theme ~/.config/rofi/launchers/type-1/style-11.rasi)
+
+if [ -n "$workspaceNumber" ] && [ "$workspaceNumber" == "Move Workspace Left" ]; then
+  hyprctl dispatch movecurrentworkspacetomonitor l
+elif [ -n "$workspaceNumber" ] && [[ "$workspaceNumber" == "Move Workspace Right" ]]; then
+  hyprctl dispatch movecurrentworkspacetomonitor r
+elif [ -n "$workspaceNumber" ] && [[ "$workspaceNumber" != "Exit" ]]; then
+  hyprctl dispatch movetoworkspace "$workspaceNumber"
+fi

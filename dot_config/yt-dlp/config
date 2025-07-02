@@ -1,0 +1,20 @@
+#  yt-dlp.conf
+
+--embed-chapters
+--embed-info-json
+--embed-metadata
+--embed-thumbnail
+
+--sub-langs "en, nl"
+--write-auto-subs
+--write-sub
+
+# --sponsorblock-mark all
+# --sponsorblock-remove sponsor,interaction,selfpromo,outro
+--embed-subs
+--compat-options no-keep-subs
+
+--merge-output-format mkv
+--restrict-filenames
+
+--retries 3

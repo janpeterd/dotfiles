@@ -1,0 +1,182 @@
+# DEFAULT BINDINGS: https://github.com/sxyazi/yazi/blob/shipped/yazi-config/preset/keymap-default.toml
+
+"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+
+[[mgr.prepend_keymap]]
+on = ["g", "c"]
+run = "plugin vcs-files"
+desc = "Show Git file changes"
+
+[[mgr.prepend_keymap]]
+on = "M"
+run = "plugin mount"
+
+[[mgr.prepend_keymap]]
+on = "T"
+run = "plugin toggle-pane max-preview"
+desc = "Maximize or restore the preview pane"
+
+[[mgr.prepend_keymap]]
+on = ["g", "c"]
+run = "plugin vcs-files"
+desc = "Show Git file changes"
+
+[[mgr.prepend_keymap]]
+on = ["A", "z"]
+run = """
+    shell 'printf "ZIP Name: "; read name; zip -r "$name.zip" "$(basename \"$1\")"' --block --confirm
+"""
+desc = "Create zip archive from directory."
+
+[[mgr.prepend_keymap]]
+on = ["<C-x>", "<C-d>"]
+run = '''
+shell --block 'cd_result=$(bookmark dirs | fzf --border rounded --height 100% --preview "ls {}"); if [ -n "$cd_result" ]; then ya pub dds-cd --str "$cd_result"; fi'
+'''
+desc = "Goto bookmarked directory"
+
+[[mgr.prepend_keymap]]
+on = ["<C-x>", "<C-f>"]
+run = '''
+shell --block 'file="$(bookmark files | fzf --border rounded --height 100% --preview "bat --color=always --style=numbers --line-range=:500 {}")"; if [ "$file" != "" ]; then nvim "$file"; fi'
+'''
+desc = "Edit bookmarked file"
+
+[[mgr.prepend_keymap]]
+on = ["<C-x>", "<C-b>"]
+run = '''
+shell --block 'bookmark -a "$1"'
+'''
+desc = "Bookmark file/dir under cursor"
+
+[[mgr.prepend_keymap]]
+on = ["<C-x>", "."]
+run = '''
+shell --block 'nvim "$(dirname $f)"'
+'''
+desc = "Open directory in nvim"
+
+[[mgr.prepend_keymap]]
+on = ["e"]
+run = '''
+shell --block 'nvim "$1"'
+'''
+
+desc = "Open directory in nvim"
+[[mgr.prepend_keymap]]
+on = ["<A-b>"]
+run = '''
+shell 'if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; 
+  then
+    hyprsetbg "$1"
+  else
+    setbg "$1"
+  fi'
+'''
+desc = "Set background based on desktop environment"
+
+[[mgr.prepend_keymap]]
+on = ["<C-x>", "<C-p>"]
+run = "shell 'libreoffice --headless --convert-to pdf \"$1\"'"
+desc = "Convert file to pdf"
+
+[[mgr.prepend_keymap]]
+on = ["g", "h"]
+run = "cd ~"
+desc = "Go to the home directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "c"]
+run = "cd ~/.config"
+desc = "Go to the config directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "p"]
+run = "cd ~/Pictures"
+desc = "Go to the pictures directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "v"]
+run = "cd ~/Videos"
+desc = "Go to the videos directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "r"]
+run = "cd ~/Code/repos"
+desc = "Go to the repos directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "d"]
+run = "cd ~/Downloads"
+desc = "Go to the downloads directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "D"]
+run = "cd ~/Documents"
+desc = "Go to the documents directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "t"]
+run = "cd /tmp"
+desc = "Go to the temporary directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "m"]
+run = "cd /media"
+desc = "Go to the /media directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "s"]
+run = "cd ~/synced"
+desc = "Go to the ~/synced directory"
+
+[[mgr.prepend_keymap]]
+on = ["g", "S"]
+run = "cd ~/Sync"
+desc = "Go to the ~/Sync directory"
+
+[[mgr.prepend_keymap]]
+on = ["<C-g>", "g"]
+run = "shell \"nvim -c Neogit\" --block"
+desc = "Open NEOGIT"
+
+[[mgr.prepend_keymap]]
+on = ["<C-g>", "G"]
+run = "shell lazygit --block"
+desc = "Open LAZYGIT"
+
+[[mgr.prepend_keymap]]
+on = ["c", "C"]
+run = '''
+shell '
+if [-d "$1"]; then
+  wl-copy "$(ls "$1")"
+else
+  wl-copy < "$1"
+fi
+notify-send -i "$1" "File contents copied to clipboard" "    [ $1 ]"
+'
+'''
+desc = "Copy file content"
+
+[[mgr.prepend_keymap]]
+on = ["W"]
+run = 'shell "$SHELL" --block'
+desc = "Open shell here"
+
+[[mgr.prepend_keymap]]
+on = ["<C-n>"]
+run = '''
+    shell 'ripdrag -t -k -r -s 42 "$@"'
+'''
+
+[[mgr.prepend_keymap]]
+on = "y"
+run = ['''
+    shell 'for path in "$@"; do echo "file://$path"; done | wl-copy -t text/uri-list'
+    ''', "yank"]
+
+[[mgr.prepend_keymap]]
+on = "l"
+run = "plugin smart-enter"
+desc = "Enter the child directory, or open the file"

@@ -1,0 +1,61 @@
+window {
+  font-family: "Roboto", monospace;
+  font-size: 14pt;
+  color: #9c9c9c;
+  background-color: rgba(26, 27, 38, 0.8);
+}
+
+button {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 25%;
+  /* background-color: rgba(0, 0, 0, 0.8); */
+  background-color: rgba(53, 57, 70, 1);
+  margin: 25px;
+  border-radius: 20%;
+  min-width: 200px;
+  min-height: 300px;
+  transition: 0.1s;
+}
+
+button:focus {
+  /* background-color: rgba(125, 49, 44, 0.8); */
+  /* color: black; */
+  background-color: rgba(240, 148, 121, 1);
+  color: rgba(53, 57, 70, 1);
+}
+
+#lock {
+  background-image: image(url("./lock.png"));
+}
+#lock:focus {
+  background-image: image(url("./lock-hover.png"));
+}
+
+#logout {
+  background-image: image(url("./logout.png"));
+}
+#logout:focus {
+  background-image: image(url("./logout-hover.png"));
+}
+
+#suspend {
+  background-image: image(url("./sleep.png"));
+}
+#suspend:focus {
+  background-image: image(url("./sleep-hover.png"));
+}
+
+#shutdown {
+  background-image: image(url("./power.png"));
+}
+#shutdown:focus {
+  background-image: image(url("./power-hover.png"));
+}
+
+#reboot {
+  background-image: image(url("./restart.png"));
+}
+#reboot:focus {
+  background-image: image(url("./restart-hover.png"));
+}

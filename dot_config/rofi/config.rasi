@@ -1,0 +1,150 @@
+configuration {
+	/*---------- General setting ----------*/
+	modi: "drun,run,filebrowser,window,ssh";
+	case-sensitive: false;
+	cycle: true;
+	filter: "";
+	scroll-method: 0;
+	normalize-match: true;
+	show-icons: true;
+	steal-focus: false;
+
+	/*---------- Matching setting ----------*/
+	matching: "normal";
+	tokenize: true;
+
+	/*---------- SSH settings ----------*/
+	ssh-client: "ssh";
+    terminal: "kitty";
+	ssh-command: "{terminal} -e {ssh-client} {host} [-p {port}]";
+	parse-hosts: true;
+	parse-known-hosts: true;
+
+	/*---------- Drun settings ----------*/
+	drun-categories: "";
+	drun-match-fields: "name,generic,exec,categories,keywords";
+	drun-display-format: "{name} [<span weight='light' size='small'><i>({generic})</i></span>]";
+	drun-show-actions: false;
+	drun-url-launcher: "xdg-open";
+	drun-use-desktop-cache: false;
+	drun-reload-desktop-cache: false;
+	drun {
+		/** Parse user desktop files. */
+		parse-user:   true;
+		/** Parse system desktop files. */
+		parse-system: true;
+    }
+
+	/*---------- Run settings ----------*/
+	run-command: "{cmd}";
+	run-list-command: "";
+	run-shell-command: "{terminal} -e {cmd}";
+
+	/*---------- Fallback Icon ----------*/
+	run,drun {
+		fallback-icon: "application-x-addon";
+	}
+
+	/*---------- Window switcher settings ----------*/
+	window-match-fields: "title,class,role,name,desktop";
+	window-command: "wmctrl -i -R {window}";
+	window-format: "{w} - {c} - {t:0}";
+	window-thumbnail: true;
+
+	/*---------- History and Sorting ----------*/
+	disable-history: false;
+	sorting-method: "normal";
+	max-history-size: 25;
+
+	/*---------- Display setting ----------*/
+	display-window: "Windows";
+	display-windowcd: "Window CD";
+	display-run: "Run";
+	display-ssh: "SSH";
+	display-drun: "Apps";
+	display-combi: "Combi";
+	display-keys: "Keys";
+	display-filebrowser: "Files";
+
+	/*---------- Misc setting ----------*/
+	terminal: "rofi-sensible-terminal";
+	font: "Roboto 13";
+	sort: false;
+	threads: 0;
+	click-to-exit: true;
+
+	/*---------- File browser settings ----------*/
+    filebrowser {
+	  directory: "/home";
+      directories-first: true;
+      sorting-method:    "name";
+    }
+
+	/*---------- Other settings ----------*/
+    timeout {
+      action: "kb-cancel";
+      delay:  0;
+    }
+
+	/*---------- Keybindings ----------*/
+	kb-accept-entry: "Control+l,Control+m,Return,KP_Enter,Control+y";
+	kb-cancel: "Escape,Control+g,Control+bracketleft,MouseSecondary";
+	kb-mode-complete: "Alt+l";
+	kb-remove-to-eol: "Control+Alt+e";
+	kb-row-down: "Down,Control+j,Control+n";
+	kb-row-up: "Up,Control+k,Control+p";
+	ml-row-down: "ScrollDown";
+	ml-row-up: "ScrollUp";
+}
+
+@theme "/dev/null"
+
+* {
+    background-color: #181A1C;
+    text-color:       #E2E2E3;
+    border-color:     #353946;
+    selected-color:   #76CCE0;
+}
+
+window {
+    width: 35%;
+    padding: 5px;
+    border: 2px;
+    border-radius: 8px;
+}
+
+listview {
+    lines: 8;
+    spacing: 5px;
+}
+
+element {
+    padding: 8px 8px;
+    border-radius: 8px;
+}
+
+element-icon {
+    size: 1.1em;
+    padding: 0px 0px 0px 8px;
+    margin: 0px 0px 0px 8px;
+}
+
+element selected {
+    background-color: @background-color;
+    text-color: @text-color;
+    border: 0px 0px 0px 8px;
+    border-color: @selected-color;
+    border-radius: 0px;
+}
+
+inputbar {
+    spacing: 10px;
+    border: 0px 0px 1px 0px;
+    border-color: @selected-color;
+    padding: 0px 0px 6px 0px;
+    margin: 0px 0px 6px 0px;
+}
+
+prompt {
+    text-color: @selected-color;
+}

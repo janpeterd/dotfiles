@@ -1,0 +1,266 @@
+#!/usr/bin/env zsh
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Path to your oh-my-zsh installation.
+export ZSH="$ZDOTDIR/ohmyzsh"
+
+export PATH="$PATH:/home/jp/Code/Projects/Android_bookmarks/flutter/bin"
+export PATH="$PATH:/usr/lib/jvm/default/bin"
+if [[ $(which jetbrains-toolbox) ]]; then
+    export PATH="$PATH:/home/jp/.local/share/JetBrains/Toolbox/scripts"
+fi
+
+# hide EOL sign ('%')
+PROMPT_EOL_MARK=""
+
+# ALIASES
+
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time oh-my-zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="jnrowe"
+# ZSH_THEME=""
+
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+# zstyle ':omz:update' frequency 13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+plugins=(zoxide zsh-autosuggestions fzf zsh-syntax-highlighting)
+
+# dont dump these files in my dotfiles!
+export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+# emacs style copy to system clipboard
+copy-clipboard () {
+  if [[ "$REGION_ACTIVE" -ne 0 ]]; then
+    zle copy-region-as-kill
+    print -rn -- $CUTBUFFER | wl-copy
+    REGION_ACTIVE=0
+  fi
+}
+zle -N copy-clipboard
+
+
+# Use emacs keybindings, by default
+bindkey -e
+bindkey '^[l' down-case-word
+bindkey '^t' transpose-chars
+bindkey '^[w' copy-clipboard
+
+# HISTORY
+export HISTFILE="${XDG_DATA_HOME:-$HOME/.local/share}/history"
+export HISTSIZE=15000
+export SAVEHIST=15000
+
+#append into history file
+setopt INC_APPEND_HISTORY
+#ignore duplicates in history file
+setopt HIST_IGNORE_DUPS
+#add timestamp for each entry
+setopt EXTENDED_HISTORY
+
+
+# PROJECTS
+# This file is meant to change the working directory to a project directory
+# run in with the *'source' command!*
+
+# Define project directories
+
+project-launcher-zsh() {
+    projects=(
+        "$(find '/home/jp/Code/Projects school/' -maxdepth 1 -mindepth 1 -type d)"
+        "$(find '/home/jp/Code/Projects/' -maxdepth 1 -mindepth 1 -type d)"
+        "$(find '/home/jp/Code/repos/' -maxdepth 1 -mindepth 1 -type d)"
+    )
+
+    if [[ -z "$projects" ]]; then
+        echo "No projects found!"
+        exit 1
+    fi
+
+    # Use fzf to select project directory
+    selected_project=$(printf '%s\n' "${projects[@]}" | fzf)
+    if [[ -z "$selected_project" ]]; then
+        echo "No project selected!"
+        exit 1
+    fi
+
+    # Change to project directory
+    cd "$selected_project"
+
+    # If venv or env is in the directory, activate it
+    if [[ -d "$selected_project/venv" ]]; then
+        source "$selected_project/venv/bin/activate"
+    elif [[ -d "$selected_project/env" ]]; then
+        source "$selected_project/env/bin/activate"
+    fi
+}
+
+kitty-session-launcher-zsh() {
+
+    if [[ -z $KITTY_WINDOW_ID ]]; then
+        echo "Not running kitty!"
+    else
+        kitty_sessions=(
+            "$(find '/home/jp/.config/kitty/sessions/' -maxdepth 1 -mindepth 1 -type f)"
+        )
+
+        if [[ -z "$kitty_sessions" ]]; then
+            echo "No projects found!"
+            exit 1
+        fi
+
+        # Use fzf to select project directory
+        selected_session=$(printf '%s\n' "${kitty_sessions[@]}" | fzf)
+        if [[ -z "$selected_session" ]]; then
+            echo "No project selected!"
+            exit 1
+    fi
+
+    # Change to project directory
+    setsid -f kitty --session "$selected_session" &>/dev/null &
+fi
+}
+
+
+bookmark-dir-cd() {
+cd_result=$(bookmark dirs | fzf --border rounded --height 100% --preview "ls {}")
+if [ "$cd_result" != '' ]; then cd "$cd_result"; fi
+}
+
+bookmark-file-edit() {
+file=$(bookmark files | fzf --border rounded --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')
+dir=$(dirname "$file")
+if [ "$file" != '' ]; then cd "$dir" && nvim "$file"; fi
+}
+
+config-launcher-zsh() {
+configs=(
+    "$(find '/home/jp/.config/' -maxdepth 1 -mindepth 1 \( -type d -or -type l \))"
+)
+
+    if [[ -z "$configs" ]]; then
+        echo "No configs found!"
+        exit 1
+    fi
+
+    # Use fzf to select config directory
+    selected_config=$(printf '%s/\n' "${configs[@]}" | fzf)
+    if [[ -z "$selected_config" ]]; then
+        echo "No config selected!"
+        exit 1
+    fi
+
+    cd "$selected_config"
+}
+
+school-launcher-zsh() {
+    schools=(
+        "$(find '/home/jp/school/ITF1/' -maxdepth 2 -mindepth 2 \( -type d -or -type l \))"
+    )
+
+    if [[ -z "$schools" ]]; then
+        echo "No schools found!"
+        exit 1
+    fi
+
+    # Use fzf to select school directory
+    selected_school=$(printf '%s/\n' "${schools[@]}" | fzf)
+    if [[ -z "$selected_school" ]]; then
+        echo "No school selected!"
+        exit 1
+    fi
+
+    cd "$selected_school"
+}
+
+# bindkey -s '^o' '^ulf\n'
+bindkey -s '\ec' '^ulfcd\n' # exit lf and change to that directory
+bindkey -s '^o' '^uyazi\n'
+
+# Quick navigation to folders
+# bindkey -s '^e' '^Cconfig-launcher-zsh\n'
+# bindkey -s '^s' '^Cschool-launcher-zsh\n'
+
+# Alt + shift + f (because alt f AND control f are used to navigate)
+# bindkey -s '^[F' '^Ctmux-sessionizer\n'
+bindkey -s '^X^d' '^Cbookmark-dir-cd\n'
+bindkey -s '^X^f' '^Cbookmark-file-edit\n'
+bindkey -s '^X^p' '^uproject-launcher-zsh\n'
+bindkey -s '^X^k' '^ukitty-session-launcher-zsh\n'
+bindkey -s '^X^t' '^usesh connect $(sesh list -i  | fzf +s --ansi --highlight-line --scheme=path)\n'
+
+
+source "$ZDOTDIR/aliases"
+
+# Add custom completion fucntions:
+export FPATH=$ZDOTDIR/completions:$FPATH
+
+# Uncomment this when using different node versions, may increase shell startup time
+# see https://github.com/nvm-sh/nvm
+# source /usr/share/nvm/init-nvm.sh
+
+
+# Pyenv python version manager
+# export PYENV_ROOT="$HOME/.pyenv"
+# [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+# eval "$(pyenv init - zsh)"
+
+# Atuin magical shell history
+eval "$(atuin init zsh)"
+
+
+# Map Control + y to the accept-line widget for autosuggestions
+bindkey '^y' autosuggest-accept
+
+greeting() {
+  printf "| \e[31m%s\e[34m@\e[32m%s\e[38m (%s)\e[0m | \e[33m%s\e[0m | \e[35m%s\e[0m | \e[34m%s\e[0m | \e[33m%s\e[0m | \e[32m%s\e[0m | \e[36m%s\e[0m |\n" "$USER" "$(uname --nodename)" "$(uname --machine)" "$(date '+%H:%M')" "$(uptime -p)" "$(df -h --output=avail $HOME | tail -1 | xargs)" $(ip -4 -brief addr show $(ip route show | rg -r '$1' -wo 'default .*? dev (.*?)'))
+hour=$(date "+%H")
+  greeting=""
+  if [ $hour -gt 5 ] && [ $hour -lt 11 ]; then
+    greeting="Good Morning $USER!"
+  elif [ $hour -gt 10 ] && [ $hour -lt 18 ]; then
+    greeting="Good Day $USER!"
+  elif [ $hour -gt 17 ] && [ $hour -lt 22 ]; then
+    greeting="Good Evening $USER!"
+  else
+    greeting="Good Night $USER!"
+  fi
+  cowsay -f eyes $greeting | lolcat
+}
+greeting

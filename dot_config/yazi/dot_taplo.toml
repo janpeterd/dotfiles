@@ -1,0 +1,4 @@
+# https://taplo.tamasfe.dev/configuration/formatter-options.html
+
+[formatting]
+column_width = 400

@@ -1,0 +1,132 @@
+@define-color accent #76CCE0;
+@define-color bg-light #453C3D;
+@define-color urgent #FC5D7C;
+@define-color bg #181A1C;
+@define-color fg #e2e2e3;
+
+* {
+  font-family: "Roboto", "Symbols Nerd Font Mono";
+  font-size: 14px;
+}
+
+tooltip,
+menu {
+  background: @bg;
+  opacity: 0.9;
+}
+
+window {
+  border-radius: 25px;
+  font-weight: bold;
+}
+
+window#waybar {
+  border-radius: 0 0 8px 8px;
+  background: @bg;
+}
+
+#waybar {
+  color: @fg;
+  background: @bg;
+  transition-duration: 0.2s;
+}
+
+.modules-left,
+.modules-center,
+.modules-right {
+  padding: 0;
+}
+
+#idle_inhibitor {
+  padding-right: 20px;
+}
+#idle_inhibitor.activated {
+  color: @urgent;
+}
+
+#workspaces {
+  padding-left: 20px;
+  padding-right: 10px;
+}
+
+#workspaces button {
+  font-size: 10px;
+  color: rgba(217, 216, 214, 0.3);
+  padding-left: 2px;
+  padding-right: 2px;
+  border-radius: 9999px;
+  font-weight: 900;
+  border: 1px solid transparent;
+}
+#workspaces button.urgent {
+  text-shadow: 0px 0px 4px #e65e72;
+  border: 1px solid @accent;
+  font-weight: bold;
+  animation: 1s ease-in-out 0s infinite blink;
+}
+#workspaces button.active,
+#workspaces button.focused {
+  color: @accent;
+  /*background: @bg-light;*/
+  font-weight: bold;
+  /*border-top: 2px solid #ebdbb2;*/
+}
+
+#workspaces button:hover {
+  background: @bg;
+  color: @accent;
+  border: 1px solid @accent;
+  /*border-top: 2px solid #ebdbb2;*/
+  transition-duration: 0.1s;
+}
+
+#cpu.warning,
+#memory.warning {
+  color: #f09479;
+}
+#cpu.critical,
+#memory.critical {
+  color: @accent;
+}
+
+window#waybar.empty,
+window#waybar.empty .modules-left,
+window#waybar.empty .modules-center,
+window#waybar.empty .modules-right {
+  background: none;
+  border: none;
+}
+
+window#waybar.floating,
+window#waybar.floating .modules-left,
+window#waybar.floating .modules-center,
+window#waybar.floating .modules-right {
+  background: none;
+  border: none;
+}
+
+#custom-actions,
+#custom-niri-actions {
+  padding-left: 300px;
+  padding-right: 300px;
+  background: transparent;
+}
+
+#custom-separator {
+  color: @accent;
+}
+
+#custom-notification.notification {
+  animation: 1s ease-in-out 0s infinite blink;
+}
+
+@keyframes blink {
+  from {
+    text-shadow: none;
+    color: @urgent;
+  }
+  to {
+    text-shadow: 0px 0px 5px @urgent;
+    color: white;
+  }
+}

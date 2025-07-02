@@ -1,0 +1,5 @@
+show-failed-attempts
+color=000000
+font="Jetbrains Mono", monospace
+indicator-radius=130
+indicator-thickness=10

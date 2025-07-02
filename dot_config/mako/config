@@ -1,0 +1,19 @@
+font=Roboto Condensed 12
+padding=12
+default-timeout=5000
+layer=top
+
+icons=1
+max-icon-size=96
+
+border-radius=5
+background-color=#181A1C
+text-color=#E2E2E3
+border-color=#353946
+progress-color=over #76CCE0
+
+[urgency="critical"]
+background-color=#FF6D7E
+text-color=#E2E2E3
+border-color=#55393D
+progress-color=over #76CCE0
