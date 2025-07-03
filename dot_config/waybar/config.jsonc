@@ -15,8 +15,8 @@
     "custom/niri-actions"
   ],
   "modules-right": [
+    "custom/emacs-clock",
     "niri/language",
-    "custom/separator",
     "pulseaudio",
     "battery",
     "backlight",
@@ -158,7 +158,7 @@
     }
   },
   "mpris": {
-    "player": "spotify",
+    "player": "playerctld",
     "format": "{player_icon} {status_icon} {artist} - {title}",
     "title-len": 25,
     "artist-len": 15,
