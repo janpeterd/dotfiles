@@ -1,0 +1,1175 @@
+(require 'package)
+;;  Add melpa repository
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("amy" . "https://packages.amygrinn.com/")) ;; for org yaap
+(package-initialize)
+
+;; Make sure to install the fonts on your system
+;;   - nerd-icons-install-fonts
+;;   - all-the-icons-install-fonts
+
+;; WINDOWS shortcut command:
+;; "C:\Program Files\Emacs\emacs-29.1\bin\emacsclientw.exe" -c -n -a "" --server-file "C:\Users\janpe\.emacs.d\server\server" --eval "(progn (org-agenda-list)(delete-other-windows)(setq system-time-locale \"C\"))"
+
+;; LINUX INFO
+;; If you start emacs daemon with emacs.service.
+;; You should also add a drop-in service file, that makes emacs start after graphical.target.
+;; Otherwise emacs will start in text only mode and launching graphical application from within emacs isn't possible
+
+;; Run this command:
+;; $systemctl --user edit emacs.service --drop-in=10-after-gfx
+;; And add this line
+;; After=graphical-session.target
+;; And also edit the regular service on wayland:
+;; $ systemctl --user edit emacs.service
+;; And add these 2 lines (required for org-download to detect clipboard)
+;; [Service]
+;; Environment="XDG_SESSION_TYPE=wayland"
+
+;; ===============================================================================================
+
+
+(defvar jp/agenda-auto-update-timer nil
+  "Timer for updating the Org agenda buffer.")
+
+(define-minor-mode jp/agenda-auto-update-mode
+  "Minor mode that updates the Org agenda buffer every 5 minutes."
+  :lighter " Org-Agenda-Update"
+  (if jp/agenda-auto-update-timer
+      (progn
+        (cancel-timer jp/agenda-auto-update-timer)
+        (setq jp/agenda-auto-update-timer nil)
+        (setq mode-line-format (eval (car (get 'mode-line-format 'standard-value))))
+        (message "Org agenda update mode disabled."))
+    (progn
+      (add-hook 'org-agenda-finalize-hook
+                (lambda ()
+                  (when jp/agenda-auto-update-timer
+                      (add-to-list 'mode-line-format '(:propertize "  [AUTO UPDATE]  " face (:weight bold :background "red" :prepend))))
+                  ))
+      (setq jp/agenda-auto-update-timer
+            (run-at-time "0 minutes" 300
+                         (lambda ()
+                           (org-agenda-redo)
+                           (message "Org agenda buffer updated."))))
+      (message "Org agenda update mode enabled.")
+
+      (force-mode-line-update)
+      )
+    )
+  )
+
+
+;; HELPER FUNCTIONS
+(defun jp/is_android_termux ()
+  "Check if emacs is running on Android inside Termux"
+  (interactive)
+  (if (getenv "TERMUX_VERSION") t nil)
+  )
+
+(defun jp/is_windows ()
+  "Check if emacs is running on Windows"
+  (interactive)
+  (if (string= system-type "windows-nt") t nil)
+  )
+
+(defun jp/org/org-close-all-drawers-key ()
+  "Close all drawers"
+  (interactive)
+  (org-cycle-hide-drawers 'all)
+  )
+
+(defun jp/org-archive-done-cancelled-tasks ()
+  "Archive all tasks that are marked DONE"
+  (interactive)
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (org-element-property :begin (org-element-at-point))))
+   "/DONE" 'agenda)
+  (org-map-entries
+   (lambda ()
+     (org-archive-subtree)
+     (setq org-map-continue-from (org-element-property :begin (org-element-at-point))))
+   "/CANCELLED" 'agenda)
+  (org-save-all-org-buffers))
+
+;; TODO: fix this
+(defun jp/set-centered-header-line (format-string &optional window)
+  "Create a header and center the text"
+  (interactive)
+  (let ((text (format-mode-line format-string)))
+    (if window
+    (progn
+      (setq window-margins (window-margins window))
+      (setq left-margin (car window-margins))
+      (setq right-margin (cdr window-margins))
+      (setq full-width (+ (window-width) (or left-margin 0) (or right-margin 0))))
+      (progn
+    (setq window-margins (window-margins))
+    (setq left-margin (car window-margins))
+    (setq right-margin (cdr window-margins))
+    (setq full-width (+ (window-width) (or left-margin 0) (or right-margin 0))))
+      )
+
+    (setq-local header-line-format
+        (calendar-string-spread
+         (list text)
+         32
+         full-width))))
+
+
+
+;; Install missing packages
+;; (package-refresh-contents)
+(dolist (package '(use-package))
+  (unless (package-installed-p package)
+    (package-install package)))
+
+
+(if (jp/is_windows)
+    (progn
+      (setq user-init-file "C:/Users/janpe/Code/repos/dot/arch/emacs/.emacs")
+      (setq visible-bell t)
+      (add-hook 'org-agenda-mode-hook
+        (lambda ()
+          (visual-line-mode -1)
+          (toggle-truncate-lines 1)))))
+
+
+(if (jp/is_windows)
+    (setq user-config-dir "C:/Users/janpe/Code/repos/dot/arch/emacs/")
+  (setq user-config-dir (concat (getenv "HOME") "/dot/arch/emacs/"))
+  )
+
+
+(if (jp/is_android_termux)
+    ;; Open urls on click android
+    (setq browse-url-browser-function 'browse-url-xdg-open
+    alert-termux-command "/data/data/com.termux/files/usr/bin/termux-notification"))
+
+
+(global-visual-line-mode t)
+(prefer-coding-system 'utf-8-unix) 
+
+;; BIND: JUMP TO THE LAST CAPTURE!
+(global-set-key (kbd "<f5>") (lambda () (interactive) (bookmark-jump "org-capture-last-stored")))
+
+
+;; Move customization variables to a separate file and load it
+;; NOTE:
+;; It might be handy to check this file. Sometimes emacs puts some
+;; weird unwanted stuff here. You can also always delete it.
+(setq custom-file (locate-user-emacs-file "custom-vars.el"))
+(load custom-file 'noerror 'nomessage)
+
+
+;; font stuff now managed by FONTAINE:
+;;;; Fontaine (font configurations)
+;; Read the manual: <https://protesilaos.com/emacs/fontaine>
+(use-package fontaine
+  :ensure t
+  :hook
+  ;; Persist the latest font preset when closing/starting Emacs and
+  ;; while switching between themes.
+  ((after-init . fontaine-mode)
+   (after-init . (lambda ()
+           ;; Set last preset or fall back to desired style from `fontaine-presets'.
+           (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))))
+  :bind ("C-c f" . fontaine-set-preset)
+  :config
+  ;; This is defined in Emacs C code: it belongs to font settings.
+  (setq x-underline-at-descent-line nil)
+
+  ;; And this is for Emacs28.
+  (setq-default text-scale-remap-header-line t)
+
+  ;; This is the default value.  Just including it here for
+  ;; completeness.
+  (setq fontaine-latest-state-file (locate-user-emacs-file "fontaine-latest-state.eld"))
+
+  (setq fontaine-presets
+        '((small
+           :default-family "Jetbrains Mono"
+           :default-height 80
+           :variable-pitch-family "Roboto Condensed")
+          (regular) ; like this it uses all the fallback values and is named `regular'
+          (medium
+           ;; :default-weight semilight
+           :default-height 130
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 150)
+          (presentation
+           :default-height 180)
+          (jumbo
+           :default-height 260)
+          (t
+           ;; I keep all properties for didactic purposes, but most can be
+           ;; omitted.  See the fontaine manual for the technicalities:
+           ;; <https://protesilaos.com/emacs/fontaine>.
+           :default-family "Jetbrains Mono"
+           :default-weight regular
+           :default-slant normal
+           :default-height 100
+
+           :fixed-pitch-family "Jetbrains Mono"
+           :fixed-pitch-weight nil
+           :fixed-pitch-slant nil
+           :fixed-pitch-height 1.0
+
+           :fixed-pitch-serif-family nil
+           :fixed-pitch-serif-weight nil
+           :fixed-pitch-serif-slant nil
+           :fixed-pitch-serif-height 1.0
+
+           :variable-pitch-family "Roboto Condensed"
+           :variable-pitch-weight nil
+           :variable-pitch-slant nil
+           :variable-pitch-height 1.0
+
+           :mode-line-active-family nil
+           :mode-line-active-weight nil
+           :mode-line-active-slant nil
+           :mode-line-active-height 1.0
+
+           :mode-line-inactive-family nil
+           :mode-line-inactive-weight nil
+           :mode-line-inactive-slant nil
+           :mode-line-inactive-height 1.0
+
+           :header-line-family nil
+           :header-line-weight nil
+           :header-line-slant nil
+           :header-line-height 1.0
+
+           :line-number-family nil
+           :line-number-weight nil
+           :line-number-slant nil
+           :line-number-height 1.0
+
+           :tab-bar-family nil
+           :tab-bar-weight nil
+           :tab-bar-slant nil
+           :tab-bar-height 1.0
+
+           :tab-line-family nil
+           :tab-line-weight nil
+           :tab-line-slant nil
+           :tab-line-height 1.0
+
+           :bold-family nil
+           :bold-weight bold
+           :bold-slant nil
+           :bold-height 1.0
+
+           :italic-family nil
+           :italic-weight nil
+           :italic-slant italic
+           :italic-height 1.0
+
+           :line-spacing nil))))
+
+
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+
+;; MENU CLEANUP ;;
+(menu-bar-mode -1) ; no bars
+(tool-bar-mode -1)
+(unless (jp/is_android_termux)
+  (scroll-bar-mode -1))
+(delete-selection-mode) ; Overwrite selection
+(global-auto-revert-mode 1) ; change buffer if file changes on disk
+(hl-line-mode) ; highlight current line
+;; No starup screen, just buffer
+(setq inhibit-startup-message t
+      inhibit-splash-screen t)
+
+;; Spaces > Tabs
+(setq-default indent-tabs-mode nil)
+
+; some settings
+(setq system-time-locale "C"
+      display-line-numbers 'visual
+      global-auto-revert-non-file-buffers t
+      use-short-answers t) ; Revert Dired and other buffers
+
+(setq
+ calendar-mark-diary-entries-flag nil
+ calendar-mark-holidays-flag t
+ calendar-mode-line-format nil
+ calendar-longitude 4.94471
+ calendar-latitude 51.32254
+ calendar-date-style 'iso
+ calendar-time-zone-style 'numeric ; Emacs 28.1
+ calendar-week-start-day 1
+ calendar-day-name-array
+ [
+  "zondag"
+  "maandag"
+  "dinsdag"
+  "woensdag" 
+  "donderdag"
+  "vrijdag"
+  "zaterdag"
+  ]
+ calendar-month-name-array
+ [
+  "januari"
+  "februari"
+  "maart"
+  "april"
+  "mei" 
+  "juni"
+  "juli"
+  "augustus"
+  "september" 
+  "oktober"
+  "november"
+  "december"
+  ])
+
+;; Nederlandse feestdagen
+;; Because there are dupicates with holiday-general-holidays and lists,
+;; I disable almost all other holiday lists.
+;; TODO: spend some time to fill these out
+(setq holiday-other-holidays
+      '((holiday-fixed 1 1 "Nieuwjaarsdag")
+        (holiday-fixed 1 6 "Driekoningen")
+        (holiday-fixed 2 14 "Valentijnsdag")
+        (holiday-fixed 4 1 "Één April")
+        (holiday-fixed 5 1 "Dag van de Arbeid")
+        (holiday-fixed 5 4 "Dodenherdenking")
+        (holiday-fixed 5 5 "Bevrijdingsdag")
+        (holiday-fixed 10 4 "Dierendag")
+        (holiday-fixed 10 31 "Halloween")
+        (holiday-fixed 11 11 "Sint Maarten")
+        (holiday-fixed 12 5 "Sinterklaas")
+        (holiday-fixed 12 25 "Eerste kerstdag")
+        (holiday-fixed 12 26 "Tweede kerstdag")
+        (holiday-fixed 12 31 "Oudejaarsdag")
+        ;; Feestdagen gerelateerd aan Pasen
+        (holiday-easter-etc -49 "Carnaval")
+        (holiday-easter-etc -48 "Carnaval")
+        (holiday-easter-etc -47 "Carnaval")
+        (holiday-easter-etc -2 "Goede Vrijdag")
+        (holiday-easter-etc 0 "Eerste Paasdag")
+        (holiday-easter-etc +1 "Tweede Paasdag")
+        (holiday-easter-etc +39 "Hemelvaart")
+        (holiday-easter-etc +49 "Eerste Pinksterdag")
+        (holiday-easter-etc +50 "Tweede Pinksterdag")
+        ;; Overige feestdagen met een variabele datum
+        (holiday-float 5 0 2 "Moederdag")
+        (holiday-float 6 0 3 "Vaderdag")))
+
+(setq holiday-general-holidays nil
+      holiday-christian-holidays nil
+      holiday-hebrew-holidays nil
+      holiday-islamic-holidays nil
+      holiday-bahai-holidays nil
+      holiday-oriental-holidays nil)
+
+(setq make-backup-files nil
+      create-lockfiles nil
+      auto-save-default nil)
+
+
+;; ====================================================;; 
+;;            PACKAGE specific configuration           ;;
+;; ====================================================;; 
+
+(use-package vertico
+  :ensure t
+  :config
+  (setq vertico-cycle t
+    vertico-resize nil)
+  (vertico-mode 1)
+  )
+
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init
+  (savehist-mode))
+
+(use-package marginalia
+  :ensure t
+  :config
+  (marginalia-mode 1)
+  )
+
+(use-package orderless
+  :ensure t
+  :config
+  ;; (setq completion-styles '(orderless basic))
+  (setq completion-styles '(orderless basic)
+    completion-category-defaults nil
+    completion-category-overrides '((file (styles partial-completion))))
+  )
+
+(use-package consult
+  :ensure t
+  :bind
+  ("C-c C-g" . consult-ripgrep)
+  ("C-c b" . consult-bookmark)
+  )
+
+(use-package nerd-icons
+  :unless (jp/is_android_termux)
+  :ensure t
+  )
+
+(use-package nerd-icons-completion
+  :ensure t
+  :unless (jp/is_android_termux)
+  :config
+  (nerd-icons-completion-mode)
+  )
+
+(use-package nerd-icons-corfu
+  :unless (jp/is_android_termux)
+  :ensure t
+  )
+
+(use-package nerd-icons-dired
+  :ensure t
+  :unless (jp/is_android_termux)
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package htmlize
+  :ensure t)
+
+(use-package ispell
+  :config
+  (if (jp/is_windows)
+      (setq ispell-program-name "C:/Program Files/hunspell/bin/hunspell.exe")
+    (setq ispell-program-name "hunspell"))
+  (setq ispell-dictionary "nederlands,english")
+  (ispell-set-spellchecker-params)
+  (setq ispell-alternate-dictionary "/usr/share/dict/words")
+  (ispell-hunspell-add-multi-dic "nederlands,english")
+  )
+
+;; Centered layout focus on content in org buffers
+(use-package visual-fill-column
+  :ensure t
+  :hook (
+     (org-agenda-mode . visual-fill-column-mode))
+  :custom
+  (visual-fill-column-center-text t)
+  (visual-fill-column-width 130)
+  )
+
+;; Show cheatsheet when doing a keybind
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode)
+  (which-key-setup-minibuffer)
+  )
+
+
+;; Notify orgmode stuff
+
+;; I have settled with org-yaap, because it also works on termux and
+;; does everything I want.
+(use-package org-yaap
+  :ensure t
+  :config
+  (setq org-yaap-persistent-clock t ;; notification when clocked in
+        org-yaap-alert-before '(0 15)
+        org-yaap-alert-timeout 60 ;; remind hourly for overdue tasks
+    org-yaap-exclude-tags '("@habit" "dont-notify"))
+  (org-yaap-mode 1)
+  )
+
+(use-package dirvish
+  :ensure t
+  :config
+  (dirvish-override-dired-mode)
+  )
+
+
+
+  ;; Autocompletion
+(use-package corfu
+  :ensure t
+  :init
+  (global-corfu-mode)
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  :config
+  (setq global-corfu-minibuffer
+    (lambda ()
+      (not (or (bound-and-true-p mct--active)
+           (bound-and-true-p vertico--input)
+           (eq (current-local-map) read-passwd-map)))))
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+  :bind
+  (:map corfu-map ("M-SPC" . corfu-insert-separator))
+  )
+
+(use-package modus-themes
+  :ensure t
+  :config
+  (setq modus-themes-custom-auto-reload nil
+    modus-themes-to-toggle '(modus-operandi modus-vivendi)
+    ;; modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted)
+    ;; modus-themes-to-toggle '(modus-operandi-deuteranopia modus-vivendi-deuteranopia)
+    ;; modus-themes-to-toggle '(modus-operandi-tritanopia modus-vivendi-tritanopia)
+    modus-themes-mixed-fonts t
+    modus-themes-variable-pitch-ui nil
+    modus-themes-italic-constructs t
+    modus-themes-bold-constructs t
+    modus-themes-completions '((t . (extrabold)))
+    modus-themes-prompts nil
+    modus-themes-headings
+    '((agenda-structure . (variable-pitch light 2.2))
+      (agenda-date . (variable-pitch regular 1.3))
+      (t . (regular 1.15))))
+
+  ;; (setq modus-themes-common-palette-overrides nil)
+
+  (setq modus-themes-common-palette-overrides
+        `((fringe unspecified)
+          ;; (bg-mode-line-active bg-lavender)
+          ;; (border-mode-line-active unspecified)
+          ;; (border-mode-line-inactive unspecified)
+          (bg-line-number-active bg-hl-line)
+          (bg-line-number-inactive unspecified)
+          (fg-line-number-active fg-main)
+          ;; ,@modus-themes-preset-overrides-warmer
+          ))
+  )
+
+(use-package ef-themes
+  :ensure t
+  :demand t
+  :config
+  (setq ef-themes-variable-pitch-ui t
+    ef-themes-mixed-fonts t
+    ef-themes-headings ; read the manual's entry of the doc string
+    '((0 . (variable-pitch light 1.9))
+      (1 . (variable-pitch light 1.8))
+      (2 . (variable-pitch regular 1.7))
+      (3 . (variable-pitch regular 1.6))
+      (4 . (variable-pitch regular 1.5))
+      (5 . (variable-pitch 1.4)) ; absence of weight means `bold'
+      (6 . (variable-pitch 1.3))
+      (7 . (variable-pitch 1.2))
+      (agenda-date . (semilight 1.5))
+      (agenda-structure . (variable-pitch light 1.9))
+      (t . (variable-pitch 1.1))))
+
+
+
+  ;; (setq ef-themes-headings ; read the manual's entry or the doc string
+  ;;    '((0 variable-pitch light 2.5)
+  ;;      (1 variable-pitch light 1.6)
+  ;;      (2 variable-pitch light 1.4)
+  ;;      (3 variable-pitch light 1.2)
+  ;;      (4 variable-pitch light 1.1)
+  ;;      (5 variable-pitch light 1.1)
+  ;;      (6 regular 1.1)
+  ;;      (7 regular 1.1)
+  ;;      (agenda-date variable-pitch 1.3)
+  ;;      )
+  ;;    ef-themes-mixed-fonts t
+  ;;    )
+  ;; (load-theme 'ef-bio t)
+  )
+
+(use-package autothemer
+  :ensure t)
+
+;; (defun bs-sp-workaround ()
+;;   "Workaround issues with `spacious-padding-mode' when using emacsclient."
+;;   (when server-mode
+;;     (spacious-padding-mode 1)
+;;     (remove-hook 'server-after-make-frame-hook #'bs-sp-workaround)))
+;; (add-hook 'server-after-make-frame-hook #'bs-sp-workaround)
+
+(use-package magit
+  :ensure t
+  :bind ("C-c g" . magit)("C-c s" . consult-line))
+
+(use-package rainbow-mode
+  :ensure t)
+
+;;; EVIL MODE ;;;
+(use-package evil
+  :ensure t
+  :init
+  (if (getenv "TERMUX_VERSION")
+      (setq evil-want-C-i-jump nil))
+
+  (setq evil-want-C-u-scroll t
+    evil-want-keybinding nil
+    evil-undo-system 'undo-tree
+    evil-respect-visual-line-mode t)
+
+  :config
+  (evil-set-initial-state 'org-capture-mode 'insert)
+  (evil-set-leader 'normal (kbd "SPC"))
+  (evil-define-key 'normal 'global (kbd "<leader>w") (make-sparse-keymap)) ; window
+  (evil-define-key 'normal 'global (kbd "<leader>f") (make-sparse-keymap)) ; file
+  (evil-define-key 'normal 'global (kbd "<leader>s") (make-sparse-keymap)) ; search
+  (evil-define-key 'normal 'global (kbd "<leader>b") (make-sparse-keymap)) ; buffer
+  (evil-define-key 'normal 'global (kbd "<leader>h") (make-sparse-keymap)) ; help
+  (evil-define-key 'normal 'global (kbd "<leader>c") (make-sparse-keymap)) ; code
+  (evil-define-key 'normal 'global (kbd "<leader>hm") 'consult-man)
+  (evil-define-key 'normal 'global (kbd "<leader>hv") 'describe-variable)
+  (evil-define-key 'normal 'global (kbd "<leader>hf") 'describe-function)
+  (evil-define-key 'normal 'global (kbd "<leader>ff") 'find-file)
+  (evil-define-key 'normal 'global (kbd "<leader>,") 'consult-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>bb") 'consult-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>bl") 'mode-line-other-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>wl") 'evil-window-right)
+  (evil-define-key 'normal 'global (kbd "<leader>wh") 'evil-window-left)
+  (evil-define-key 'normal 'global (kbd "<leader>wj") 'evil-window-bottom)
+  (evil-define-key 'normal 'global (kbd "<leader>wk") 'evil-window-top)
+  (evil-define-key 'normal 'global (kbd "<leader>ww") 'evil-window-next)
+  (evil-define-key 'normal 'global (kbd "<leader>wW") 'evil-window-prev)
+  (evil-define-key 'normal 'global (kbd "<leader>wc") 'evil-window-delete)
+  (evil-define-key 'normal 'global (kbd "<leader>wo") 'delete-other-windows)
+  (evil-define-key 'normal 'global (kbd "<leader>wv") 'evil-window-vsplit)
+  (evil-define-key 'normal 'global (kbd "<leader>ws") 'evil-window-split)
+  (evil-define-key 'normal 'global (kbd "<leader>ss") 'consult-line)
+  (evil-define-key 'normal 'global (kbd "<leader>sg") 'consult-ripgrep)
+  (evil-define-key 'normal 'global (kbd "<leader>so") 'consult-org-heading)
+  (evil-define-key 'normal 'global (kbd "<leader>sO") 'consult-org-agenda)
+  (evil-define-key 'normal 'global (kbd "<leader>cs") 'org-download-screenshot) ;; Code snapshot
+  (evil-define-key 'normal 'global (kbd "-") 'find-file)
+  (evil-define-key 'insert 'global (kbd "C-d") 'delete-char)
+  (evil-define-key 'insert 'global (kbd "C-a") 'back-to-indentation)
+  (evil-define-key 'insert 'global (kbd "C-e") 'end-of-line)
+  (evil-mode 1)
+  )
+
+(use-package evil-args
+  :ensure t)
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode)
+  )
+
+(use-package evil-commentary
+  :ensure t
+  :config (evil-commentary-mode))
+
+(use-package evil-numbers
+  :ensure t)
+
+(use-package evil-collection
+  :ensure t
+  :init (setq evil-want-keybinding nil)
+  :config
+  (evil-collection-init)
+  )
+
+;;; END EVIL MODE;;
+
+
+(use-package smartparens
+  :ensure t
+  :config (smartparens-global-mode))
+
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(setq recentf-max-saved-items 25)
+(global-set-key "\C-x\ \C-r" 'recentf-open)
+
+(use-package org
+  :config
+  (if (jp/is_windows)
+      (setq org-directory "C:/Users/janpe/Sync/org"
+        org-clock-sound "C:/Users/janpe/ding.wav")
+      (setq org-directory (concat (getenv "HOME") "/Sync/org")
+        ;; Sound played when timer ends
+        org-clock-sound (concat (getenv "HOME") "/.local/share/Sounds/ding.wav")))
+
+  (setq
+   org-extend-today-until 4 ; This variable is important, it counts tasks and habits, etc. for the previous day until 4 in the morning
+   org-use-effective-time t ; when completing a task past midnight, treat the time when you mark the todo as done as 23:59
+
+                    ; easily reference these files later
+   org-reading-file (concat org-directory "/notes/reading.org")
+   org-inbox-file (concat org-directory "/todo.org")
+   org-media-file (concat org-directory "/notes/media.org")
+
+   ;; TAGS: easily search your tasks via tags, or create custom agenda views with them
+   org-tag-alist
+   '(
+     ;; Places
+     ("@grocery" . ?G)
+     ("@home" . ?H)
+     ("@school" . ?S)
+
+     ;; Devices
+     ("@computer" . ?C)
+     ("@isaVPS" . ?I)
+     ("@jpserv" . ?J)
+     ("@phone" . ?P)
+
+     ;; Activities
+     ("@calls" . ?a)
+     ("@creative" . ?c)
+     ("@email" . ?e)
+     ("@errands" . ?r)
+     ("@exam" . ?a)
+     ("@planning" . ?n) 
+     ("@programming" . ?p)
+     ("@reading" . ?r)
+     ("@researh" . ?R)
+     ("@violin" . ?e)
+     ("@writing" . ?w)
+     ("@habit" . ?h)
+
+     ;; Special
+     ("dont-notify" . ?D))
+
+   ;; Todo-keywords: Change state of tasks to these keywords
+   org-todo-keywords
+   '((sequence
+      "TODO(t)"                                                 
+"MAINTENANCE(m)"                                                 
+      "SCHOOL(s)"                                               
+      "EXAM(e)"                                                 
+      "APPOINTMENT(a)"                                          
+      "CURRENTLY READING(C!)"                                                
+      "TO READ(R!)"                                                
+      "HABIT(h)"                                                
+      "HEALTH(H)"                                               
+      "GOAL(g)"                                                 
+      "WAIT(w)"                                                 
+      "|"                                                       
+      "DONE(d)"
+      "READ(r@)"     ; Here the ! after the key means that it should record state changes of that keyword in drawer                                             
+      "CANCELLED(c)" )                                          
+     )
+
+   ;; Effort: Estimate duration of a task on creation
+   org-global-properties
+   '(("Effort_ALL" .
+      "0:05 0:10 0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00"))
+
+   ;; Font face styling for keywords (ex. TODO)
+   org-todo-keyword-faces '(
+                ("SCHOOL" . (:inherit org-todo :foreground "#A020F0"))
+                ("EXAM" . (:inherit org-todo :foreground "#FF0000" :background "#000000"))
+                ("HABIT" . (:inherit org-todo :foreground "#16820D"))
+                ("CURRENTLY READING" . (:inherit org-todo :foreground "#127777"))
+                ("READ" . (:inherit org-todo :foreground "#127777"))
+                ("TO READ" . (:inherit org-todo :foreground "#D2A27E"))
+                ("MAINTENANCE" . (:inherit org-todo :foreground "#FBBE0D"))
+                ))
+
+   ;; Configuration for generating websites from ORG files
+   ;; See build-site.el script in my config folder!
+   ;; org-publish-project-alist
+   ;; `(("notes"
+   ;;    :base-directory ,org-directory
+   ;;    :recursive t
+   ;;    :with-toc t                ;; Include a table of contents
+   ;;    :auto-sitemap t
+   ;;    :with-drawers nil
+   ;;    :makeindex t
+   ;;    :with-sub-superscript nil
+   ;;    :publishing-function org-html-publish-to-html
+   ;;    :publishing-directory ,(concat (getenv "HOME") "/org-publish")
+   ;;    :headline-levels 6
+   ;;    ))
+  
+
+  (setq org-pretty-entities t
+    org-startup-with-inline-images t
+    org-insert-heading-respect-content t
+    ;; Quotes
+    org-fontify-quote-and-verse-blocks t
+    org-fontify-whole-block-delimiter-line t
+    org-image-actual-width '(600)
+    org-startup-truncated nil
+    org-log-done 'time
+    org-log-into-drawer t 
+    org-log-redeadline 'time 
+    org-log-reschedule 'time 
+    org-clock-into-drawer "CLOCKING"
+    org-startup-indented t
+    org-use-sub-superscripts '{}
+    org-catch-invisible-edits 'show-and-error
+    org-cycle-separator-lines 0
+    )
+
+
+  (setq org-refile-targets
+    '((nil :maxlevel . 10)
+          (org-agenda-files :maxlevel . 10)))
+
+
+  (setq org-agenda-custom-commands
+        '(
+          ;; Tasks that need to be planned
+          ("p" "Planning"
+           ((tags-todo "+@planning"
+                       ((org-agenda-overriding-header "Planning Tasks")))
+            (tags-todo "-{.*}"
+                       ((org-agenda-overriding-header "Untagged Tasks")))))
+          
+          ;; Tasks I do when home
+          ("h" "home"
+           ((tags-todo "+@home"
+                       ((org-agenda-overriding-header "Tasks to do at home")))))
+
+          ;; Tasks I do on computer
+          ("c" "computer"
+           ((tags-todo "+@computer"
+                       ((org-agenda-overriding-header "Computer tasks")))))
+
+          ;; Tasks that involve programming
+          ("p" "programming"
+           ((tags-todo "+@programming"
+                       ((org-agenda-overriding-header "Programming tasks/projects")))))
+
+          ;; Errands
+          ("e" "errands"
+           ((tags-todo "+@errands"
+                       ((org-agenda-overriding-header "Errands")))))
+
+          ;; School related tasks
+          ("s" "School"
+           ((tags-todo "+@school"
+                       ((org-agenda-overriding-header "Tasks to do at school")))))
+
+          ;; Day overview
+          ("d" "Daily Agenda"
+           ((agenda "" ((org-agenda-span 'day)
+                        (org-deadline-warning-days 7)))
+            (tags-todo "+PRIORITY=\"A\""
+                       ((org-agenda-overriding-header "High Priority Tasks")))))
+
+          ;; Week overview
+          ("w" "Weekly Review"
+           ((agenda ""
+                    ((org-agenda-overriding-header "Completed Tasks")
+                     (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
+                     (org-agenda-span 'week)))
+
+            (agenda ""
+                    ((org-agenda-overriding-header "Unfinished Scheduled Tasks")
+                     (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                     (org-agenda-span 'week)))))))
+
+  ;; (setq org-agenda-prefix-format '((agenda . " %i %?3e %s")
+  ;;                   (todo . " %i %-12:c %?3e")
+  ;;                   (tags . " %i %-12:c")
+  ;;                   (search . " %i %-12:c")))
+  (setq org-agenda-prefix-format "%?3e  %t %s")        
+
+  ;; Capture Templates
+  ;; https://orgmode.org/manual/Capture-templates.html
+  (setq org-capture-templates
+        `(
+          ("t" "Task")
+
+          ("tt" "Regular todo" entry
+           (file+headline ,(concat org-directory "/todo.org") "Inbox") "** TODO %^{TITLE}%(org-set-tags-command)\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%?\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("ts" "Regular Task width SCHEDULED" entry
+           (file+headline ,(concat org-directory "/todo.org") "Inbox") "* TODO %^{TASK NAME}\nSCHEDULED: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+
+          ("td" "Regular Task width DEADLINE" entry
+           (file+headline ,(concat org-directory "/todo.org") "Inbox") "* TODO %^{TASK NAME}\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("tD" "Regular Task width SCHEDULED AND DEADLINE" entry
+           (file+headline ,(concat org-directory "/todo.org") "Inbox") "* TODO %^{TASK NAME}\nSCHEDULED: %^t\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("tc" "Clock in new Task" entry
+           (file+headline ,(concat org-directory "/todo.org") "Inbox") "* TODO %^{TASK NAME}\n\n%?%i\n"
+           :clock-in t
+           :prepend t
+           :immediate-finish t)
+
+          ("j" "Journal" entry
+           (file+olp+datetree ,(concat org-directory "/journal.org")) "* %U %^{TITLE}%(org-set-tags-command)\n\n%i%?\n")
+
+          ("r" "Readling list" entry
+           (file+headline , org-reading-file "Reading list") "** TODO %^{TITLE} :@reading:\n:PROPERTIES:\n:CREATED: %U\n:TITLE: %\\1 \n:PAGES: %^{PAGES}\n:AUTHOR: %^{AUTHOR}\n:TYPE: %^{PROP|Physical|Digital, EPUB|Digital PDF|Digital other|Audiobook}\n:END:\n%i\n\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("R" "Research" entry
+           (file ,(concat org-directory "/notes/research.org")) "** %^{TO RESEARCH}\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%?\n"
+           :prepend t
+           :empty-lines-before 1
+           :immediate-finish t)
+
+          ("d" "Date stamp") ;; activities/ events
+          ("dd" "Date stamp" entry
+           (file+headline ,(concat org-directory "/todo.org") "Events") "** %?\n%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("dr" "Date range" entry
+           (file+headline ,(concat org-directory "/todo.org") "Events") "** %?\n%^t--%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("p" "project")
+          ("pn" "New project" entry
+           (file+headline ,(concat org-directory "/projects.org") "Inbox") "** %^{PROJECT TITLE}%(org-set-tags-command)\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%?\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("s" "school")
+
+          ;; You should REFILE tasks when capturing with *C-c w* keybinding
+          ("st" "Regular Task" entry
+           (file+headline ,(concat org-directory "/school.org") "Inbox") "* SCHOOL %^{TASK NAME}   :@school:\n\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("ss" "Regular Task width SCHEDULED" entry
+           (file+headline ,(concat org-directory "/school.org") "Inbox") "* SCHOOL %^{TASK NAME}   :@school:\nSCHEDULED: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+
+          ("sd" "Regular Task width DEADLINE" entry
+           (file+headline ,(concat org-directory "/school.org") "Inbox") "* SCHOOL %^{TASK NAME}   :@school:\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("sD" "Regular Task width SCHEDULED AND DEADLINE" entry
+           (file+headline ,(concat org-directory "/school.org") "Inbox") "* SCHOOL %^{TASK NAME}   :@school:\nSCHEDULED: %^t\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("sc" "Clock in new Task" entry
+           (file+headline ,(concat org-directory "/school.org") "Inbox") "* SCHOOL %^{TASK NAME}   :@school:\n\n%?%i\n"
+           :clock-in t
+           :prepend t
+           :immediate-finish t)
+
+          ("m" "media")
+          ("mw" "Watch")
+          ("mwy" "YouTube")
+          ("mwya" "Add to Youtube watchlist" entry
+           (file+olp , org-media-file "Watching" "YouTube" "Watchlist") "** [[%^{URL}][%^{Description}]] :youtube:%^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n")
+          ("mwo" "Others")
+          ("mwoa" "Add to others watchlist" entry
+           (file+olp , org-media-file "Watching" "Others" "Watchlist") "** [[%^{URL}][%^{Description}]] %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n")
+          ("ma" "Articles")
+          ("maa" "Add to reading list" entry
+           (file+headline , org-media-file "Reading list") "** [[%^{URL}][%^{Description}]] %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n")
+          ))
+
+
+  ;; Highlight running clock in modeline
+  (set-face-attribute 'org-mode-line-clock nil :foreground "red2" :background "black" :weight 'bold)
+
+  (custom-set-faces
+  ;;  '(org-tag
+  ;;    ((t (:family "Iosevka Comfy" :height 0.7 :italic t))))
+   '(org-todo
+     ((t (:family "Roboto Condensed" :bold t :box t :height 0.9))))
+  ;;  '(org-drawer
+  ;;    ((t (:family "Iosevka Comfy" :height 0.7))))
+   )
+
+  
+  :hook (
+     (org-mode . jp/org/org-close-all-drawers-key); close all drawers when opening orgfile
+     (org-mode . variable-pitch-mode)
+     (org-mode . flyspell-mode)
+     ;; (org-mode . (lambda ()
+     ;;            (setq-local header-line-format "%f")
+     ;;            ))
+    ;; (org-mode . (lambda () (jp/set-centered-header-line "%f")))
+     )
+     
+  
+  :bind (("C-c a" . org-agenda)
+     ("C-c c" . org-capture)
+     ("C-c l" . org-store-link)
+     ("C-c C-M-l" . org-toggle-link-display)
+     ("C-c o" . (lambda () (interactive) (find-file org-directory)))
+     ("<f6>" . (lambda () (interactive)(org-agenda-todo "DONE")))
+     ("<f7>" . (lambda () (interactive)(org-agenda-list)(delete-other-windows)))
+     )
+  )
+
+
+(use-package org-agenda
+  :after org
+  :config
+
+
+  (setq org-agenda-files
+        `(,org-directory
+          ,(concat org-directory "/notes")))
+
+
+
+  (add-hook 'org-agenda-mode-hook (lambda () (setq-local header-line-format "")))
+
+  ;; Start centered header line ;;
+  ;; This code centers string header-line string.
+  ;; I played around with this and works now also with visual-fill-column (which adds margins)
+
+  (add-hook 'org-agenda-mode-hook (lambda () (jp/set-centered-header-line "Agenda")))
+
+    (defun jp/update-centered-header-line (text)
+      (dolist (window (window-list))
+    (with-selected-window window
+      (if (not(eq header-line-format nil))
+          (if (eq major-mode 'org-agenda-mode)
+          (jp/set-centered-header-line "Agenda" window) ; display something else for org-agenda
+        (jp/set-centered-header-line text window))))))
+
+  (add-hook 'window-size-change-functions (lambda (&optional frame)(jp/update-centered-header-line "%f")))
+
+  ;; End of center header line ;; 
+
+
+  (setq org-agenda-skip-scheduled-if-done nil)                        
+  (setq org-agenda-start-on-weekday nil) 
+  (setq org-agenda-start-day "+0d") ; start on today
+  (setq org-agenda-skip-deadline-if-done t)
+  (setq org-agenda-skip-scheduled-if-done t)
+  (setq org-agenda-span 5)                                          
+  (setq org-agenda-hide-tags-regexp ".*")
+  (setq org-deadline-warning-days 2)
+  (setq org-agenda-sticky t)
+  (setq org-agenda-sorting-strategy
+    '((agenda habit-down time-up priority-down category-keep)
+      (todo priority-down category-keep)
+      (tags priority-down category-keep)
+      (search category-keep)))
+
+  ;; (setq  org-agenda-deadline-faces
+  ;;     '((1.0 . error)
+  ;;       (1.0 . org-warning)
+  ;;       (0.5 . org-upcoming-deadline)
+  ;;       (0.0 . org-upcoming-distant-deadline)))
+  )
+
+
+(use-package org-habit
+  :config
+  (if (getenv "TERMUX_VERSION")
+      (setq org-habit-graph-column 55
+        org-habit-preceding-days 3
+        org-habit-following-days 2)
+    (setq org-habit-graph-column 60)))
+
+(use-package org-habit-stats
+  :ensure t
+  :config
+    (define-key org-agenda-mode-map (kbd "C-c h") 'org-habit-stats-view-habit-at-point-agenda)
+    (define-key org-habit-stats-mode-map (kbd "C-c f") 'org-habit-stats-view-next-habit)
+    (define-key org-habit-stats-mode-map (kbd "C-c b") 'org-habit-stats-view-previous-habit)
+  )
+
+
+(use-package org-download
+  :ensure t
+  :config
+  (setq-default org-download-image-dir (concat org-directory "/.imgs"))
+
+  (if (string= system-type "gnu/linux")
+      (setq org-download-screenshot-method "slurp | xargs -I _ grim -g \"_\" /tmp/screenshot.png")
+    )
+  )
+
+;; pandoc jpserv.org -o jpserv.pdf --from org --template eisvogel --listings
+(use-package ox-pandoc
+  :ensure t
+  :config
+  ;; TODO: fix this: user-config-dir is void
+  (setq org-pandoc-options-for-latex-pdf `((template . ,(concat user-config-dir "eisvogel.latex"))))
+  )
+
+(use-package ox-html
+  :custom
+  (org-html-head-include-default-style nil)
+  (org-html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/reset.css\" />\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.css\" />")
+  (org-html-scripts "<script defer type=\"text/javascript\" src=\"/js/index.js\"></script>")
+  (org-html-head-include-scripts t)
+  )
+  
+
+(use-package highlight-indent-guides
+  :ensure t
+  :defer t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  )
+
+(use-package undo-tree
+  :ensure t
+  :config
+  (global-undo-tree-mode)
+  (setq undo-tree-enable-undo-in-region nil))
+
+(setq undo-tree-history-directory-alist `(("." . ,(concat (getenv "HOME") "/.emacs.d/undo"))))
+
+(use-package git-gutter
+  :ensure t
+  :config (git-gutter-mode))
+(use-package org-pomodoro
+  :ensure t)
+
+(use-package web-mode
+  :ensure t)
+
+(use-package emacs
+  :config
+  (setq-default scroll-preserve-screen-position t)
+  (setq-default scroll-conservatively 1) ; affects `scroll-step'
+  (setq-default scroll-margin 0)
+
+  (define-minor-mode jp/scroll-center-cursor-mode
+    "Toggle centred cursor scrolling behaviour."
+    :init-value nil
+    :lighter " S="
+    :global nil
+    (if jp/scroll-center-cursor-mode
+        (setq-local scroll-margin (* (frame-height) 2)
+                    scroll-conservatively 0
+                    maximum-scroll-margin 0.5)
+      (dolist (local '(scroll-preserve-screen-position
+                       scroll-conservatively
+                       maximum-scroll-margin
+                       scroll-margin))
+        (kill-local-variable `,local))))
+
+  ;; C-c l is used for `org-store-link'.  The mnemonic for this is to
+  ;; focus the Line and also works as a variant of C-l.
+  :bind ("C-c L" . jp/scroll-center-cursor-mode))
+
+
+;; (load-file (concat user-emacs-directory  "kanagawa-dragon-theme.el"))
+
+;; Make emacs transparent
+;; (set-frame-parameter nil 'alpha-background 85)
+;; (add-to-list 'default-frame-alist '(alpha-background . 85))
+
+;; (load-theme 'kanagawa-dragon t)
+
+;; (ef-themes-select 'ef-bio)
+(modus-themes-select 'modus-vivendi)
+(pixel-scroll-precision-mode)
+(org-agenda-list)
+(delete-other-windows)
