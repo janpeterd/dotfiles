@@ -177,7 +177,7 @@ bindkey -s '^o' '^uyazi\n'
 # Alt + shift + f (because alt f AND control f are used to navigate)
 # bindkey -s '^[F' '^Ctmux-sessionizer\n'
 bindkey -s '^X^d' '^Cbookmark-dir-cd\n'
-bindkey -s '^X^f' '^Cchezmoi edit --apply $(chezmoi managed | fzf)\n'
+bindkey -s '^X^f' '^Cchezmoi edit --apply ~/$(chezmoi managed | fzf)\n'
 # bindkey -s '^X^f' '^Cbookmark-file-edit\n'
 bindkey -s '^X^p' '^uproject-launcher-zsh\n'
 bindkey -s '^X^k' '^ukitty-session-launcher-zsh\n'

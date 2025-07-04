@@ -283,7 +283,6 @@ environment {
 // spawn-at-startup "swaybg" "-i" "~/Pictures/wallpapers/yoda.png"
 
 // spawn-at-startup "mako"
-spawn-at-startup "sh" "-c" "sleep 1 && waybar"
 spawn-at-startup "swaybg" "-i" "{{ or .wallpaper.path (joinPath .chezmoi.homeDir "Pictures" "wallpaper.png") }}"
 spawn-at-startup "xwayland-satellite"
 spawn-at-startup "emacs" "--fg-daemon"
