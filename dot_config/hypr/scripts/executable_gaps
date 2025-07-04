@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Author: Jan-Peter Dhallé
+# Date: 11/11/2024
+
+MAX_GAP_OUTER=150
+MAX_GAP_INNER=150
+INTERVAL=5
+
+get_gaps() {
+  gap_in=$(hyprctl getoption general:gaps_in | head -1 | cut -d" " -f3)
+  gap_out=$(hyprctl getoption general:gaps_out | head -1 | cut -d" " -f3)
+}
+
+increase_gaps_inner() {
+  if [ "$MAX_GAP_INNER" -lt $((gap_in + INTERVAL)) ]; then
+    hyprctl keyword general:gaps_in "$MAX_GAP_INNER"
+  else
+    hyprctl --batch "keyword general:gaps_in $((gap_in + 2))"
+  fi
+}
+
+increase_gaps_outer() {
+  if [ "$MAX_GAP_OUTER" -lt $((gap_out + INTERVAL)) ]; then
+    hyprctl keyword general:gaps_out "$MAX_GAP_OUTER"
+  else
+    hyprctl keyword general:gaps_out $((gap_out + INTERVAL))
+  fi
+}
+increase_gaps() {
+  if [[ "$1" == "outer" ]]; then
+    increase_gaps_outer
+  elif [[ "$1" == "inner" ]]; then
+    increase_gaps_inner
+  else
+    increase_gaps_inner
+    increase_gaps_outer
+  fi
+}
+
+decrease_gaps_inner() {
+  if [ "$gap_in" -lt $INTERVAL ]; then
+    hyprctl --batch "keyword general:gaps_in $((0))"
+  else
+    hyprctl --batch "keyword general:gaps_in $((gap_in - INTERVAL))"
+  fi
+}
+
+decrease_gaps_outer() {
+  if [ "$gap_out" -lt $INTERVAL ]; then
+    hyprctl --batch "keyword general:gaps_out $((0))"
+  else
+    hyprctl --batch "keyword general:gaps_out $((gap_out - INTERVAL))"
+  fi
+}
+
+decrease_gaps() {
+  if [[ "$1" == "outer" ]]; then
+    decrease_gaps_outer
+  elif [[ "$1" == "inner" ]]; then
+    decrease_gaps_inner
+  else
+    decrease_gaps_outer
+    decrease_gaps_inner
+  fi
+}
+
+# -------------------------- Program ------------------------------------
+
+# Set gap values
+get_gaps
+
+
+# Modify gap values
+if [[ $1 == "inc" ]]; then
+  if [[ $2 == "outer" ]]; then
+    increase_gaps "outer"
+  elif [[ $2 == "inner" ]]; then
+    increase_gaps "inner"
+  else
+    increase_gaps
+  fi
+elif [[ $1 == "dec" ]]; then
+  if [[ $2 == "outer" ]]; then
+    decrease_gaps "outer"
+  elif [[ $2 == "inner" ]]; then
+    decrease_gaps "inner"
+  else
+    decrease_gaps
+  fi
+elif [[ $1 == "toggle" ]]; then
+  if [ "$gap_in" -ne 0 ] ||  [ "$gap_out" -ne 0 ]; then
+    hyprctl --batch "keyword general:gaps_in 0; keyword general:gaps_out 0; keyword decoration:rounding 0"
+  else
+    hyprctl reload
+  fi
+fi
+
+# Print new values
+get_gaps
+echo "gaps" "gaps after change $gap_in $gap_out"

@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+
+# This script isn't tested much and with a maximum of 2 monitors.
+# It should work with more but yea...
+# Made for personal use
+
+hyprlandConfig="$HOME/.config/hypr/hyprland.conf"
+dmenuCommand="rofi -dmenu -i -theme $HOME/.config/rofi/launchers/type-1/style-8.rasi"
+
+# If there is only 1 MONTITOR you have to reset the config to be able to detect others.
+if [[ "$1" == "--reset" ]]; then
+    # This triggers hyprland auto config update
+    touch "$hyprlandConfig"
+    exit 0
+
+fi
+
+choose() {
+    read -r -p "Answer: " ans
+    echo "$ans"
+}
+
+monitorCount="$(hyprctl monitors -j | jq length)"
+
+# This array contains the connection port (HDMI..., DP, etc), not really a good way for the user to identify the monitor
+monitorNames=()
+while IFS= read -r line; do
+    monitorNames+=("$line")
+done <<<"$(hyprctl monitors -j | jq '.[].name' | tr -d '"')"
+
+# Monitor description include Brand, model and port better for identifying
+monitorDesc=()
+while IFS= read -r line; do
+    monitorDesc+=("$line")
+done <<<"$(hyprctl monitors -j | jq '.[].description' | tr -d '"')"
+
+if [ "$monitorCount" -gt 1 ]; then
+    printf "INFO: Detected %d monitors.\n\n" "$monitorCount"
+else
+    printf "WARNING: Only %d monitor detected, exiting...\nRun the script with --reset to reload config" "$monitorCount"
+    exit
+fi
+
+printf "\nWARNING: Run this script without any important windows opened.\nSetting monitor configuration via hyprctl (which this script uses) isn't very stable and windows might dissapear!\n\n"
+
+if [[ "$1" == "--dmenu" ]]; then
+    ans=$(printf "1: %-10s \n 2: %-10s\n 3: %-10s\n 4: %-10s\n 5: %-10s\n" "Mirror" "Extend" "Single monitor" "Reset (Use config)" "Exit" | $dmenuCommand -p "What do you want to do?: " | tr -d ' ' | cut -d':' -f1)
+    echo "$ans"
+else
+    printf "What do you want to do: \n 1: %-10s \n 2: %-10s\n 3: %-10s\n 4: %-10s\n 5: %-10s\n" "Mirror" "Extend" "Single monitor" "Reset (Use config)" "Exit"
+    ans=$(choose)
+fi
+case "$ans" in
+1) # =MIRROR=
+    # ask for what monitor you want to mirror
+    printf "\nWhich monitor do you want to mirror? \n\n"
+    for i in "${!monitorDesc[@]}"; do
+        if [[ "$1" == "--dmenu" ]]; then
+            answer=$(printf "$i: %10s \n" "${monitorDesc[$i]}" | $dmenuCommand | tr -d ' ' | cut -d':' -f1)
+        else
+            printf "$i: %10s \n" "${monitorDesc[$i]}"
+            answer=$(choose)
+        fi
+    done
+    printf "INFO: Chosen monitor: %s\n" "${monitorDesc[$answer]}"
+    toMirror="${monitorNames[$answer]}"
+    # use 'monitor' keyword, set all displays that aren't the chosen display to mirror
+    for i in "${!monitorNames[@]}"; do
+        monName="${monitorNames[$i]}"
+        echo "Current monitor name: $monName"
+        if [[ ! ${monitorNames[$i]} == "${monitorNames[$answer]}" ]]; then
+            printf "Not monitor %s setting to mirror %s \n" "${monitorNames[$answer]}" "${monitorNames[$answer]}"
+            hyprctl keyword monitor "$monName",preferred,auto,1,mirror,"$toMirror"
+        fi
+    done
+
+    # Set the chosen monitor to best settings
+    hyprctl keyword monitor "${monitorNames[$answer]}",preferred,auto,1
+    ;;
+2) # =EXTEND=
+    x_count=0
+    extend_mon_order=()
+    extend_mon_desc=()
+    # go from left to right
+    printf "We will choose the order of the monitors by going from left to right.\nWhich monitor should go on the left?\n Don't choose the same one twice...\n\n"
+    for i in "${!monitorNames[@]}"; do
+        for j in "${!monitorDesc[@]}"; do
+            if [[ "$1" == "--dmenu" ]]; then
+                answer=$(printf "%s: %s\n" "$j" "${monitorDesc[$j]}" | $dmenuCommand | tr -d ' ' | cut -d':' -f1)
+            else
+                printf "%s: %s\n" "$j" "${monitorDesc[$j]}"
+            fi
+        done
+        answer=$(choose)
+        chosenMonName="${monitorNames[$answer]}"
+        extend_mon_order+=("$chosenMonName")
+        extend_mon_desc+=("${monitorDesc[$answer]}")
+    done
+
+    printf "\nChosen monitor order: \n"
+    for i in "${!extend_mon_desc[@]}"; do
+        printf "%s: %s\n" "$i" "${extend_mon_desc[$i]}"
+    done
+    if [[ "$1" == "--dmenu" ]]; then
+        ans=$(printf "y\nn" | $dmenuCommand -p "Continue?: " | tr -d ' ' | cut -d':' -f1)
+    else
+        printf "Continue? y/n\n"
+        ans=$(choose)
+    fi
+    if [[ "$ans" == "y" ]]; then
+        for i in "${!extend_mon_order[@]}"; do
+            hyprctl keyword monitor "${extend_mon_order[$i]}",preferred,"$x_count"x0,1,
+            # TODO: don't assume 1920 x...
+            x_count=$(($x_count + 1920))
+            printf "%s\n" "$x_count"
+        done
+    fi
+    ;;
+
+3) # =SINGLE MONTITOR=
+    # ask for what monitor you want to mirror
+    printf "\nWhich monitor do you want to use? \n\n"
+    for i in "${!monitorDesc[@]}"; do
+        printf "$i: %10s \n" "${monitorDesc[$i]}"
+    done
+    answer=$(choose)
+    printf "INFO: Chosen monitor: %s\n" "${monitorDesc[$answer]}"
+    # use 'monitor' keyword, set all displays that aren't the chosen display to mirror
+    for i in "${!monitorNames[@]}"; do
+        monName="${monitorNames[$i]}"
+        echo "Current monitor name: $monName"
+        if [[ ! ${monitorNames[$i]} == "${monitorNames[$answer]}" ]]; then
+            printf "Not monitor %s, disabling \n" "${monitorNames[$answer]}" "${monitorNames[$answer]}"
+            hyprctl keyword monitor "$monName",disable
+        fi
+    done
+
+    # Set the chosen monitor to best settings
+    hyprctl keyword monitor "${monitorNames[$answer]}",preferred,auto,1
+    ;;
+4) # =RESET=
+    # This triggers hyprland auto config update
+    touch "$hyprlandConfig"
+    exit
+    ;;
+5) # =EXIT=
+    exit
+    ;;
+*)
+    echo "Invalid"
+    ;;
+esac

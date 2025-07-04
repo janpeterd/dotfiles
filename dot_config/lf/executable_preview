@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+FILE=$1
+CACHEDIR="$HOME/.cache/lf"
+CACHE="$HOME/.cache/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$FILE")" | sha256sum | awk '{print $1}')"
+
+
+#
+#  ==-----FUNCTIONS-----==
+#
+
+determine_image_preview_type() {
+    if [[ $(grep -x "set sixel.*" "$HOME/.config/lf/lfrc") == "" ]]; then
+        if [ -n "$TMUX" ]; then
+            IMAGE_PREVIEW_TYPE="tmux"
+        elif [ -n "$KITTY_WINDOW_ID" ]; then
+            IMAGE_PREVIEW_TYPE="kitty"
+        elif [ -n "$GHOSTTY_RESOURCES_DIR" ]; then
+            IMAGE_PREVIEW_TYPE="kitty"
+        elif [ -n "$WEZTERM_PANE" ]; then
+            IMAGE_PREVIEW_TYPE="wezterm"
+        else
+            IMAGE_PREVIEW_TYPE="default"
+        fi
+    else
+        # if sixel is configured, assume that terminal supports it
+        IMAGE_PREVIEW_TYPE="sixel"
+    fi
+}
+
+image() {
+    f=$1
+    w=$2
+    h=$3
+    x=$4
+    y=$5
+    if [[ $IMAGE_PREVIEW_TYPE == "tmux" ]]; then
+        ueberzugpp cmd -s "$UB_SOCKET" -a add -i PREVIEW -x "$x" -y "$y" --max-width "$w" --max-height "$h" -f "$f"
+    elif [[ $IMAGE_PREVIEW_TYPE == "kitty" || $IMAGE_PREVIEW_TYPE == "wezterm" ]]; then
+        if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            kitty +kitten icat --scale-up --stdin=no --transfer-mode=stream --place="${w}x${h}@${x}x${y}" "$f" </dev/null >/dev/tty
+        else
+            kitty +kitten icat --transfer-mode=memory --stdin=no --place="${w}x${h}@${x}x${y}" "$f" </dev/null >/dev/tty
+        fi
+    elif [[ $IMAGE_PREVIEW_TYPE == "sixel" ]]; then
+        chafa "$f" -f sixel -s "$w""x""$h" --animate false
+    else
+        chafa "$f" -s "$w""x""$h" --animate false
+    fi
+    exit 1
+}
+
+bat_cat_file() {
+    if file -Lb "$1" | grep -qE 'text'; then
+        if command -v bat >/dev/null 2>&1; then
+            bat --color=always --style=plain --theme=fly16 --pager=never "$1" "$@"
+        elif command -v batcat >/dev/null 2>&1; then
+            batcat --color=always --style=plain --theme=fly16 --pager=never "$1" "$@"
+        else
+            cat "$1"
+        fi
+    else
+        # binary file use file command
+        file -Lb "$1" | fold -sw 50
+    fi
+}
+
+determine_image_preview_type
+
+
+#
+#  ==-----PREVIEW PER FILETYPE-----==
+#
+case "$(printf "%s\n" "$(readlink -f "$FILE")" | awk '{print tolower($0)}')" in
+    *.7z) 7z l "$FILE" ;;
+    *.[1-8]) man "$FILE" | col -b ;;
+    *.avi | *.mp4 | *.wmv | *.dat | *.3gp | *.ogv | *.mkv | *.mpg | *.mpeg | *.vob | *.fl[icv] | *.m2v | *.mov | *.webm | *.mts | *.m4v | *.r[am] | *.qt | *.divx) [ -f "$CACHE.jpg" ] && image "$CACHE.jpg" "$2" "$3" "$4" "$5" || ffmpegthumbnailer -i "$FILE" -o "$CACHE.jpg" -s 0 -q 5 && image "$CACHE.jpg" "$2" "$3" "$4" "$5" ;;
+    *.bmp | *.jpg | *.jpeg | *.png | *.xpm | *.webp | *.tiff | *.gif | *.jfif | *.ico) image "$FILE" "$2" "$3" "$4" "$5" ;;
+    *.cbz | *.cbr | *.cbt) [ -f "$CACHE" ] && image "$CACHE" "$2" "$3" "$4" "$5" || comicthumb "$FILE" "$CACHE" && image "$CACHE" "$2" "$3" "$4" "$5" ;;
+    *.doc | *.docx | *.odt | *.sxw) [ -f "$CACHE.txt" ] && bat_cat_file "$CACHE.txt" || libreoffice --convert-to txt --outdir "$CACHEDIR" &>/dev/null "$FILE" ; mv "$CACHEDIR/$(basename "${FILE%.*}").txt" "$CACHE.txt" && bat_cat_file "$CACHE.txt" ;;
+    *.pptx | *.odp ) [ -f "$CACHE.jpg" ] && image "$CACHE.jpg" "$2" "$3" "$4" "$5" || libreoffice --convert-to jpg --outdir "$CACHEDIR" "$FILE" &>/dev/null && mv "$CACHEDIR/$(basename "${FILE%.*}").jpg" "$CACHE.jpg" && image "$CACHE.jpg" "$2" "$3" "$4" "$5" ;;
+    *.epub) [ -f "$CACHE.png" ] && image "$CACHE.png" "$2" "$3" "$4" "$5" || gnome-epub-thumbnailer "$FILE" "$CACHE.png" &>/dev/null && image "$CACHE.png" "$2" "$3" "$4" "$5" ;;
+    *.mobi) [ -f "$CACHE.png" ] && image "$CACHE.png" "$2" "$3" "$4" "$5" || gnome-mobi-thumbnailer "$FILE" "$CACHE.png" &>/dev/null && image "$CACHE.png" "$2" "$3" "$4" "$5" ;;
+    *.ino) bat_cat_file --language=cpp "$FILE" ;;
+    *.iso) iso-info --no-header -l "$FILE" ;;
+    *.json) jq -C < "$FILE" ;;
+    *.md) CLICOLOR_FORCE=1 glow -s dark "$FILE" ;;
+    *.o) nm "$FILE" ;;
+    *.pdf) [ -f "$CACHE.jpg" ] && image "$CACHE.jpg" "$2" "$3" "$4" "$5" || pdftoppm -jpeg -f 1 -singlefile "$FILE" "$CACHE" &>/dev/null && image "$CACHE.jpg" "$2" "$3" "$4" "$5" ;;
+    *.rar) unrar l "$FILE" ;;
+    *.svg) [ -f "$CACHE.jpg" ] && image "$CACHE.jpg" "$2" "$3" "$4" "$5" || magick "$FILE" "$CACHE.jpg" &>/dev/null && image "$CACHE.jpg" "$2" "$3" "$4" "$5" ;;
+    *.tar) tar tf "$FILE" ;;
+    *.tar.bz2 | *.tbz2) tar tjf "$FILE" ;;
+    *.tar.txz | *.txz | *.tar.xz) xz --list "$FILE" ;;
+    *.tgz | *.tar.gz) tar tzf "$FILE" ;;
+    *.torrent) transmission-show "$FILE" ;;
+    *.ttf | *.otf | *.woff | *.woff2) [ -f "$CACHE" ] && image "$CACHE.png" "$2" "$3" "$4" "$5" || magick -size 532x365 xc:"#000000" -gravity center -pointsize 38 -font "$FILE" -fill "#ffffff" -annotate +0+0 "ABCDEFGHIJKLM\nNOPQRSTUVWXYZ\nabcdefghijklm\nnopbbqrstuvwxyz\n1234567890\n\%(){}[]" -flatten "$CACHE.png" &>/dev/null && image "$CACHE.png" "$2" "$3" "$4" "$5" ;;
+    *.wav | *.mp3 | *.flac | *.m4a | *.wma | *.ape | *.ac3 | *.og[agx] | *.spx | *.opus | *.as[fx] | *.mka) exiftool "$FILE" ;;
+    *.xls | *.xlsx | *.ods) [ -f "$CACHE.jpg" ] && bat_cat_file "$CACHE.csv" || libreoffice --convert-to csv --outdir "$CACHEDIR" "$FILE" &>/dev/null && mv "$CACHEDIR/$(basename "${FILE%.*}").csv" "$CACHE.csv" && bat_cat_file "$CACHE.csv" ;;
+    *.zip | *.jar | *.war | *.ear | *.oxt | *.vsix) unzip -l "$FILE" ;;
+    *) bat_cat_file "$FILE" ;;
+esac
+exit 0

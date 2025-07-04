@@ -12,50 +12,8 @@ if [[ $(which jetbrains-toolbox) ]]; then
     export PATH="$PATH:/home/jp/.local/share/JetBrains/Toolbox/scripts"
 fi
 
-# hide EOL sign ('%')
 PROMPT_EOL_MARK=""
-
-# ALIASES
-
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="jnrowe"
-# ZSH_THEME=""
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion.
-# Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment one of the following lines to change the auto-update behavior
-# zstyle ':omz:update' mode disabled  # disable automatic updates
-# zstyle ':omz:update' mode auto      # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-# Uncomment the following line to change how often to auto-update (in days).
-# zstyle ':omz:update' frequency 13
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
 
 plugins=(zoxide zsh-autosuggestions fzf zsh-syntax-highlighting)
 
@@ -64,9 +22,8 @@ export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-
-# emacs style copy to system clipboard
 copy-clipboard () {
+
   if [[ "$REGION_ACTIVE" -ne 0 ]]; then
     zle copy-region-as-kill
     print -rn -- $CUTBUFFER | wl-copy
@@ -220,7 +177,8 @@ bindkey -s '^o' '^uyazi\n'
 # Alt + shift + f (because alt f AND control f are used to navigate)
 # bindkey -s '^[F' '^Ctmux-sessionizer\n'
 bindkey -s '^X^d' '^Cbookmark-dir-cd\n'
-bindkey -s '^X^f' '^Cbookmark-file-edit\n'
+bindkey -s '^X^f' '^Cchezmoi edit --apply $(chezmoi managed | fzf)\n'
+# bindkey -s '^X^f' '^Cbookmark-file-edit\n'
 bindkey -s '^X^p' '^uproject-launcher-zsh\n'
 bindkey -s '^X^k' '^ukitty-session-launcher-zsh\n'
 bindkey -s '^X^t' '^usesh connect $(sesh list -i  | fzf +s --ansi --highlight-line --scheme=path)\n'

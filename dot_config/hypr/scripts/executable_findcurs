@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+large_size=80
+threshold=130
+enlarged=0
+endtime=0
+
+enlargen_cursor() {
+    hyprctl setcursor HYPRCURSOR_THEME $large_size
+    gsettings set org.gnome.desktop.interface cursor-size $large_size
+    enlarged=1
+    endtime=$(date +%s)
+    endtime=$((endtime + 2))
+}
+
+reset_cursor() {
+    hyprctl setcursor HYPRCURSOR_THEME "$HYPRCURSOR_SIZE"
+    gsettings set org.gnome.desktop.interface cursor-size "$HYPRCURSOR_SIZE"
+    enlarged=0
+}
+
+while :; do
+
+    pos=$(hyprctl cursorpos)
+    x=$(echo "$pos" | cut -d',' -f1)
+    y=$(echo "$pos" | cut -d',' -f2)
+
+    dx=$((x - lastx))
+    dy=$((y - lasty))
+
+    # calculate movement
+    dist=$(bc <<<"scale=2; sqrt($dx*$dx + $dy*$dy)")
+
+    if [ "$(bc <<<"$dist > $threshold")" -eq 1 ]; then
+        enlargen_cursor
+    fi
+
+    if [[ $enlarged -eq 1 && $(date +%s) -ge $endtime ]]; then
+        reset_cursor
+    fi
+
+    lastx=$x
+    lasty=$y
+
+    sleep 0.01
+done

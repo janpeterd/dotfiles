@@ -1,0 +1,437 @@
+# Basic vars
+set shellopts '-eu'
+set ifs "\n"
+set scrolloff 10
+set icons
+# click and right click, scroll and control + scroll
+set mouse
+set period 1
+# set globsearch
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
+set cleaner '~/.config/lf/cleaner_kitty'
+set previewer '~/.config/lf/preview'
+# set sixel # sixel preview
+set drawbox
+set autoquit true
+set statfmt "\033[36m%p\033[0m| %c| %u| %g| %s| %t| -> %l"
+set borderfmt "\033[0m"
+# set cursorpreviewfmt  "\033[7;90m"
+
+# ------------------ COMMANDS ------------------
+# These can be mapped or just launched from within lf
+
+
+# Executes on cd
+cmd on-cd &{{
+
+# display repository status in your prompt
+  if [ -d .git ] || [ -f .git ]; then
+    branch=$(git branch --show-current 2>/dev/null) || true
+      commit=$(git rev-parse --short HEAD 2>/dev/null) || true
+      remote=$(git config --get branch.$branch.remote 2>/dev/null) || true
+      fmt="\033[32;1m%u@%h\033[0m:\033[34;1m%w\033[0m\033[33;1m%S  $branch  $commit\033[0m"
+  else
+    fmt="\033[32;1m%u@%h\033[0m:\033[34;1m%d\033[0m\033[1m%f\033[0m"
+      fi
+      lf -remote "send $id set promptfmt \"$fmt\""
+}}
+
+
+cmd open ${{
+    case $(file --mime-type "$(readlink -f $f)" -b) in
+      application/vnd.openxmlformats-officedocument.spreadsheetml.sheet) setsid -f localc $fx >/dev/null 2>&1 ;;
+      application/vnd.oasis.opendocument.spreadsheet) setsid -f localc $fx >/dev/null 2>&1 ;;
+      application/vnd.ms-excel) setsid -f localc $fx >/dev/null 2>&1 ;;
+      application/vnd.oasis.opendocument.text) setsid -f lowriter $fx > /dev/null 2>&1 ;;
+      application/vnd.openxmlformats-officedocument.wordprocessingml*) setsid -f lowriter $fx > /dev/null 2>&1 ;;
+      application/vnd.ms-word*) setsid -f lowriter $fx > /dev/null 2>&1 ;;
+      application/vnd.openxmlformats-officedocument.presentationml*) setsid -f loimpress $fx >/dev/null 2>&1 ;;
+      application/vnd.ms-powerpoint) setsid -f loimpress $fx >/dev/null 2>&1 ;;
+      image/vnd.djvu|application/pdf|application/epub*|application/octet-stream|application/postscript) zathura $fx >/dev/null 2>&1 ;;
+      text/*|application/json|inode/x-empty) $EDITOR $fx;;
+      image/x-xcf) setsid -f gimp $f >/dev/null 2>&1 ;;
+      image/bmp) $BROWSER $fx >/dev/null 2>&1 ;;
+      image/gif) setsid -f mpv --loop=inf $fx >/dev/null 2>&1 ;;
+      image/*) setsid -f imv $fx >/dev/null 2>&1 ;;
+      audio/*) mpv --audio-display=no --really-quiet --display-tags-clr --msg-level=cplayer=error $f ;;
+      video/*)
+      if declare -p KITTY_WINDOW_ID >/dev/null 2>&1; then
+          if declare -p SSH_CLIENT >/dev/null 2>&1 || declare -p SSH_TTY >/dev/null 2>&1; then
+        mpv --vo=kitty --vo-kitty-use-shm=no $f -quiet 2>&1
+          else
+        mpv --vo=kitty --vo-kitty-use-shm=yes $f -quiet 2>&1
+          fi
+      else
+          setsid -f mpv $fx >/dev/null 2>&1
+      fi
+      ;;
+      application/x-rar*) setsid -f file-roller $f >/dev/null 2>&1 ;;
+      application/pgp-encrypted) $EDITOR $fx ;;
+      *) for f in $fx; do nvim $f; done ;;
+        esac
+}}
+
+cmd source_config $lf -remote "send $id source ~/.config/lf/lfrc"
+cmd mkdir $mkdir -p "$(echo $* | tr ' ' '\ ')"
+
+# This extract command makes use of the aunpack perl script 
+# included with the atool package
+cmd extract ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "extract?[y/N]"
+  read ans
+  [ $ans = "y" ] && aunpack $fx
+}}
+
+cmd delete ${{
+  clear; tput cup $(($(tput lines)/3)); tput bold
+  set -f
+  printf "%s\n\t" "$fx"
+  printf "delete?[y/N]"
+  read ans
+  [ $ans = "y" ] && trash-put -- $fx
+}}
+
+# Open in a gui file manager
+cmd openingui ${{
+# gui_file_manager="thunar"
+# gui_file_manager="nautilus"
+  gui_file_manager="pcmanfm"
+  if [[ -d "$f" ]]; then
+# argument is a directory, do nothing
+    setsid -f $gui_file_manager "$f" &>/dev/null
+    else
+# argument is a file, get the directory path
+    dir=$(dirname "$f")
+    if [[ "$gui_file_manager" == "thunar" ]]; then
+      setsid -f $gui_file_manager "$dir" &>/dev/null
+      else
+      setsid -f $gui_file_manager "$f" &>/dev/null
+    fi
+  fi
+}}
+
+# Git clone
+cmd git_clone ${{
+  echo "Git repo URL to clone: "
+  read ans
+# TODO: figure out how to execute the clone in the background...
+  git clone "$ans" &
+}}
+
+# using libreoffice headless
+cmd converttopdf &{{
+  # clear; tput cup $(($(tput lines)/3)); tput bold
+  # set -f
+  # clear; echo "Convert $f to pdf?"
+  # read ans
+  # [ $ans = "y" ] && 
+  libreoffice --headless --convert-to pdf "$f"
+}}
+
+# Quickly add and remove files from my bookmarks
+# my bookmarks are just 2 plaintext files 1 containing directory paths 
+# and the other file paths
+cmd manage_bookmarks ${{
+  dirs_file="/home/jp/.local/share/Bookmarks/directories.txt"
+  files_file="/home/jp/.local/share/Bookmarks/files.txt"
+  sed_pattern=$(echo $f | sed 's/\//\\\//g')
+
+  if [[ -d $f ]]; then
+    clear; echo "Bookmarking selected directory."
+    if [[ $(grep -x "$f" $dirs_file) != "" ]]; then
+      clear; echo "Do you want to remove it?"
+      read ans
+      # [ $ans = "y" ] && sed "/$sed_pattern/d" -i "$dirs_file" && notify-send "Removing bookmark" "Removing bookmark $f from $dirs_file"
+      echo sed "/$sed_pattern/d" -i "$dirs_file" && notify-send "Removing bookmark" "Removing bookmark $f from $dirs_file"
+
+    else
+      notify-send "Bookmarking Directory" "Appending $f to $dirs_file"
+      echo $f >> $dirs_file
+    fi
+  elif [[ -f $f ]]; then
+    clear; echo "Bookmarking selected file."
+    if [[ $(grep -x "$f" $files_file) != "" ]]; then
+      notify-send "File is already bookmarked!"
+      clear; echo "Do you want to remove it?"
+      read ans
+      [ $ans = "y" ] && sed "/$sed_pattern/d" -i "$files_file" && notify-send "Removing bookmark" "Removing bookmark $f from $files_file"
+    else
+      notify-send "Bookmarking File" "Appending $f to $files_file"
+      echo $f >> $files_file
+    fi
+  fi
+}}
+
+
+cmd copy-full-path ${{
+  if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+    wl-copy "$fx"
+  else
+    xclip -sel c "$fx"
+  fi
+  notify-send -i "$f" "Path copied to clipboard" "    [ $fx ]"
+}}
+
+cmd copy-parent-dir ${{
+  dir="$(dirname $f)"
+  if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+    wl-copy "$dir"
+  else
+    xclip -sel c "$dir"
+  fi
+  notify-send -i "$dir" "Path copied to clipboard" "    [ $dir ]"
+}}
+
+cmd copy-filename-without-extension ${{
+  filename="$(basename "$fx")"
+  no_ext="${filename%.*}"
+  if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+    wl-copy "$no_ext"
+  else
+    xclip -sel c "$no_ext"
+  fi
+  notify-send -i "$f" "Filename copied to clipboard" "    [ $no_ext ]"
+}}
+
+cmd copy-filename ${{
+  filename="$(basename "$fx")"
+  if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+    wl-copy "$filename"
+  else
+    xclip -sel c "$filename"
+  fi
+  notify-send -i "$f" "Filename copied to clipboard" "    [ $filename ]"
+}}
+
+
+cmd copy-contents ${{
+# ls if directory else just file contents
+  if [ -d "$f" ]; then
+    dircontents=$(ls "$f")
+    if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+       wl-copy "$dircontents"
+    else
+      xclip -sel c "$dircontents"
+    fi
+    notify-send -i "$dircontents" "Directory listing copied to clipboard" "    [ $dircontents ]"
+  else
+    if [[ $XDG_SESSION_TYPE == 'wayland' ]]; then
+      wl-copy < "$f"
+    else
+      # TODO: x11
+        xclip -sel c "$f"
+    fi
+    notify-send -i "$f" "File contents copied to clipboard" "    [ $f ]"
+  fi
+}}
+
+cmd bulkrename $vidir
+
+
+# some launchers using fzf
+cmd school-launcher-lf ${{
+  configs=(
+      "$(find '/home/jp/school/ITF1' -maxdepth 2 -mindepth 2 \( -type d -or -type l \))"
+      )
+
+  if [[ -z "$configs" ]]; then
+    clear;
+    echo "No configs found!"
+    exit 1
+  fi
+
+# Use fzf to select config directory
+  selected_config=$(printf '%s/\n' "${configs[@]}" | fzf)
+  if [[ -z "$selected_config" ]]; then
+    clear;
+  echo "No config selected!"
+    exit 1
+  fi
+
+  lf -remote "send $id cd \"$selected_config\""
+}}
+
+cmd project-launcher-lf ${{
+  projects=(
+      "$(find '/home/jp/Code/Projects school/' -maxdepth 1 -mindepth 1 -type d)"
+      "$(find '/home/jp/Code/Projects/' -maxdepth 1 -mindepth 1 -type d)"
+      "$(find '/home/jp/Code/repos/' -maxdepth 1 -mindepth 1 -type d)"
+      )
+
+  if [[ -z "$projects" ]]; then
+
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    clear;
+    echo "No projects found!"
+  fi
+
+# Use fzf to select project directory
+  selected_project=$(printf '%s\n' "${projects[@]}" | fzf)
+  if [[ -z "$selected_project" ]]; then
+    clear; tput cup $(($(tput lines)/3)); tput bold
+    set -f
+    clear;
+    echo "No project selected!"
+  fi
+
+# Change to project directory
+  lf -remote "send $id cd \"$selected_project\""
+}}
+
+
+cmd config-launcher-lf ${{
+  configs=(
+      "$(find '/home/jp/.config/' -maxdepth 1 -mindepth 1 \( -type d -or -type l \))"
+      )
+
+  if [[ -z "$configs" ]]; then
+    clear;
+    echo "No configs found!"
+    exit 1
+  fi
+
+# Use fzf to select config directory
+  selected_config=$(printf '%s/\n' "${configs[@]}" | fzf)
+  if [[ -z "$selected_config" ]]; then
+    clear;
+    echo "No config selected!"
+    exit 1
+  fi
+
+  lf -remote "send $id cd \"$selected_config\""
+}}
+
+cmd setbg ${{
+  if [[ $XDG_CURRENT_DESKTOP == "Hyprland" ]]; 
+  then
+    hyprsetbg $f
+  else
+    setbg $f
+  fi
+}}
+
+# Zoxide
+cmd z %{{
+  result="$(zoxide query --exclude $PWD $@ | sed 's/\\/\\\\/g;s/"/\\"/g')"
+  lf -remote "send $id cd \"$result\""
+}}
+
+cmd zi ${{
+  result="$(zoxide query -i | sed 's/\\/\\\\/g;s/"/\\"/g')"
+  lf -remote "send $id cd \"$result\""
+}}
+
+cmd on-cd &{{
+  zoxide add "$PWD"
+}}
+
+
+
+# Bindings
+
+# show dirsize
+map sd :calcdirsize $f
+# run the previewscript and page the file
+map i $~/.config/lf/preview "$f" | less -R
+# map i $~/.config/lf/preview_sixel $f | less -R
+map f $lf -remote "send $id select \"$(fzf k-border rounded --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')\""
+map f $lf  -remote "send $id select \"$(fzf --border rounded --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')\""
+# map w $$SHELL
+
+# map gb :git_branch
+# map gp ${{clear; git pull --rebase || true; echo "press ENTER"; read ENTER}}
+# map gs ${{clear; git status; echo "press ENTER"; read ENTER}}
+# map gl ${{clear; git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit}}
+
+# SEARCH
+# locate
+map <c-s>l $lf -remote "send $id select \"$(locate / | fzf --border rounded --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')\""
+# ripgrep/ grep
+map S $rg-fzf # search
+map <c-s>r $rg-fzf
+map <c-s>g $rg-fzf
+# find
+map <c-s>f $lf -remote "send $id select \"$(find . 2>/dev/null | fzf --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')\""
+# Find command, way slower that locate (but up to date more? maybe useful idk)
+# map J $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' -e 's/^\S*\s*//' ${XDG_CONFIG_HOME:-$HOME/.config}/shell/bm-dirs | fzf)"
+# map J $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' ~/.local/share/Bookmarks/directories.txt | fzf)"
+
+map D delete
+map E extract
+# map C copyto
+# map M moveto
+map <c-n> push :mkdir<space>
+map <c-r> reload
+map <enter> shell
+map x $$f
+map X !$f
+# map o openingui # This command isn't necessary once you correctly setup mimeopen
+map o &mimeopen $f
+map O !mimeopen -d $f 2>/dev/null
+
+map <c-o>s school-launcher-lf
+map <c-o>p project-launcher-lf
+map <c-o>c config-launcher-lf
+
+# map B bulkrename
+
+# map b $lf -remote "send $id cd $(sed -e 's/\s*#.*//' -e '/^$/d' ~/.local/share/Bookmarks/directories.txt | fzf --border rounded --height 100% --preview 'ls {}')"
+map <c-x><c-d> $sh -c 'cd_result=$(sed -e "s/\s*#.*//" -e "/^$/d" ~/.local/share/Bookmarks/directories.txt | fzf --border rounded --height 100% --preview "ls {}"); if [ -n "$cd_result" ]; then $lf -remote "send $id cd \"$cd_result\""; fi'
+map <c-x><c-f> $file="$(sed -e 's/\s*#.*//' -e '/^$/d' ~/.local/share/Bookmarks/files.txt | fzf --border rounded --height 100% --preview 'bat --color=always --style=numbers --line-range=:500 {}')"; if [ "$file" != '' ]; then nvim "$file"; fi
+
+map Q $lf -remote "send $id quit" && $EDITOR .
+
+# File commands
+map <c-x>x $chmod +x $f
+
+# Copy
+map YY copy-full-path
+map Yf copy-filename
+map Yc copy-contents
+map Yn copy-filename-without-extension
+map Yd copy-parent-dir
+
+
+# Git commands
+map <c-g>c git_clone
+map <c-g>s ${{clear; git status | bat -l sh; read -p "press key to exit" quit;}}
+map <c-g>l ${{clear; git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit}}
+map <c-g>p ${{clear; git pull; read ans}}
+map <c-g>g $nvim -c Neogit
+map <c-g>G $lazygit
+
+# quick cd
+map gd :cd ~/Downloads
+map gt :cd /tmp
+map gp :cd ~/Pictures
+map gP :cd ~/Code/Projects
+map gv :cd ~/Videos
+map gD :cd ~/Documents
+map gr :cd ~/Code/repos
+map gc :cd ~/.config
+map gC :cd ~/.cache
+map gs :cd ~/Sync
+map gS :cd ~/Pictures/Screenshots
+
+map P converttopdf $f
+
+map Z zi
+
+map <c-b> manage_bookmarks
+map <c-f-5> source_config
+
+map <a-b> :setbg
+map <a-d> :$setsid -f dragon-drop $fx &>/dev/null
+map <a-c> :$setsid -f dragon-drop --all $fx &>/dev/null
+
+map V push :$nvim<space>
+
+map W $setsid -f $TERMINAL >/dev/null 2>&1
+
+
+
+# vim: tabstop=2 shiftwidth=2

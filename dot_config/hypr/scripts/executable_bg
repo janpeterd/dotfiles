@@ -1,0 +1,34 @@
+#!/bin/bash
+
+paperfile="$HOME/.config/hypr/hyprpaper.conf"
+
+if ! [ -f "$paperfile" ]; then
+	notify-send "ERROR: Changing wallpaper" "$paperfile config file does not exist. Create it first"
+	echo "Config file doesn't exist"
+	exit 1
+fi
+
+if [ "$1" ]; then
+	new_path="$1"
+else
+	read -r -p "Absolute Path to new wallpaper: " new_path
+fi
+echo "$new_path"
+
+if [ -f "$new_path" ]; then
+	if [[ $new_path =~ \.(jpg|jpeg|png)$ ]]; then
+		notify-send -i "$new_path" "Changing wallpaper" "Substituting paths in $paperfile"
+		sed -E "s#\s*(\/.*(\.jpg|\.png))#$new_path#g" -i "$paperfile"
+		# sed -E "s#\s*(\/.*(\.jpg|\.png))#$new_path#g" < "$paperfile"
+	else
+		notify-send "ERROR: Changing wallpaper" "$new_path is not a valid image. (.png or .jpg)"
+		echo "Not a valid image!"
+	fi
+else
+	notify-send "ERROR: Changing wallpaper" "$new_path does not exist."
+	echo "File doesn't exist!"
+	exit 1
+fi
+kill -9 "$(pidof hyprpaper)"
+
+setsid -f hyprpaper &>/dev/null &
