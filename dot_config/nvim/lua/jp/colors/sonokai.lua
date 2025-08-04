@@ -10,21 +10,21 @@ vim.cmd [[
 
 vim.api.nvim_set_hl(0, "DiffAdd", {
   fg = "none",
-  bg = palette.diff_green[1],
+  bg = palette.bg_green[1],
 })
 
 vim.api.nvim_set_hl(0, "DiffChange", {
   fg = "none",
-  bg = palette.diff_blue[1],
+  bg = palette.bg_blue[1],
 })
 
 vim.api.nvim_set_hl(0, "DiffDelete", {
   fg = "none",
-  bg = palette.diff_red[1],
+  bg = palette.bg_red[1],
 })
 
 vim.api.nvim_set_hl(0, "DiffText", {
   fg = palette.yellow[1],
-  bg = palette.diff_yellow[1],
+  bg = palette.bg_yellow[1],
   bold = true,
 })
