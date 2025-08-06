@@ -4,9 +4,28 @@
 [credential "http://jpserv:3000"]
 	provider = generic
 [alias]
+	st = status --short
 	sw = switch
 	last = switch -
 	main = switch main
+[commit]
+  verbose = true
+[branch]
+  sort = -committerdate
+[tag]
+  sort = -version:refname
+[push]
+  autoSetupRemote = true
+[maintenance]
+  auto = true
+  strategy = incremental
+[status]
+  branch = true
+[rerere]
+  enabled = true
+  autoUpdate = true
+[help]
+  autocorrect = prompt
 [core]
     pager = delta
 
