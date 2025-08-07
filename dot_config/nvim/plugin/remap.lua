@@ -6,6 +6,11 @@ end
 
 -- Pure neovim remaps. Plugin remaps are in plugin files.
 
+
+-- Native find
+vim.keymap.set("n", "<leader>fn", ":find ", { desc = "[F]ind [N]ative)" })
+
+
 -----------
 -- Open file
 ------------
