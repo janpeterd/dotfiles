@@ -41,7 +41,6 @@ local attach_to_buffer = function(output_bufnr, pattern, command)
   autocmd("BufWritePost", {
     group = augroup("JP-commands", { clear = true }),
     pattern = pattern,
-
     callback = function()
       local append_data = function(_, data)
         if data then
@@ -118,24 +117,6 @@ usercmd("AutoRun", function()
 
     attach_to_buffer(bufnr, pattern, split_command)
   end
-end, {})
-
-usercmd("TelescopeLocate", function()
-  local pickers = require "telescope.pickers"
-  local finders = require "telescope.finders"
-  local conf = require("telescope.config").values
-  local locate = function(input, opts)
-    opts = opts or {}
-    pickers
-      .new(opts, {
-        prompt_title = "Locate a file",
-        finder = finders.new_oneshot_job({ "locate", input }, opts),
-        sorter = conf.generic_sorter(opts),
-      })
-      :find()
-  end
-  local input = vim.fn.input "Locate a file: "
-  locate(input)
 end, {})
 
 usercmd("Format", function(args)
@@ -238,7 +219,7 @@ vim.keymap.set("n", "<F12>", function()
   SetDiagnosticsOptions()
 end, { desc = "Toggle lsp_lines mode" })
 
-local RemoveComments = function()
+local RemoveComments = function(opts)
   local ts = vim.treesitter
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = vim.bo[bufnr].filetype
@@ -246,27 +227,41 @@ local RemoveComments = function()
 
   local ok, parser = pcall(ts.get_parser, bufnr, lang)
   if not ok then
-    return vim.notify("No parser for " .. ft, vim.log.levels.WARN)
+    return vim.notify("No Treesitter parser for " .. ft, vim.log.levels.WARN)
   end
-
+  local start_row = opts.line1 - 1
+  local end_row = opts.line2
   local tree = parser:parse()[1]
   local root = tree:root()
   local query = ts.query.parse(lang, "(comment) @comment")
-
+  if not query then
+    return vim.notify("Failed to parse Treesitter query for comments.", vim.log.levels.ERROR)
+  end
   local ranges = {}
-  for _, node in query:iter_captures(root, bufnr, 0, -1) do
+  for _, node in query:iter_captures(root, bufnr, start_row, end_row) do
     table.insert(ranges, { node:range() })
   end
-
+  if #ranges == 0 then
+    vim.notify("No comments found.", vim.log.levels.INFO)
+    return
+  end
   table.sort(ranges, function(a, b)
     if a[1] == b[1] then
-      return a[2] < b[2]
+      return a[2] > b[2]
     end
     return a[1] > b[1]
   end)
-
-  for _, r in ipairs(ranges) do
-    vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {})
-  end
+  vim.api.nvim_buf_call(bufnr, function()
+    for _, r in ipairs(ranges) do
+      vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {})
+    end
+  end)
 end
-vim.api.nvim_create_user_command("RemoveComments", RemoveComments, {})
+vim.api.nvim_create_user_command(
+  "RemoveComments",
+  RemoveComments,
+  {
+    range = "%",
+    desc = "Remove comment nodes within a range (default: whole file)"
+  }
+)

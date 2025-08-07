@@ -4,7 +4,7 @@ return {
     lazy = false,
     priority = 500,
     config = function()
-      require("mini.pick").setup()
+      -- require("mini.pick").setup()
       require("mini.extra").setup()
       require("mini.colors").setup()
       require("mini.bufremove").setup()
@@ -37,18 +37,18 @@ return {
         require("mini.bufremove").delete,
         { desc = "[B]uffer [J]oink (delete buf, keep window)" }
       )
-      vim.keymap.set("n", "<leader>ff", "<cmd>Pick files<cr>", { desc = "[F]ind [f]iles" })
-      vim.keymap.set("n", "<leader>fr", "<cmd>Pick oldfiles<cr>", { desc = "[F]ind [R]ecent files" })
-      vim.keymap.set("n", "<leader>hh", "<cmd>Pick help<cr>", { desc = "[H]elp [h]elp pages" })
-      vim.keymap.set("n", "<leader>hk", "<cmd>Pick keymaps<cr>", { desc = "[H]elp [K]eymaps" })
-      vim.keymap.set("n", "<leader>,", "<cmd>Pick buffers<cr>", { desc = "[B]uffer [,] list" })
-      vim.keymap.set("n", "<leader>sg", "<cmd>Pick grep_live<cr>", { desc = "[S]earch [g]rep (live update)" })
-      vim.keymap.set("n", "<leader>sG", "<cmd>Pick grep<cr>", { desc = "[S]earch [g]rep (single grep)" })
-      vim.keymap.set("n", "<leader>ss", "<cmd>Pick buf_lines<cr>", { desc = "[S]earch buffer lines" })
-      vim.keymap.set("n", "<leader>uc", "<cmd>Pick colorschemes<cr>", { desc = "[U]i [C]olorschemes" })
-      vim.keymap.set("n", "<leader>uh", "<cmd>Pick hipatterns<cr>", { desc = "[U]i [H]ighlights" })
-      vim.keymap.set("n", "<leader>gb", "<cmd>Pick git_branches<cr>", { desc = "[G]it [B]ranches" })
-      vim.keymap.set("n", "<leader>gf", '<cmd>Pick files tool="git"<cr>', { desc = "[G]it [F]iles" })
+      -- vim.keymap.set("n", "<leader>ff", "<cmd>Pick files<cr>", { desc = "[F]ind [f]iles" })
+      -- vim.keymap.set("n", "<leader>fr", "<cmd>Pick oldfiles<cr>", { desc = "[F]ind [R]ecent files" })
+      -- vim.keymap.set("n", "<leader>hh", "<cmd>Pick help<cr>", { desc = "[H]elp [h]elp pages" })
+      -- vim.keymap.set("n", "<leader>hk", "<cmd>Pick keymaps<cr>", { desc = "[H]elp [K]eymaps" })
+      -- vim.keymap.set("n", "<leader>,", "<cmd>Pick buffers<cr>", { desc = "[B]uffer [,] list" })
+      -- vim.keymap.set("n", "<leader>sg", "<cmd>Pick grep_live<cr>", { desc = "[S]earch [g]rep (live update)" })
+      -- vim.keymap.set("n", "<leader>sG", "<cmd>Pick grep<cr>", { desc = "[S]earch [g]rep (single grep)" })
+      -- vim.keymap.set("n", "<leader>ss", "<cmd>Pick buf_lines<cr>", { desc = "[S]earch buffer lines" })
+      -- vim.keymap.set("n", "<leader>uc", "<cmd>Pick colorschemes<cr>", { desc = "[U]i [C]olorschemes" })
+      -- vim.keymap.set("n", "<leader>uh", "<cmd>Pick hipatterns<cr>", { desc = "[U]i [H]ighlights" })
+      -- vim.keymap.set("n", "<leader>gb", "<cmd>Pick git_branches<cr>", { desc = "[G]it [B]ranches" })
+      -- vim.keymap.set("n", "<leader>gf", '<cmd>Pick files tool="git"<cr>', { desc = "[G]it [F]iles" })
     end,
   },
 }

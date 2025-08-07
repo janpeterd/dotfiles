@@ -1,14 +1,13 @@
 return {
   {
     "ibhagwan/fzf-lua",
-    enabled = false,
+    enabled = true,
     -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       local fzf_lua = require "fzf-lua"
       fzf_lua.setup { "fzf-native" }
       local set = vim.keymap.set
-      -- calling `setup` is optional for customization
       set(
         "n",
         "<leader>fF",
@@ -28,8 +27,8 @@ return {
       set("n", "<leader>bb", fzf_lua.buffers, { desc = "Fzf buffers" })
       set("n", "<leader>,", fzf_lua.buffers, { desc = "Fzf buffers" })
       set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fzf oldfiles" })
-      set("n", "<leader>fcn", function()
-        fzf_lua.files { cwd = "/home/jp/.config/nvim" }
+      vim.keymap.set("n", "<leader>fcn", function()
+        fzf_lua.files { cwd = "/home/jp/.local/share/chezmoi/dot_config/nvim" }
       end, { desc = "Fzf config files" })
       set("n", "<leader>fcN", function()
         fzf_lua.files { cwd = "/home/jp/Sync/org" }
@@ -41,8 +40,16 @@ return {
           },
         }
       end, { desc = "Fzf live native grep" })
+      vim.keymap.set("n", "<leader>sG", function()
+        require("fzf-lua").grep {
+          winopts = {
+            fullscreen = true,
+          },
+        }
+      end, { desc = "Fzf grep" })
       set("n", "<leader>gb", fzf_lua.git_branches, { desc = "Fzf git branches" })
       set("n", "<leader>uc", fzf_lua.colorschemes, { desc = "Fzf colorschemes" })
+      set("n", "<leader>uh", fzf_lua.highlights, { desc = "Fzf highlights" })
       set("n", "<leader>gc", fzf_lua.git_commits, { desc = "Fzf git commits" })
       set("n", "<leader>gC", fzf_lua.git_bcommits, { desc = "Fzf git buffer commits" })
       vim.keymap.set("n", "<leader>ss", function()
