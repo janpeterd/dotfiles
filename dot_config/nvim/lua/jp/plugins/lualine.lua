@@ -1,7 +1,7 @@
 return {
   "nvim-lualine/lualine.nvim",
   event = "VeryLazy",
-  enabled = true,
+  enabled = false,
   opts = function()
     -- Change the background of lualine_c section for normal mode
     return {

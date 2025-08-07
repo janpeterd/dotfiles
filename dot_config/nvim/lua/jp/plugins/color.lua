@@ -1,12 +1,12 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "sonokai"
+Colorscheme = "kanagawa"
 
 local function colorschemes()
   return {
     {
       "rebelot/kanagawa.nvim",
       name = "kanagawa",
-      colorscheme = "kanagawa",
+      colorscheme = "kanagawa-wave",
       config = function()
         require "jp.colors.kanagawa"
       end,
@@ -83,8 +83,8 @@ local SetupSpec = function()
       local colorscheme = (plugin.colorscheme or plugin.name)
       if type(original_config) == "function" then
         plugin.config = function()
-          vim.cmd("colorscheme " .. colorscheme)
           original_config()
+          vim.cmd("colorscheme " .. colorscheme)
         end
       else
         plugin.config = function()
