@@ -261,6 +261,7 @@ environment {
     XDG_SESSION_TYPE "wayland"
     QT_QPA_PLATFORM "wayland"
     GDK_BACKEND "wayland"
+    GDK_IM_MODULE ""
     SDL_VIDEODRIVER "wayland"
     CLUTTER_BACKEND "wayland"
     XDG_SESSION_TYPE "wayland"
@@ -326,10 +327,7 @@ animations {
 
 // Work around WezTerm's initial configure bug
 // by setting an empty default-column-width.
-window-rule {
-  match title="^Qurio - Chromium$"
-  open-floating true
-}
+
 window-rule {
   // This regular expression is intentionally made as specific as possible,
   // since this is the default config, and we want no false positives.

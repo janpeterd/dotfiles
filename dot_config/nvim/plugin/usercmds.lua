@@ -2,7 +2,6 @@ local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 local usercmd = vim.api.nvim_create_user_command
 
--- Display output of command in buffer
 usercmd("Redir", function(ctx)
   local lines = vim.split(vim.api.nvim_exec2(ctx.args, { output = true })["output"], "\n", { plain = true })
   vim.cmd "new"
@@ -10,9 +9,7 @@ usercmd("Redir", function(ctx)
   vim.opt_local.modified = false
 end, { nargs = "+", complete = "command" })
 
--- Center the cursor, handy for reading text or writing non code
 usercmd("CenterCursor", function(ctx)
-  -- check argument
   local large_scrolloff = 99999
   local arg = string.lower(ctx.fargs[1])
   local function reset_scrolloff()
@@ -41,11 +38,10 @@ end, {
 })
 
 local attach_to_buffer = function(output_bufnr, pattern, command)
-  -- Now create an autocommand, on event: BufWritePost (after writing file to disk)
   autocmd("BufWritePost", {
     group = augroup("JP-commands", { clear = true }),
     pattern = pattern,
-    --     -- this function will be called when the event happens
+
     callback = function()
       local append_data = function(_, data)
         if data then
@@ -60,7 +56,7 @@ local attach_to_buffer = function(output_bufnr, pattern, command)
         false,
         { "AutoRun output (update by saving pattern-matched file):" }
       )
-      -- As an example I am running the ls command, In practice you would want to use this to for example compile code, or lint it or do something useful.
+
       vim.fn.jobstart(command, {
         stdout_buffered = true,
         on_stdout = append_data,
@@ -80,11 +76,11 @@ local attach_to_terminal_buffer = function(pattern, command)
           vim.api.nvim_buf_delete(buf, { force = true })
         end
       end
-      -- Create new window and buffer below
+
       vim.cmd "below new"
-      -- Set height of new window
+
       vim.api.nvim_win_set_height(0, 10)
-      -- Run command and start shell session after (otherwise it exits)
+
       vim.api.nvim_command("terminal " .. command .. ";zsh")
       local bufnr = vim.api.nvim_get_current_buf()
       vim.api.nvim_buf_set_name(bufnr, "*AutoRunTerminal*")
@@ -92,9 +88,7 @@ local attach_to_terminal_buffer = function(pattern, command)
   })
 end
 
--- Compile on save
 usercmd("AutoRun", function()
-  -- Prompt for information
   local pattern = vim.fn.input "Pattern (to match file): "
   local command = vim.fn.input "Compile/Run command: "
   local split_command = vim.split(command, " ")
@@ -102,18 +96,17 @@ usercmd("AutoRun", function()
   if term == "y" then
     attach_to_terminal_buffer(pattern, command)
   else
-    -- Create new window and buffer below
     vim.cmd "below new"
-    -- Set height of new window
+
     vim.api.nvim_win_set_height(0, 10)
-    -- Make it a scratch buffer
+
     vim.cmd "setlocal buftype=nofile"
     vim.cmd "setlocal bufhidden=hide"
     vim.cmd "setlocal noswapfile"
     local bufnr = vim.api.nvim_get_current_buf()
-    -- Set focus back on original window
+
     vim.cmd "wincmd w"
-    -- Set name of autorun buffer
+
     vim.api.nvim_buf_set_name(bufnr, "*AutoRun: " .. vim.inspect(command) .. "*")
     vim.api.nvim_buf_set_lines(
       bufnr,
@@ -127,18 +120,6 @@ usercmd("AutoRun", function()
   end
 end, {})
 
--- Enable copilot on command
--- usercmd('CopilotEnable',
---     function()
---         require("copilot").setup({
---             suggestions = { enabled = false },
---             panel = { enabled = false },
---         })
---         require('copilot_cmp').setup()
---     end, {}
---
--- )
-
 usercmd("TelescopeLocate", function()
   local pickers = require "telescope.pickers"
   local finders = require "telescope.finders"
@@ -146,12 +127,12 @@ usercmd("TelescopeLocate", function()
   local locate = function(input, opts)
     opts = opts or {}
     pickers
-        .new(opts, {
-          prompt_title = "Locate a file",
-          finder = finders.new_oneshot_job({ "locate", input }, opts),
-          sorter = conf.generic_sorter(opts),
-        })
-        :find()
+      .new(opts, {
+        prompt_title = "Locate a file",
+        finder = finders.new_oneshot_job({ "locate", input }, opts),
+        sorter = conf.generic_sorter(opts),
+      })
+      :find()
   end
   local input = vim.fn.input "Locate a file: "
   locate(input)
@@ -171,7 +152,6 @@ end, { range = true })
 
 vim.api.nvim_create_user_command("FormatDisable", function(args)
   if args.bang then
-    -- FormatDisable! will disable formatting just for this buffer
     vim.b.disable_autoformat = true
   else
     vim.g.disable_autoformat = true
@@ -189,22 +169,21 @@ end, {
 
 usercmd("ToggleDistractions", function()
   local enableDistractions = function()
-    vim.g.disable_autoformat = false  -- enable autoformat
-    vim.g.current_diagnostic_mode = 1 -- enable diagnostic highlights
+    vim.g.disable_autoformat = false
+    vim.g.current_diagnostic_mode = 1
     SetDiagnosticsOptions()
-    vim.g.disable_completion = false  -- enable completion
-    vim.g.mininotify_disable = false  -- enable notification popups
+    vim.g.disable_completion = false
+    vim.g.mininotify_disable = false
   end
 
   local disableDistractions = function()
-    vim.g.disable_autoformat = true   -- disable autoformat
-    vim.g.current_diagnostic_mode = 3 -- disable diagnostic highlights
+    vim.g.disable_autoformat = true
+    vim.g.current_diagnostic_mode = 3
     SetDiagnosticsOptions()
-    vim.g.disable_completion = true   -- disable completion
-    vim.g.mininotify_disable = true   -- disable notification popups
+    vim.g.disable_completion = true
+    vim.g.mininotify_disable = true
   end
 
-  -- check completion to as reference
   if vim.g.disable_completion then
     enableDistractions()
   else
@@ -213,8 +192,6 @@ usercmd("ToggleDistractions", function()
 end, {
   desc = "Toggle (often useful) distractions (completion, diagnostics, autoformatting, notify popup)",
 })
-
-
 
 DEFAULT_DIAGNOSTIC_CONFIG = {
   virtual_text = true,
@@ -260,3 +237,36 @@ vim.keymap.set("n", "<F12>", function()
   vim.g.current_diagnostic_mode = (vim.g.current_diagnostic_mode % #Mode) + 1
   SetDiagnosticsOptions()
 end, { desc = "Toggle lsp_lines mode" })
+
+local RemoveComments = function()
+  local ts = vim.treesitter
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ft = vim.bo[bufnr].filetype
+  local lang = ts.language.get_lang(ft) or ft
+
+  local ok, parser = pcall(ts.get_parser, bufnr, lang)
+  if not ok then
+    return vim.notify("No parser for " .. ft, vim.log.levels.WARN)
+  end
+
+  local tree = parser:parse()[1]
+  local root = tree:root()
+  local query = ts.query.parse(lang, "(comment) @comment")
+
+  local ranges = {}
+  for _, node in query:iter_captures(root, bufnr, 0, -1) do
+    table.insert(ranges, { node:range() })
+  end
+
+  table.sort(ranges, function(a, b)
+    if a[1] == b[1] then
+      return a[2] < b[2]
+    end
+    return a[1] > b[1]
+  end)
+
+  for _, r in ipairs(ranges) do
+    vim.api.nvim_buf_set_text(bufnr, r[1], r[2], r[3], r[4], {})
+  end
+end
+vim.api.nvim_create_user_command("RemoveComments", RemoveComments, {})

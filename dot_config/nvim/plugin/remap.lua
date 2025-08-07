@@ -130,6 +130,7 @@ set("n", "<leader>bl", "<C-^>", { desc = "[B]uffer [l]ast" })
 ------------
 
 set("v", "<leader>/", "y<ESC>/<c-r>0", { desc = "Search selection" })
+set("n", "<leader>/", "/\\v", { desc = "Search magic" })
 
 ------------
 -- Window management

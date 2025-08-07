@@ -1,10 +1,31 @@
 return {
   {
-    "tpope/vim-fugitive",
-    lazy = false,
+    "NeogitOrg/neogit",
+    lazy = true,
+    cmd = { "Neogit", "NeogitResetState" },
+    keys = {
+      {
+        "<leader>gg",
+        function()
+          require("neogit").open { kind = "replace" }
+        end,
+        desc = "[G]it Neo[g]it",
+      },
+    },
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "sindrets/diffview.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
     config = function()
-      vim.keymap.set("n", "<leader>gg", ":Git<CR>", { desc = "[G]it summary" })
-      vim.keymap.set("n", "<leader>g<space>", ":Git ", { desc = "[G]it command builder" })
+      local neogit = require "neogit"
+      neogit.setup {
+        integrations = {
+          telescope = true,
+          diffview = true,
+          auto_show_console_on = "always",
+        },
+      }
     end,
   },
 
@@ -17,8 +38,8 @@ return {
     config = function()
       require("gitsigns").setup {
         signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
-        numhl = false,     -- Toggle with `:Gitsigns toggle_numhl`
-        linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
+        numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+        linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
         word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
@@ -42,6 +63,18 @@ return {
           )
         end,
       }
+    end,
+  },
+  {
+    "FabijanZulj/blame.nvim",
+    lazy = true,
+    cmd = "BlameToggle",
+    keys = {
+      { "<leader>gB", desc = "[G]it [b]lame" },
+    },
+    config = function()
+      require("blame").setup()
+      vim.keymap.set("n", "<leader>gB", "<cmd>BlameToggle<cr>", { desc = "[G]it [b]lame" })
     end,
   },
   { "akinsho/git-conflict.nvim", version = "*", config = true },

@@ -146,33 +146,10 @@ configs=(
     cd "$selected_config"
 }
 
-school-launcher-zsh() {
-    schools=(
-        "$(find '/home/jp/school/ITF1/' -maxdepth 2 -mindepth 2 \( -type d -or -type l \))"
-    )
-
-    if [[ -z "$schools" ]]; then
-        echo "No schools found!"
-        exit 1
-    fi
-
-    # Use fzf to select school directory
-    selected_school=$(printf '%s/\n' "${schools[@]}" | fzf)
-    if [[ -z "$selected_school" ]]; then
-        echo "No school selected!"
-        exit 1
-    fi
-
-    cd "$selected_school"
-}
-
-# bindkey -s '^o' '^ulf\n'
-bindkey -s '\ec' '^ulfcd\n' # exit lf and change to that directory
 bindkey -s '^o' '^uyazi\n'
 
 # Quick navigation to folders
 # bindkey -s '^e' '^Cconfig-launcher-zsh\n'
-# bindkey -s '^s' '^Cschool-launcher-zsh\n'
 
 # Alt + shift + f (because alt f AND control f are used to navigate)
 # bindkey -s '^[F' '^Ctmux-sessionizer\n'
@@ -219,6 +196,6 @@ hour=$(date "+%H")
   else
     greeting="Good Night $USER!"
   fi
-  cowsay -f eyes $greeting | lolcat
+  cowsay -f bud-frogs $greeting | lolcat
 }
 greeting

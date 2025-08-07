@@ -14,7 +14,7 @@ local function colorschemes()
     {
       "projekt0n/github-nvim-theme",
       name = "github-theme",
-      coloerscheme = "github_dark",
+      colorscheme = "github_dark",
       config = function()
         require "jp.colors.github-theme"
       end,
@@ -26,11 +26,20 @@ local function colorschemes()
         require "jp.colors.gruvbox"
       end,
     },
-    { "savq/melange-nvim", name = "melange" },
-    { "blazkowolf/gruber-darker.nvim", name = "gruber-darker" },
+    {
+      "savq/melange-nvim",
+      name = "melange",
+      colorscheme = "melange",
+    },
+    {
+      "blazkowolf/gruber-darker.nvim",
+      name = "gruber-darker",
+      colorscheme = "gruber-darker",
+    },
     {
       "bluz71/vim-moonfly-colors",
       name = "moonfly",
+      colorscheme = "moonfly",
     },
     {
       "loctvl842/monokai-pro.nvim",
@@ -53,6 +62,14 @@ local function colorschemes()
     { "Shatur/neovim-ayu", name = "neovim-ayu" },
     { "lifepillar/vim-solarized8", name = "solarized8", branch = "neovim" },
     { "dasupradyumna/midnight.nvim", name = "midnight" },
+    {
+      "vague2k/vague.nvim",
+      name = "vague",
+      colorscheme = "vague",
+      config = function()
+        require("vague").setup { transparent = true }
+      end,
+    },
   }
 end
 
@@ -75,7 +92,7 @@ local SetupSpec = function()
         end
       end
     else
-      plugin.lazy = true
+      plugin.event = "VeryLazy"
       plugin.priority = 20
     end
     table.insert(LazySpec, plugin)

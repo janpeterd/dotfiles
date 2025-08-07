@@ -705,29 +705,29 @@
    org-tag-alist
    '(
      ;; Places
-     ("@grocery" . ?G)
-     ("@home" . ?H)
-     ("@school" . ?S)
+     ("@car" . ?c)
+     ("@grocery" . ?g)
+     ("@home" . ?h)
+     ("@work" . ?w)
 
      ;; Devices
      ("@computer" . ?C)
-     ("@isaVPS" . ?I)
      ("@jpserv" . ?J)
      ("@phone" . ?P)
 
      ;; Activities
      ("@calls" . ?a)
-     ("@creative" . ?c)
      ("@email" . ?e)
      ("@errands" . ?r)
      ("@exam" . ?a)
+     ("@gardening" . ?G)
+     ("@habit" . ?H)
      ("@planning" . ?n) 
      ("@programming" . ?p)
      ("@reading" . ?r)
      ("@researh" . ?R)
-     ("@violin" . ?e)
-     ("@writing" . ?w)
-     ("@habit" . ?h)
+     ("@violin" . ?V)
+     ("@writing" . ?W)
 
      ;; Special
      ("dont-notify" . ?D))
@@ -918,12 +918,12 @@
 
           ("d" "Date stamp") ;; activities/ events
           ("dd" "Date stamp" entry
-           (file+headline ,(concat org-directory "/todo.org") "Events") "** %?\n%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
+           (file+headline ,(concat org-directory "/todo.org") "Events") "** %^{ACTIVITY}\n%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :prepend t
            :immediate-finish t)
 
           ("dr" "Date range" entry
-           (file+headline ,(concat org-directory "/todo.org") "Events") "** %?\n%^t--%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
+           (file+headline ,(concat org-directory "/todo.org") "Events") "** %^{ACTIVITY}\n%^t--%^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i\n"
            :prepend t
            :immediate-finish t)
 
@@ -1050,7 +1050,6 @@
   (setq org-agenda-skip-deadline-if-done t)
   (setq org-agenda-skip-scheduled-if-done t)
   (setq org-agenda-span 5)                                          
-  (setq org-agenda-hide-tags-regexp ".*")
   (setq org-deadline-warning-days 2)
   (setq org-agenda-sticky t)
   (setq org-agenda-sorting-strategy

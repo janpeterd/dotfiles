@@ -9,7 +9,8 @@
   "modules-left": [
     "niri/workspaces",
     "group/window",
-    "mpris"
+    "mpris",
+    "mpd"
   ],
   "modules-center": [
     "custom/niri-actions"
@@ -164,13 +165,36 @@
     "artist-len": 15,
     "album-len": 15,
     "player-icons": {
-      "default": "▶",
-      "mpv": "🎵",
-      "spotify": "<span foreground='#7d312c'>  </span> "
+      "default": "󰓃",
+      "spotify": ""
     },
     "status-icons": {
       "paused": ""
     }
+  },
+  "mpd": {
+    "format": "{stateIcon} {randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title}",
+    "format-disconnected": "",
+    "format-stopped": "",
+    "format-paused": "{stateIcon} {title}",
+    "interval": 10,
+    "random-icons": {
+      "on": " "
+    },
+    "repeat-icons": {
+      "on": " "
+    },
+    "single-icons": {
+      "on": "1 "
+    },
+    "state-icons": {
+      "paused": "",
+      "playing": ""
+    },
+    "tooltip-format": "MPD (connected) - {stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
+    "tooltip-format-disconnected": "",
+    "on-click": "mpc toggle",
+    "on-click-right": "mpc next"
   },
   "custom/hypr-actions": {
     "format": " ",
