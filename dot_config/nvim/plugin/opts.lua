@@ -8,17 +8,16 @@ opt.signcolumn = "yes"    -- use sign column (left of line numbers) for git gutt
 opt.winborder = "rounded"
 opt.list = true           -- Show characters for space, tabs, etc.
 opt.listchars = { trail = "-", tab = "- " }
--- opt.listchars = { trail = "-" }
-opt.spelllang = "en,nl" -- Spell check languages
-opt.tabstop = 2         -- Number of spaces that tab counts for
+opt.spelllang = "en,nl"   -- Spell check languages
+opt.tabstop = 2           -- Number of spaces that tab counts for
 opt.softtabstop = 2
-opt.shiftwidth = 2      -- Nuber of spaces to use for indent
+opt.shiftwidth = 2        -- Nuber of spaces to use for indent
 opt.shiftround = true
-opt.expandtab = true    -- Use spaces instead of tabs
-opt.smartindent = true  -- Auto indent
-opt.splitright = true   -- Prefer windows splitting to the right
-opt.splitbelow = true   -- Prefer windows splitting to the bottom
-opt.wrap = false        -- wrap
+opt.expandtab = true      -- Use spaces instead of tabs
+opt.smartindent = true    -- Auto indent
+opt.splitright = true     -- Prefer windows splitting to the right
+opt.splitbelow = true     -- Prefer windows splitting to the bottom
+opt.wrap = false          -- wrap
 opt.breakindent = true
 opt.backup = false
 opt.undofile = true
