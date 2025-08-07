@@ -1172,3 +1172,6 @@
 (pixel-scroll-precision-mode)
 (org-agenda-list)
 (delete-other-windows)
+
+
+;; vim:ft=lisp

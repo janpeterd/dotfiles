@@ -48,4 +48,4 @@
 	process = git-lfs filter-process
 
 
-#vim:ft=gitconfig
+# vim:ft=gitconfig
