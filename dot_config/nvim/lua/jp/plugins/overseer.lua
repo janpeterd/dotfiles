@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "stevearc/overseer.nvim",
     config = function()
       require("overseer").setup()

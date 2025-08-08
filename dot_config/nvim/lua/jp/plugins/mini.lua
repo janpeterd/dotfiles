@@ -3,6 +3,9 @@ return {
     "echasnovski/mini.nvim",
     lazy = false,
     priority = 500,
+    enabled = function()
+      return not vim.g.mininotify_disable
+    end,
     config = function()
       -- require("mini.pick").setup()
       require("mini.extra").setup()

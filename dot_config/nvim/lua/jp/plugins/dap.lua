@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "mfussenegger/nvim-dap",
     dependencies = {
       "leoluz/nvim-dap-go",

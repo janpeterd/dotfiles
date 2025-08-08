@@ -26,6 +26,13 @@ vim.cmd [[
   autocmd BufNewFile *.html 0r $XDG_CONFIG_HOME/nvim/skeletons/html.html
 ]]
 
+local notify
+if pcall(require, "mini.notify") then
+  notify = require("mini.notify").make_notify()
+else
+  notify = vim.notify
+end
+
 -- Automatically apply chezmoi changes on write
 local chezmoi_group = augroup("chezmoi", { clear = true })
 autocmd("BufWritePost", {
@@ -34,7 +41,6 @@ autocmd("BufWritePost", {
   pattern = os.getenv("HOME") .. "/.local/share/chezmoi/*",
   desc = "Apply chezmoi changes on write",
   callback = function(args)
-    vim.notify = require('mini.notify').make_notify()
     -- Get the full, absolute path of the file being saved (the source path).
     local source_path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(args.buf), ':p')
     if source_path == "" then return end
@@ -46,7 +52,7 @@ autocmd("BufWritePost", {
 
     -- If the command failed or returned nothing (e.g., for an ignored file), stop.
     if vim.v.shell_error ~= 0 or target_path == "" then
-      vim.notify("chezmoi: Not a managed file: " .. source_path, vim.log.levels.WARN)
+      notify("chezmoi: Not a managed file: " .. source_path, vim.log.levels.WARN)
       return
     end
 
@@ -56,9 +62,9 @@ autocmd("BufWritePost", {
 
     -- If the apply command succeeded, show a confirmation.
     if vim.v.shell_error == 0 then
-      vim.notify("Applied chezmoi for " .. target_path, vim.log.levels.INFO)
+      notify("Applied chezmoi for " .. target_path, vim.log.levels.INFO)
     else
-      vim.notify("chezmoi apply failed for " .. target_path, vim.log.levels.ERROR)
+      notify("chezmoi apply failed for " .. target_path, vim.log.levels.ERROR)
     end
   end,
 })

@@ -74,28 +74,52 @@ local function colorschemes()
 end
 
 local SetupSpec = function()
+  if vim.g.jp_profile == "native" then
+    return {}
+  end
+
   LazySpec = {}
   for _, plugin in ipairs(colorschemes()) do -- Filter selected colors
-    if Colorscheme == plugin.name then
-      plugin.lazy = false
-      plugin.priority = 1000
-      local original_config = plugin.config
-      local colorscheme = (plugin.colorscheme or plugin.name)
-      if type(original_config) == "function" then
-        plugin.config = function()
-          original_config()
-          vim.cmd("colorscheme " .. colorscheme)
+    if vim.g.jp_profile == "minimal" then
+      if plugin.name == "kanagawa" then
+        plugin.lazy = false
+        plugin.priority = 1000
+        local original_config = plugin.config
+        local colorscheme = (plugin.colorscheme or plugin.name)
+        if type(original_config) == "function" then
+          plugin.config = function()
+            original_config()
+            vim.cmd("colorscheme " .. colorscheme)
+          end
+        else
+          plugin.config = function()
+            vim.cmd("colorscheme " .. colorscheme)
+          end
         end
-      else
-        plugin.config = function()
-          vim.cmd("colorscheme " .. colorscheme)
-        end
+        table.insert(LazySpec, plugin)
       end
     else
-      plugin.event = "VeryLazy"
-      plugin.priority = 20
+      if Colorscheme == plugin.name then
+        plugin.lazy = false
+        plugin.priority = 1000
+        local original_config = plugin.config
+        local colorscheme = (plugin.colorscheme or plugin.name)
+        if type(original_config) == "function" then
+          plugin.config = function()
+            original_config()
+            vim.cmd("colorscheme " .. colorscheme)
+          end
+        else
+          plugin.config = function()
+            vim.cmd("colorscheme " .. colorscheme)
+          end
+        end
+      else
+        plugin.event = "VeryLazy"
+        plugin.priority = 20
+      end
+      table.insert(LazySpec, plugin)
     end
-    table.insert(LazySpec, plugin)
   end
   return LazySpec
 end

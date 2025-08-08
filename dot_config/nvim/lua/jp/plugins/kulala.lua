@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "mistweaverco/kulala.nvim",
     keys = {
       { "<leader>Rs", desc = "Send request" },

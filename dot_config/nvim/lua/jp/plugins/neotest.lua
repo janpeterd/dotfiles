@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "rcasia/neotest-java",
     -- ft = "java", -- This can be useful, but making it a direct dependency of neotest is more critical for adapter loading.
     -- You can keep ft = "java" if neotest-java has other setup it does on filetype.
@@ -13,6 +14,7 @@ return {
     -- Otherwise, its configuration will primarily be within neotest's adapter section.
   },
   {
+    enabled = vim.g.jp_profile == 'dev',
     "nvim-neotest/neotest",
     dependencies = {
       "nvim-neotest/nvim-nio",

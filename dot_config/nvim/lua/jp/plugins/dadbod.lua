@@ -1,4 +1,5 @@
 return {
+  enabled = vim.g.jp_profile == 'dev',
   'kristijanhusak/vim-dadbod-ui',
   dependencies = {
     { 'tpope/vim-dadbod', lazy = true },

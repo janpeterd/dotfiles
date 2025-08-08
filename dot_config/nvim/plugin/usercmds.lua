@@ -120,6 +120,10 @@ usercmd("AutoRun", function()
 end, {})
 
 usercmd("Format", function(args)
+  if not pcall(require, "conform") then
+    vim.notify("conform.nvim is not installed. Please install it to use this command.", vim.log.levels.WARN)
+    return
+  end
   local range = nil
   if args.count ~= -1 then
     local end_line = vim.api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1]
@@ -154,7 +158,9 @@ usercmd("ToggleDistractions", function()
     vim.g.current_diagnostic_mode = 1
     SetDiagnosticsOptions()
     vim.g.disable_completion = false
-    vim.g.mininotify_disable = false
+    if pcall(require, "mini.notify") then
+      vim.g.mininotify_disable = false
+    end
   end
 
   local disableDistractions = function()
@@ -162,7 +168,9 @@ usercmd("ToggleDistractions", function()
     vim.g.current_diagnostic_mode = 3
     SetDiagnosticsOptions()
     vim.g.disable_completion = true
-    vim.g.mininotify_disable = true
+    if pcall(require, "mini.notify") then
+      vim.g.mininotify_disable = true
+    end
   end
 
   if vim.g.disable_completion then

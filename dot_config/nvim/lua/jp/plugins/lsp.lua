@@ -147,34 +147,35 @@ return {
         },
       }
       -- =================================
+      if vim.g.jp_profile == "dev" then
+        local ensure_installed = vim.tbl_keys(servers or {})
+        vim.list_extend(ensure_installed, {
+          -- "clang-format",
+          -- "debugpy", -- DAP for python
+          -- "gofumpt",
+          -- "goimports",
+          -- "luacheck",
+          -- "pint",
+          "prettier",
+          "prettierd",
+          -- "ruff",
+          -- "shellcheck",
+          -- "stylua", -- Used to format Lua code
+          -- "codelldb",
+        })
 
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        -- "clang-format",
-        -- "debugpy", -- DAP for python
-        -- "gofumpt",
-        -- "goimports",
-        -- "luacheck",
-        -- "pint",
-        "prettier",
-        "prettierd",
-        -- "ruff",
-        -- "shellcheck",
-        -- "stylua", -- Used to format Lua code
-        -- "codelldb",
-      })
+        if vim.fn.has "win32" == 1 then
+          servers = vim.tbl_filter(function(key)
+            return key ~= "phpactor" and key ~= "lua_ls"
+          end, servers)
 
-      if vim.fn.has "win32" == 1 then
-        servers = vim.tbl_filter(function(key)
-          return key ~= "phpactor" and key ~= "lua_ls"
-        end, servers)
+          ensure_installed = vim.tbl_filter(function(tool)
+            return tool ~= "luacheck"
+          end, ensure_installed)
+        end
 
-        ensure_installed = vim.tbl_filter(function(tool)
-          return tool ~= "luacheck"
-        end, ensure_installed)
+        mason_tool_installer.setup { ensure_installed = ensure_installed }
       end
-
-      mason_tool_installer.setup { ensure_installed = ensure_installed }
 
       -- for name, config in pairs(servers) do
       --   if config == true then

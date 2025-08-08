@@ -1,5 +1,19 @@
 vim.g.mapleader = " "
 
+-- Set profile
+-- available profiles: 'native', 'minimal', 'dev'
+vim.g.jp_profile = "minimal"
+
+if vim.g.jp_profile == "native" then
+  vim.cmd("colorscheme zaibatsu")
+end
+
+
+-- Plugin initialization below, fully disabled on "native" profile
+if vim.g.jp_profile == "native" then
+  return
+end
+
 local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {

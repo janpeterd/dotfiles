@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "JavaHello/spring-boot.nvim",
     ft = { "java", "yaml", "jproperties" },
     dependencies = {
@@ -9,6 +10,7 @@ return {
     opts = {},
   },
   {
+    enabled = vim.g.jp_profile == 'dev',
     "mfussenegger/nvim-jdtls",
     lazy = true,
     ft = "java",

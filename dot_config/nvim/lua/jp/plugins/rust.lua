@@ -1,5 +1,6 @@
 return {
   {
+    enabled = vim.g.jp_profile == 'dev',
     "mrcjkb/rustaceanvim",
     version = "^6", -- Recommended
     ft = "rust",
