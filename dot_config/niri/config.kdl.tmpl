@@ -723,4 +723,9 @@ binds {
   Mod+Shift+P { power-off-monitors; }
 }
 
+
+switch-events {
+  lid-close { spawn "systemctl" "suspend-then-hibernate" ; }
+}
+
 // vim: ft=kdl
