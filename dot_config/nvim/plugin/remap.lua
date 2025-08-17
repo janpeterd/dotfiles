@@ -51,7 +51,8 @@ end)
 -- Editing
 ------------
 
-set("n", "<leader>tt", "<cmd>drop /home/jp/Sync/org/currently.org<CR>")
+set("n", "<leader>tt", "<cmd>drop ~/Sync/org/todo.org<CR>")
+set("n", "<leader>tv", "<cmd>drop ~/Sync/org/vito.org<CR>")
 set("i", "<C-BS>", "<C-w>")
 set("c", "<C-p>", "<Up>")
 set("c", "<C-n>", "<Down>")

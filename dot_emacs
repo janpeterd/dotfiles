@@ -708,7 +708,7 @@
      ("@car" . ?c)
      ("@grocery" . ?g)
      ("@home" . ?h)
-     ("@work" . ?w)
+     ("@vito" . ?v)
 
      ;; Devices
      ("@computer" . ?C)
@@ -745,11 +745,11 @@
       "HABIT(h)"                                                
       "HEALTH(H)"                                               
       "GOAL(g)"                                                 
-      "WAIT(w)"                                                 
+      "WAIT(w@)"                                                 
       "|"                                                       
       "DONE(d)"
       "READ(r@)"     ; Here the ! after the key means that it should record state changes of that keyword in drawer                                             
-      "CANCELLED(c)" )                                          
+      "CANCELLED(c)" )
      )
 
    ;; Effort: Estimate duration of a task on creation
@@ -758,7 +758,7 @@
       "0:05 0:10 0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00"))
 
    ;; Font face styling for keywords (ex. TODO)
-   org-todo-keyword-faces '(
+   org-todo-keyword-faces '( 
                 ("SCHOOL" . (:inherit org-todo :foreground "#A020F0"))
                 ("EXAM" . (:inherit org-todo :foreground "#FF0000" :background "#000000"))
                 ("HABIT" . (:inherit org-todo :foreground "#16820D"))
@@ -873,10 +873,41 @@
   ;; https://orgmode.org/manual/Capture-templates.html
   (setq org-capture-templates
         `(
-          ("t" "Task")
+          ("v" "VITO")
+          ("vt" "Vito todo" entry
+           (file+headline ,(concat org-directory "/vito.org") "Inbox") "** TODO %^{TITLE}%(org-set-tags-command)\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%^\n"
+           :prepend t
+           :immediate-finish t)
+          ("vs" "Vito Task width SCHEDULED" entry
+           (file+headline ,(concat org-directory "/vito.org") "Inbox") "* TODO %^{TASK NAME}\nSCHEDULED: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
 
+
+          ("vd" "Vito Task width DEADLINE" entry
+           (file+headline ,(concat org-directory "/vito.org") "Inbox") "* TODO %^{TASK NAME}\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("vD" "Vito Task width SCHEDULED AND DEADLINE" entry
+           (file+headline ,(concat org-directory "/vito.org") "Inbox") "* TODO %^{TASK NAME}\nSCHEDULED: %^t\nDEADLINE: %^t\n:PROPERTIES:\n:CREATED: %U\n:END:\n%?%i\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("vc" "Clock in new Task" entry
+           (file+headline ,(concat org-directory "/vito.org") "Inbox") "* TODO %^{TASK NAME}\n\n%?%i\n"
+           :clock-in t
+           :prepend t
+           :immediate-finish t)
+
+          ("t" "Task")
           ("tt" "Regular todo" entry
            (file+headline ,(concat org-directory "/todo.org") "Inbox") "** TODO %^{TITLE}%(org-set-tags-command)\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%?\n"
+           :prepend t
+           :immediate-finish t)
+
+          ("tg" "Garden todo" entry
+           (file+headline ,(concat org-directory "/garden.org") "Inbox") "** TODO %^{TITLE}:@garden@home:\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i%?\n"
            :prepend t
            :immediate-finish t)
 
@@ -1003,6 +1034,8 @@
   
   :bind (("C-c a" . org-agenda)
      ("C-c c" . org-capture)
+     ("C-c t" . (lambda () (interactive) (find-file (concat org-directory "/todo.org"))))
+     ("C-c v" . (lambda () (interactive) (find-file (concat org-directory "/vito.org"))))
      ("C-c l" . org-store-link)
      ("C-c C-M-l" . org-toggle-link-display)
      ("C-c o" . (lambda () (interactive) (find-file org-directory)))

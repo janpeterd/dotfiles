@@ -39,10 +39,10 @@ return {
       set("n", "<leader>,", fzf_lua.buffers, { desc = "Fzf buffers" })
       set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fzf oldfiles" })
       set("n", "<leader>fcn", function()
-        fzf_lua.files { cwd = "/home/jp/.local/share/chezmoi/dot_config/nvim" }
+        fzf_lua.files { cwd = vim.env.HOME .. "/.local/share/chezmoi/dot_config/nvim" }
       end, { desc = "Fzf config files" })
       set("n", "<leader>fcN", function()
-        fzf_lua.files { cwd = "/home/jp/Sync/org" }
+        fzf_lua.files { cwd = vim.env.HOME .. "/Sync/org" }
       end, { desc = "Fzf org notes" })
       set("n", "<leader>sg", function()
         require("fzf-lua").live_grep_native {
