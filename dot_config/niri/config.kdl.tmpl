@@ -257,7 +257,11 @@ layout {
   }
 }
 environment {
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
     DISPLAY ":0"
+{{ else }}
+    DISPLAY ":1"
+{{ end }}
     XDG_SESSION_TYPE "wayland"
     QT_QPA_PLATFORM "wayland"
     GDK_BACKEND "wayland"
@@ -459,7 +463,7 @@ binds {
   Mod+E { spawn "kitty" "-e" "yazi"; }
   Mod+Shift+E { spawn "nautilus"; }
   Mod+N { spawn "kitty" "-e" "nvim"; }
-  Mod+D { spawn "rofi" "-show" "drun"; }
+  Mod+D { spawn "fuzzel"; }
   Mod+Shift+D { spawn "keepassxc"; }
   Mod+Alt+L { spawn "swaylock"; }
   Mod+Shift+W { spawn "google-chrome-stable" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }

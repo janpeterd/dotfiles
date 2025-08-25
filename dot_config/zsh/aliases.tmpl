@@ -73,5 +73,9 @@ alias h=/home/jp/.local/bin/wrappedhl
 alias G="nvim -c Neogit"
 alias neofetch=fastfetch
 alias cm=chezmoi
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+alias bat=batcat
+alias fd=fdfind
+{{ end }}
 
 # vim:ft=zsh

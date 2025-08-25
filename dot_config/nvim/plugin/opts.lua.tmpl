@@ -66,9 +66,15 @@ function Fd(file_pattern, _)
   if file_pattern:sub(1, 1) == "*" then
     file_pattern = file_pattern:gsub(".", ".*%0") .. ".*"
   end
+{{ if eq .chezmoi.osRelease.id "ubuntu" }}
+  local cmd = 'fdfind  --color=never --full-path --type file --hidden --exclude=".git" --exclude="deps" "'
+      .. file_pattern
+      .. '"'
+{{ else }}
   local cmd = 'fd  --color=never --full-path --type file --hidden --exclude=".git" --exclude="deps" "'
       .. file_pattern
       .. '"'
+{{ end }}
   local result = vim.fn.systemlist(cmd)
   return result
 end
@@ -103,3 +109,5 @@ function GitStatus()
 end
 
 opt.statusline = "%#StatusLine# %f %y%=%{v:lua.GitStatus()} %l:%c "
+
+-- vim:ft=lua

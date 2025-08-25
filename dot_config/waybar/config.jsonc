@@ -9,14 +9,14 @@
   "modules-left": [
     "niri/workspaces",
     "group/window",
-    "mpris",
-    "mpd"
+    "mpris"
+    // "mpd"
   ],
   "modules-center": [
     "custom/niri-actions"
   ],
   "modules-right": [
-    "custom/emacs-clock",
+    // "custom/emacs-clock",
     "niri/language",
     "pulseaudio",
     "battery",
@@ -172,39 +172,39 @@
       "paused": ""
     }
   },
-  "mpd": {
-    "format": "{stateIcon} {randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title}",
-    "format-disconnected": "",
-    "format-stopped": "",
-    "format-paused": "{stateIcon} {title}",
-    "interval": 10,
-    "random-icons": {
-      "on": " "
-    },
-    "repeat-icons": {
-      "on": " "
-    },
-    "single-icons": {
-      "on": "1 "
-    },
-    "state-icons": {
-      "paused": "",
-      "playing": ""
-    },
-    "tooltip-format": "MPD (connected) - {stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
-    "tooltip-format-disconnected": "",
-    "on-click": "mpc toggle",
-    "on-click-right": "mpc next"
-  },
-  "custom/hypr-actions": {
-    "format": " ",
-    "tooltip": false,
-    "on-click-backward": "rofi -show drun",
-    "on-click-forward": "hyprctl dispatch workspace previous",
-    "on-double-click": "hyprctl dispatch fullscreen 1",
-    "on-click-middle": "hyprctl dispatch layoutmsg swapwithmaster master",
-    "on-click-right": "hyprctl dispatch killactive"
-  },
+  // "mpd": {
+  //   "format": "{stateIcon} {randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title}",
+  //   "format-disconnected": "",
+  //   "format-stopped": "",
+  //   "format-paused": "{stateIcon} {title}",
+  //   "interval": 10,
+  //   "random-icons": {
+  //     "on": " "
+  //   },
+  //   "repeat-icons": {
+  //     "on": " "
+  //   },
+  //   "single-icons": {
+  //     "on": "1 "
+  //   },
+  //   "state-icons": {
+  //     "paused": "",
+  //     "playing": ""
+  //   },
+  //   "tooltip-format": "MPD (connected) - {stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ",
+  //   "tooltip-format-disconnected": "",
+  //   "on-click": "mpc toggle",
+  //   "on-click-right": "mpc next"
+  // },
+  // "custom/hypr-actions": {
+  //   "format": " ",
+  //   "tooltip": false,
+  //   "on-click-backward": "rofi -show drun",
+  //   "on-click-forward": "hyprctl dispatch workspace previous",
+  //   "on-double-click": "hyprctl dispatch fullscreen 1",
+  //   "on-click-middle": "hyprctl dispatch layoutmsg swapwithmaster master",
+  //   "on-click-right": "hyprctl dispatch killactive"
+  // },
   "custom/niri-actions": {
     "format": " ",
     "tooltip": false,
@@ -222,13 +222,13 @@
   "niri/language": {
     "on-click": "niri msg action switch-layout next"
   },
-  "hyprland/window": {
-    "format": "{initialTitle}",
-    //"format": "{initialClass}",
-    "separate-outputs": true,
-    "icon": true,
-    "icon-size": 20
-  },
+  // "hyprland/window": {
+  //   "format": "{initialTitle}",
+  //   //"format": "{initialClass}",
+  //   "separate-outputs": true,
+  //   "icon": true,
+  //   "icon-size": 20
+  // },
   "custom/notification": {
     "tooltip": false,
     "format": "{icon}",
@@ -298,16 +298,6 @@
     },
     "exec": "/home/jp/.config/waybar/scripts/emacs-clock.sh"
   },
-  "custom/pacman": {
-    "format": "{icon}{0}",
-    "return-type": "json",
-    "format-icons": {
-      "pending-updates": " ",
-      "updated": ""
-    },
-    "on-click": "kitty -e yay",
-    "exec": "/home/jp/.config/waybar/scripts/waybar-updates"
-  },
   "group/power": {
     "orientation": "inherit",
     "drawer": {
@@ -329,13 +319,9 @@
       "transition-left-to-right": true
     },
     "modules": [
-      "hyprland/window",
-      "custom/separator",
       "cpu",
       "custom/separator",
-      "memory",
-      "custom/separator",
-      "custom/pacman"
+      "memory"
     ]
   }
 }
