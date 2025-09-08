@@ -15,6 +15,12 @@ autocmd("TextYankPost", {
   end,
 })
 
+
+-- compile mermaid diagrams
+vim.cmd [[
+  autocmd BufWritePost *.mmd,*.mmdc !mmdc -i % -o %:r.png &
+]]
+
 -- DADBOT-UI dont fold
 vim.cmd [[
   autocmd FileType dbout setlocal nofoldenable

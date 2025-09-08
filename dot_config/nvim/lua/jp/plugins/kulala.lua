@@ -1,6 +1,6 @@
 return {
   {
-    enabled = vim.g.jp_profile == 'dev',
+    enabled = vim.g.jp_profile == "dev",
     "mistweaverco/kulala.nvim",
     keys = {
       { "<leader>Rs", desc = "Send request" },
@@ -12,6 +12,7 @@ return {
       global_keymaps = true,
       global_keymaps_prefix = "<leader>R",
       kulala_keymaps_prefix = "",
+      additional_curl_options = { "--insecure", "-A", "Mozilla/5.0" },
     },
   },
 }

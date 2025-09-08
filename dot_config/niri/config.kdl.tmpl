@@ -257,11 +257,6 @@ layout {
   }
 }
 environment {
-{{ if eq .chezmoi.osRelease.id "ubuntu" }}
-    DISPLAY ":0"
-{{ else }}
-    DISPLAY ":1"
-{{ end }}
     XDG_SESSION_TYPE "wayland"
     QT_QPA_PLATFORM "wayland;xcb"
     GDK_BACKEND "wayland,x11,*"
@@ -289,7 +284,6 @@ environment {
 
 // spawn-at-startup "mako"
 spawn-at-startup "swaybg" "-i" "{{ or .wallpaper.path (joinPath .chezmoi.homeDir "Pictures" "wallpaper.png") }}"
-spawn-at-startup "xwayland-satellite"
 spawn-at-startup "emacs" "--fg-daemon"
 spawn-at-startup "kanshi"
 spawn-at-startup "copyq" "--start-server"
@@ -339,6 +333,17 @@ window-rule {
   match app-id=r#"^org\.wezfurlong\.wezterm$"#
   default-column-width {}
 }
+
+// Dbeaver notifications
+window-rule {
+  match app-id="DBeaver"
+  match title=""
+  match is-floating=true
+
+  open-focused false
+  default-floating-position x=15 y=15 relative-to="bottom-right"
+}
+
 window-rule {
   match title="^(ripdrag)$"
   match title="^(file_progress)$"
@@ -469,6 +474,7 @@ binds {
   Mod+Shift+W { spawn "google-chrome-stable" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
   Mod+W { spawn "firefox" ; }
   Mod+Control+W { spawn "kitty" "-e" "btop" ; }
+  Mod+Control+d { spawn "kitty" "-e" "lazydocker" ; }
   Mod+Backspace { spawn "wlogout" "-b" "4" "-T" "400" "-B" "400"; }
   Mod+Shift+Backspace { switch-layout "next"; }
   Mod+B { spawn "killall" "-SIGUSR1" "waybar"; }
@@ -731,5 +737,9 @@ binds {
 switch-events {
   lid-close { spawn "systemctl" "suspend-then-hibernate" ; }
 }
+
+// debug {
+  //   wait-for-frame-completion-in-pipewire
+// }
 
 // vim: ft=kdl

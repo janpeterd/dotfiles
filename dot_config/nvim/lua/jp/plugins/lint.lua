@@ -11,9 +11,9 @@ return {
         -- lua = { "luacheck" },
         -- javascript = { "eslint_d" },
         -- typescript = { "eslint_d" },
-        sh = { "shellcheck" },
-        bash = { "shellcheck" },
-        zsh = { "shellcheck" },
+        -- sh = { "shellcheck" },
+        -- bash = { "shellcheck" },
+        -- zsh = { "shellcheck" },
       }
 
       vim.api.nvim_create_autocmd({ "BufWritePost" }, {
