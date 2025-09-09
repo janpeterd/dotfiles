@@ -2,8 +2,7 @@ vim.g.mapleader = " "
 
 -- Set profile
 -- available profiles: 'native', 'minimal', 'dev'
-vim.g.jp_profile = "{{ or .nvim.profile "
-minimal " }}"
+vim.g.jp_profile = "{{ or .nvim.profile "minimal" }}"
 
 if vim.g.jp_profile == "native" then
   vim.cmd "colorscheme zaibatsu"
