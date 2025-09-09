@@ -257,28 +257,50 @@ layout {
   }
 }
 environment {
+    // Wayland session
     XDG_SESSION_TYPE "wayland"
-    QT_QPA_PLATFORM "wayland;xcb"
-    GDK_BACKEND "wayland,x11,*"
-    GDK_IM_MODULE ""
-    SDL_VIDEODRIVER "wayland"
-    CLUTTER_BACKEND "wayland"
-    XDG_SESSION_TYPE "wayland"
-    XDG_CURRENT_DESKTOP "niri"
+
+    // Desktop name used by portals/screen sharing:
+    // Prefer "wlroots" so xdg-desktop-portal-wlr is picked up reliably.
+    // If you know your portal setup handles "niri" fine, change back to "niri".
+    XDG_CURRENT_DESKTOP "wlroots"
     XDG_SESSION_DESKTOP "niri"
+
+    // GTK + Qt prefer Wayland, fall back to X11 when needed
+    GDK_BACKEND "wayland,x11"
+    QT_QPA_PLATFORM "wayland;xcb"
+    QT_QPA_PLATFORMTHEME "qt6ct"        // only if qt6ct is installed
+    SDL_VIDEODRIVER "wayland,x11"
+    CLUTTER_BACKEND "wayland"
+
+    // Input methods (IBus)
+    GTK_IM_MODULE "ibus"
+    QT_IM_MODULE  "ibus"
+    GDK_IM_MODULE "ibus"
+    XMODIFIERS "@im=ibus"
+
+    // Portals (file pickers, screenshots, screencast) — good for Flatpak too
+    GTK_USE_PORTAL "1"
+
+    MOZ_ENABLE_WAYLAND "1"
+    MOZ_WAYLAND_USE_VAAPI "1"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+
+    // Your prefs
     BROWSER "firefox"
-    QT_QPA_PLATFORMTHEME "qt6ct"
-    GTK_IM_MODULE ""
     EDITOR "nvim"
     VISUAL "nvim"
     MANPAGER "nvim +Man!"
-    ELECTRON_OZONE_PLATFORM_HINT "auto"
-    MOZ_ENABLE_WAYLAND "1"
+
+    // Nice to have (optional)
+    // XCURSOR_THEME "Adwaita"
+    // XCURSOR_SIZE "24"
+    // QT_AUTO_SCREEN_SCALE_FACTOR "1"
 }
 
 // Add lines like this to spawn processes at startup.
 // Note that running niri as a session supports xdg-desktop-autostart,
-// which may be more convenient to use.
+// which may be more convenient to use
 // See the binds section below for more spawn examples.
 // spawn-at-startup "swaybg" "-i" "~/Pictures/wallpapers/yoda.png"
 
@@ -471,8 +493,8 @@ binds {
   Mod+D { spawn "fuzzel"; }
   Mod+Shift+D { spawn "keepassxc"; }
   Mod+Alt+L { spawn "swaylock"; }
-  Mod+Shift+W { spawn "google-chrome-stable" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
-  Mod+W { spawn "firefox" ; }
+  Mod+W { spawn "chromium" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
+  Mod+Shift+W { spawn "firefox" ; }
   Mod+Control+W { spawn "kitty" "-e" "btop" ; }
   Mod+Control+d { spawn "kitty" "-e" "lazydocker" ; }
   Mod+Backspace { spawn "wlogout" "-b" "4" "-T" "400" "-B" "400"; }
