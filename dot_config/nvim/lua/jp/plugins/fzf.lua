@@ -6,18 +6,21 @@ return {
     config = function()
       local fzf_lua = require "fzf-lua"
       local set = vim.keymap.set
-      local defaults = fzf_lua.defaults
-      local config = {
-        keymap = {
-          builtin = {
-            ["<M-p>"] = "toggle-preview",
-            ["<M-d>"] = "preview-page-down",
-            ["<M-u>"] = "preview-page-up",
-          },
-        },
+      local defaults = fzf_lua.defaults.keymap.builtin
+
+      local custom_keymaps = {
+        ["<M-p>"] = "toggle-preview",
+        ["<M-d>"] = "preview-page-down",
+        ["<M-u>"] = "preview-page-up",
       }
 
-      fzf_lua.setup(config)
+      local keymap = vim.tbl_extend("force", {}, defaults, custom_keymaps)
+
+      fzf_lua.setup({
+        keymap = {
+          builtin = keymap,
+        },
+      })
 
       -- Keybinds
       -- Builtin handy keybinds:

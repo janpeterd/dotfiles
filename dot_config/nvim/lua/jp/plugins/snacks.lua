@@ -2,9 +2,22 @@
 return {
   {
     "folke/snacks.nvim",
-    enabled = false,
+    enabled = true,
     opts = {
-      picker = { enabled = true },
+      picker = {
+        win = {
+          input = {
+            keys = {
+              ["<C-a>"] = { "select_all", mode = { "n" } },
+              ["<C-u>"] = { "list_scroll_up", mode = { "n" } },
+              ["<A-f>"] = { "toggle_follow", mode = { "n" } },
+              ["<C-b>"] = { "preview_scroll_up", mode = { "n" } },
+              ["<C-f>"] = { "preview_scroll_down", mode = { "n" } }
+            }
+          }
+
+        }
+      },
       bigfile = { enabled = false },
       dashboard = { enabled = false },
       explorer = { enabled = false },
