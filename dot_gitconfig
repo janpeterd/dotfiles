@@ -1,8 +1,10 @@
 [user]
 	email = janpeter.dhalle@gmail.com
 	name = Jan-Peter Dhallé
+
 [credential "http://jpserv:3000"]
 	provider = generic
+
 [alias]
 	st = status --short
 	sw = switch
@@ -12,24 +14,33 @@
   dlog = -c diff.external=difft log --ext-diff
   dshow = -c diff.external=difft show --ext-diff
   ddiff = -c diff.external=difft diff
+
 [commit]
   verbose = true
+
 [branch]
   sort = -committerdate
+
 [tag]
   sort = -version:refname
+
 [push]
   autoSetupRemote = true
+
 [maintenance]
   auto = true
   strategy = incremental
+
 [status]
   branch = true
+
 [rerere]
   enabled = true
   autoUpdate = true
+
 [help]
   autocorrect = prompt
+
 [core]
     pager = delta
 
@@ -39,10 +50,11 @@
 [delta]
     navigate = true
     side-by-side = true
-
+    hyperlinks = true
 
 [merge]
     conflictstyle = zdiff3
+
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean -- %f
