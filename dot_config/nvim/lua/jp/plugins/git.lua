@@ -15,13 +15,12 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "sindrets/diffview.nvim",
-      "nvim-telescope/telescope.nvim",
     },
     config = function()
       local neogit = require "neogit"
       neogit.setup {
         integrations = {
-          telescope = true,
+          snacks = true,
           diffview = true,
           auto_show_console_on = "always",
         },

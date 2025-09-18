@@ -1,7 +1,6 @@
 [user]
-	email = janpeter.dhalle@gmail.com
-	name = Jan-Peter Dhallé
-
+  email = {{ default "janpeter.dhalle@gmail.com" (get .user "email") }}
+  name  = {{ default "Jan-Peter Dhallé" (get .user "fullName") }}
 [credential "http://jpserv:3000"]
 	provider = generic
 
