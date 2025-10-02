@@ -6,10 +6,8 @@ end
 
 -- Pure neovim remaps. Plugin remaps are in plugin files.
 
-
 -- Native find
 vim.keymap.set("n", "<leader>fn", ":find ", { desc = "[F]ind [N]ative)" })
-
 
 -----------
 -- Open file
@@ -100,6 +98,7 @@ set("n", "<C-d>", "<C-d>zz")
 set("n", "<C-u>", "<C-u>zz")
 set("n", "<C-f>", "<C-f>zz")
 set("n", "<C-b>", "<C-b>zz")
+set("v", "<leader>C", "<CMD>'<,'>center<CR>")
 
 ------------
 -- Quick join and unjoin
