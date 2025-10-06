@@ -15,6 +15,11 @@ autocmd("TextYankPost", {
   end,
 })
 
+-- Specific files
+vim.cmd [[
+  autocmd BufWrite webapps.txt :Tabularize /|
+]]
+
 
 -- compile mermaid diagrams
 vim.cmd [[
