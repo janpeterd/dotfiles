@@ -24,18 +24,11 @@ cursor {
   hide-when-typing
 }
 
-output "DP-1" {
-  mode "1920x1080@144.001"
+output "eDP-1" {
+  mode "1920x1200@60"
   scale 1
   transform "normal"
   position x=0 y=0
-}
-
-output "DP-2" {
-  mode "1920x1080@74.986"
-  scale 1
-  transform "normal"
-  position x=1920 y=0
 }
 
 layout {
@@ -124,7 +117,6 @@ window-rule {
 
 window-rule {
   match app-id="DBeaver"
-  match title=""
   match is-floating=true
 
   open-focused false
@@ -159,16 +151,28 @@ window-rule {
   match app-id="^xdm-app$"
   match app-id="^org.qbittorrent.qBittorrent$"
   match app-id="^com.github.hluk.copyq$"
-  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
   match app-id=r#"firefox$"# title="^Picture-in-Picture$"
 
   open-floating true
+  open-focused true
+}
+
+window-rule {
+  match app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  open-floating true
+  open-focused true
+}
+
+window-rule {
+  match app-id="^com.github.hluk.copyq$"
+  open-floating true
+  open-focused true
 }
 
 window-rule {
     match app-id="^org.pulseaudio.pavucontrol$"
     open-floating true
-    default-floating-position x=0 y=4 relative-to="top"
+    default-floating-position x=0 y=1 relative-to="top"
     default-window-height { proportion 0.6; }
     default-column-width { proportion 0.4; }
     open-focused true
@@ -294,13 +298,16 @@ binds {
   Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
   Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
   Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
-  Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
-  Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+  // Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+  // Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
   Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
 
 
   Mod+Ctrl+Shift+Comma  { move-workspace-to-monitor-left; }
   Mod+Ctrl+Shift+Period  { move-workspace-to-monitor-right; }
+
+  Mod+Ctrl+Shift+j  { move-workspace-down; }
+  Mod+Ctrl+Shift+k  { move-workspace-up; }
 
   Mod+Page_Down      { focus-workspace-down; }
   Mod+Page_Up        { focus-workspace-up; }

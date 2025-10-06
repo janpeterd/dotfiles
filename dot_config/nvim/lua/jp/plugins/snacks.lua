@@ -2,9 +2,13 @@
 return {
   {
     "folke/snacks.nvim",
-    enabled = true,
+    enabled = false,
     opts = {
       picker = {
+        layout = {
+          preset = "telescope",
+        },
+
         win = {
           input = {
             keys = {
@@ -12,12 +16,12 @@ return {
               ["<C-u>"] = { "list_scroll_up", mode = { "n" } },
               ["<A-f>"] = { "toggle_follow", mode = { "n" } },
               ["<C-b>"] = { "preview_scroll_up", mode = { "n" } },
-              ["<C-f>"] = { "preview_scroll_down", mode = { "n" } }
-            }
-          }
-
-        }
+              ["<C-f>"] = { "preview_scroll_down", mode = { "n" } },
+            },
+          },
+        },
       },
+
       bigfile = { enabled = false },
       dashboard = { enabled = false },
       explorer = { enabled = false },

@@ -32,6 +32,7 @@ return {
         svelte = {},
         emmet_language_server = {},
         cssls = {},
+        copilot = {},
         lua_ls = {
           on_init = function(client, initialization_result)
             if client.server_capabilities then

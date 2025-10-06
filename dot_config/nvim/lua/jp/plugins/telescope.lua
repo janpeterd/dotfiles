@@ -2,7 +2,7 @@ return {
   {
     "nvim-telescope/telescope.nvim",
     lazy = true,
-    enabled = false,
+    enabled = true,
     cmd = "Telescope",
     keys = {
       { "<leader>fr", desc = "[F]ind [r]ecent" },
@@ -147,44 +147,19 @@ return {
       -- ------------------ END ACTIONS --------------------------------------------
       local config = {
         defaults = {
-          -- layout_strategy = "bottom_pane",
-          -- prompt_prefix      = "󰭎",
-          -- path_display = { "truncate" },
-          layout_strategy = "bottom_pane",
-          layout_config = {
-            width = 0.95,
-            height = 0.85,
-            prompt_position = "top",
-            -- horizontal = {
-            --   preview_width = function(_, cols, _)
-            --     if cols > 200 then
-            --       return math.floor(cols * 0.4)
-            --     else
-            --       return math.floor(cols * 0.6)
-            --     end
-            --   end,
-            -- },
-            --
-            vertical = {
-              width = 0.9,
-              height = 0.95,
-              preview_height = 0.5,
-            },
-
-            flex = {
-              horizontal = {
-                preview_width = 0.9,
-              },
-            },
-          },
-
-          -- selection_strategy = "reset", -- (default)
+          color_devicons = true,
+          borderchars = { "", "", "", "", "", "", "", "" },
           selection_strategy = "closest",
-          -- sorting_strategy   = "descending",
+          path_displays = "smart",
+          layout_strategy = "horizontal",
           sorting_strategy = "ascending",
           scroll_strategy = "cycle",
-          color_devicons = true,
-
+          layout_config = {
+            width = 400,
+            height = 100,
+            prompt_position = "top",
+            preview_cutoff = 40,
+          },
           mappings = {
             i = {
               ["<M-j>"] = actions.cycle_history_next,
