@@ -208,7 +208,7 @@
   "custom/niri-actions": {
     "format": " ",
     "tooltip": false,
-    "on-click-backward": "rofi -show drun",
+    "on-click-backward": "fuzzel",
     "on-click-forward": "niri msg action focus-workspace-previous",
     "on-double-click": "niri msg action maximize-column",
     "on-click-middle": "niri msg action move-column-left",
