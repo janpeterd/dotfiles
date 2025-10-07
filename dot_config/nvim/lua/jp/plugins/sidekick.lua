@@ -26,6 +26,13 @@ return {
       desc = "Goto/Apply Next Edit Suggestion",
     },
     {
+      "<leader>ah",
+      function()
+        require("sidekick.nes").update()
+      end,
+      desc = "Sidekick refresh next edit",
+    },
+    {
       "<leader>aa",
       function() require("sidekick.cli").toggle() end,
       desc = "Sidekick Toggle CLI",

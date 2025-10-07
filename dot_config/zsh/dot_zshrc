@@ -180,6 +180,7 @@ export FPATH=$ZDOTDIR/completions:$FPATH
 eval "$(atuin init zsh)"
 
 
+
 # Map Control + y to the accept-line widget for autosuggestions
 bindkey '^y' autosuggest-accept
 
@@ -201,6 +202,9 @@ hour=$(date "+%H")
 greeting
 
 [ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
+
+# Sdkman
+[ -f "$HOME/.sdkman/bin/sdkman-init.sh" ] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
