@@ -1,6 +1,47 @@
 local jdtls = require "jdtls"
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = vim.env.HOME .. "/.jdtls-workspace/" .. project_name
+
+
+-- --- resolve Java from JAVA_HOME (SDKMAN) ---
+local function current_java()
+  local home = vim.env.JAVA_HOME
+  if home and home ~= "" then
+    local candidate = home .. "/bin/java"
+    if vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+  end
+  return "java" -- fallback to PATH
+end
+
+local function sdkman_runtimes()
+  local runtimes = {}
+  local dirs = vim.fn.glob(vim.fn.expand("~/.sdkman/candidates/java/*"), 1, 1)
+  local active = vim.env.JAVA_HOME and vim.fn.resolve(vim.env.JAVA_HOME) or nil
+
+  for _, path in ipairs(dirs) do
+    -- dir names look like: 21.0.4-tem, 17.0.11-graal, etc.
+    local name = path:match("([^/]+)$") or path
+    local major = name:match("^(%d+)")
+    -- Use a sensible label for JDTLS (JavaSE-XX)
+    local label = major and ("JavaSE-" .. major) or name
+    table.insert(runtimes, {
+      name = label,
+      path = path,
+      default = (active and vim.fn.resolve(path) == active) or false,
+    })
+  end
+
+  -- If nothing found, still try JAVA_HOME so jdtls knows about it
+  if #runtimes == 0 and active then
+    table.insert(runtimes, { name = "JavaSE", path = active, default = true })
+  end
+
+  return runtimes
+end
+
+
 -- Needed for debugging
 local bundles = {
   vim.fn.stdpath "data" .. "/mason/share/java-debug-adapter/com.microsoft.java.debug.plugin.jar",
@@ -14,7 +55,7 @@ vim.list_extend(bundles, require("spring_boot").java_extensions())
 
 local config = {
   cmd = {
-    "java",
+    current_java(),
     "-Declipse.application=org.eclipse.jdt.ls.core.id1",
     "-Dosgi.bundles.defaultStartLevel=4",
     "-Declipse.product=org.eclipse.jdt.ls.core.product",
@@ -57,15 +98,7 @@ local config = {
       },
       configuration = {
         runtimes = {
-          {
-            name = "JavaSE-17",
-            path = "/usr/lib/jvm/java-17-openjdk",
-          },
-          {
-            name = "JavaSE-21",
-            path = "/usr/lib/jvm/java-21-openjdk",
-            default = true,
-          },
+          sdkman_runtimes()
         },
       },
       import = {

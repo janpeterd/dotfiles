@@ -107,8 +107,8 @@ window#waybar.floating .modules-right {
 
 #custom-actions,
 #custom-niri-actions {
-  padding-left: 300px;
-  padding-right: 300px;
+  padding-left: 00px;
+  padding-right: 00px;
   background: transparent;
 }
 

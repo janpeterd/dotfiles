@@ -8,12 +8,13 @@
   "reload_style_on_change": true,
   "modules-left": [
     "niri/workspaces",
-    "group/window",
-    "mpris"
+    "group/window"
+    // "mpris"
     // "mpd"
   ],
   "modules-center": [
-    "custom/niri-actions"
+    "niri/window"
+    // "custom/niri-actions"
   ],
   "modules-right": [
     // "custom/emacs-clock",
@@ -205,15 +206,15 @@
   //   "on-click-middle": "hyprctl dispatch layoutmsg swapwithmaster master",
   //   "on-click-right": "hyprctl dispatch killactive"
   // },
-  "custom/niri-actions": {
-    "format": " ",
-    "tooltip": false,
-    "on-click-backward": "fuzzel",
-    "on-click-forward": "niri msg action focus-workspace-previous",
-    "on-double-click": "niri msg action maximize-column",
-    "on-click-middle": "niri msg action move-column-left",
-    "on-click-right": "niri msg action close-window"
-  },
+  // "custom/niri-actions": {
+  //   "format": " ",
+  //   "tooltip": false,
+  //   "on-click-backward": "fuzzel",
+  //   "on-click-forward": "niri msg action focus-workspace-previous",
+  //   "on-double-click": "niri msg action maximize-column",
+  //   "on-click-middle": "niri msg action move-column-left",
+  //   "on-click-right": "niri msg action close-window"
+  // },
   "custom/separator": {
     //"format": "  ",
     "format": "  ",
@@ -221,6 +222,16 @@
   },
   "niri/language": {
     "on-click": "niri msg action switch-layout next"
+  },
+  "niri/window": {
+    "format": "{title}",
+    "icon": true,
+    "icon-size": 20,
+    "on-click-backward": "fuzzel",
+    "on-click-forward": "niri msg action focus-workspace-previous",
+    "on-double-click": "niri msg action maximize-column",
+    "on-click-middle": "niri msg action move-column-left",
+    "on-click-right": "niri msg action close-window"
   },
   // "hyprland/window": {
   //   "format": "{initialTitle}",
