@@ -37,16 +37,19 @@ window#waybar {
   padding: 0;
 }
 
-#idle_inhibitor {
+#clock {
   padding-right: 20px;
 }
+#idle_inhibitor {
+  padding-left: 20px;
+}
 #idle_inhibitor.activated {
-  color: @urgent;
+  color: @accent;
 }
 
 #workspaces {
-  padding-left: 20px;
-  padding-right: 10px;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 #workspaces button {

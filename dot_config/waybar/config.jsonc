@@ -7,8 +7,12 @@
   "fixed-center": true,
   "reload_style_on_change": true,
   "modules-left": [
+    "idle_inhibitor",
+    "custom/separator",
     "niri/workspaces",
-    "group/window"
+    "custom/separator",
+    "group/window",
+    "niri/language"
     // "mpris"
     // "mpd"
   ],
@@ -18,7 +22,6 @@
   ],
   "modules-right": [
     // "custom/emacs-clock",
-    "niri/language",
     "pulseaudio",
     "battery",
     "backlight",
@@ -26,8 +29,6 @@
     "tray",
     "custom/separator",
     "clock",
-    "custom/separator",
-    "idle_inhibitor"
   ],
   "idle_inhibitor": {
     "format": "{icon}",
