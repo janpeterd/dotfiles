@@ -3,6 +3,7 @@ return {
     "nvim-telescope/telescope.nvim",
     lazy = true,
     enabled = true,
+    branch = "master",
     cmd = "Telescope",
     keys = {
       { "<leader>fr", desc = "[F]ind [r]ecent" },
@@ -233,7 +234,6 @@ return {
       --   telescope.load_extension "smart_open"
       -- end
       telescope.load_extension "live_grep_args"
-      telescope.load_extension "harpoon"
 
       -------------------------------------------------------------------------------------------------------
 

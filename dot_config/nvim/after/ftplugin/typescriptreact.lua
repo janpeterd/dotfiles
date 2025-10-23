@@ -1,4 +1,3 @@
-vim.opt_local.formatoptions:remove "o"
 vim.opt_local.makeprg = "yarn tsc"
 
 vim.api.nvim_create_autocmd("BufWritePre", {

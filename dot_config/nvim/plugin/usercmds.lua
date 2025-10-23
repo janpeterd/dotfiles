@@ -265,11 +265,46 @@ local RemoveComments = function(opts)
     end
   end)
 end
-vim.api.nvim_create_user_command(
-  "RemoveComments",
-  RemoveComments,
-  {
-    range = "%",
-    desc = "Remove comment nodes within a range (default: whole file)"
-  }
-)
+vim.api.nvim_create_user_command("RemoveComments", RemoveComments, {
+  range = "%",
+  desc = "Remove comment nodes within a range (default: whole file)",
+})
+
+vim.api.nvim_create_user_command("RemoveTrailing", function(args)
+  local bufnr = 0
+  local view = vim.fn.winsaveview()
+
+  -- figure out target range
+  local start_line, end_line
+  if args.count ~= -1 then
+    start_line = args.line1
+    end_line = args.line2
+  else
+    start_line = 1
+    end_line = vim.api.nvim_buf_line_count(bufnr)
+  end
+
+  -- remove trailing whitespace in range
+  vim.api.nvim_buf_call(bufnr, function()
+    vim.cmd(string.format("%d,%ds/\\s\\+$//e", start_line, end_line))
+  end)
+
+  -- with bang: also trim blank lines at end of file
+  if args.bang then
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+    local i = #lines
+    while i > 1 and (lines[i] == "" or lines[i]:match "^%s*$") do
+      i = i - 1
+    end
+    -- only update if there are trailing empties to drop
+    if i < #lines then
+      vim.api.nvim_buf_set_lines(bufnr, i, -1, true, {})
+    end
+  end
+
+  vim.fn.winrestview(view)
+end, {
+  range = "%",
+  bang = true,
+  desc = "Remove trailing whitespace in range; use ! to also trim blank lines at EOF",
+})

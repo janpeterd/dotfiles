@@ -1,12 +1,12 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "sonokai"
+Colorscheme = "alabaster"
 
 local function colorschemes()
   return {
     {
       "rebelot/kanagawa.nvim",
       name = "kanagawa",
-      colorscheme = "kanagawa-wave",
+      colorscheme = "kanagawa-dragon",
       config = function()
         require "jp.colors.kanagawa"
       end,
@@ -54,6 +54,13 @@ local function colorschemes()
       name = "sonokai",
       config = function()
         require "jp.colors.sonokai"
+      end,
+    },
+    {
+      "https://git.sr.ht/~p00f/alabaster.nvim",
+      name = "alabaster",
+      config = function()
+        vim.g.alabaster_floatborder = true
       end,
     },
     { "navarasu/onedark.nvim", name = "onedark" },
