@@ -15,7 +15,7 @@ fi
 PROMPT_EOL_MARK=""
 ZSH_THEME="jnrowe"
 
-plugins=(zoxide zsh-autosuggestions fzf zsh-syntax-highlighting)
+plugins=(zoxide zsh-autosuggestions fzf zsh-syntax-highlighting direnv)
 
 # dont dump these files in my dotfiles!
 export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST

@@ -1,6 +1,7 @@
 return {
   {
     "saghen/blink.cmp",
+    enabled = false,
     dependencies = {
       "rafamadriz/friendly-snippets",
     },
@@ -39,7 +40,7 @@ return {
           window = { border = "rounded" },
           auto_show = true,
         },
-        menu = { border = "rounded" }
+        menu = { border = "rounded" },
       },
     },
     opts_extend = { "sources.default" },

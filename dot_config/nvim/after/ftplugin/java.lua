@@ -2,7 +2,6 @@ local jdtls = require "jdtls"
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = vim.env.HOME .. "/.jdtls-workspace/" .. project_name
 
-
 -- --- resolve Java from JAVA_HOME (SDKMAN) ---
 local function current_java()
   local home = vim.env.JAVA_HOME
@@ -17,13 +16,13 @@ end
 
 local function sdkman_runtimes()
   local runtimes = {}
-  local dirs = vim.fn.glob(vim.fn.expand("~/.sdkman/candidates/java/*"), 1, 1)
+  local dirs = vim.fn.glob(vim.fn.expand "~/.sdkman/candidates/java/*", 1, 1)
   local active = vim.env.JAVA_HOME and vim.fn.resolve(vim.env.JAVA_HOME) or nil
 
   for _, path in ipairs(dirs) do
     -- dir names look like: 21.0.4-tem, 17.0.11-graal, etc.
-    local name = path:match("([^/]+)$") or path
-    local major = name:match("^(%d+)")
+    local name = path:match "([^/]+)$" or path
+    local major = name:match "^(%d+)"
     -- Use a sensible label for JDTLS (JavaSE-XX)
     local label = major and ("JavaSE-" .. major) or name
     table.insert(runtimes, {
@@ -40,7 +39,6 @@ local function sdkman_runtimes()
 
   return runtimes
 end
-
 
 -- Needed for debugging
 local bundles = {
@@ -98,7 +96,7 @@ local config = {
       },
       configuration = {
         runtimes = {
-          sdkman_runtimes()
+          sdkman_runtimes(),
         },
       },
       import = {
@@ -153,7 +151,7 @@ local config = {
   },
   root_dir = vim.fs.dirname(vim.fs.find({ "gradlew", ".git", "mvnw" }, { upward = true })[1]),
 
-  capabilities = require("blink.cmp").get_lsp_capabilities(),
+  -- capabilities = require("blink.cmp").get_lsp_capabilities(),
   flags = {
     allow_incremental_sync = true,
   },

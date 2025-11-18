@@ -29,6 +29,8 @@ return {
         -- phpactor = {},
         -- rust_analyzer = {},
         -- ts_ls = {},
+        basedpyright = {},
+        qmlls = {},
         svelte = {},
         emmet_language_server = {},
         cssls = {},
@@ -214,6 +216,9 @@ return {
 
           -- Enable completion triggered by <c-x><c-o>
           vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+          vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
+            autotrigger = true,
+          })
 
           -- Buffer local mappings.
           -- See `:help vim.lsp.*` for documentation on any of the below functions

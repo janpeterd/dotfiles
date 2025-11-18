@@ -94,10 +94,6 @@ set("v", "<leader>S", '"cy:%s/<C-r>c//g<left><left>', { desc = "[S]ubstitution (
 ------------
 -- set("n", "{", "{zz")
 -- set("n", "}", "}zz")
-set("n", "<C-d>", "<C-d>zz")
-set("n", "<C-u>", "<C-u>zz")
-set("n", "<C-f>", "<C-f>zz")
-set("n", "<C-b>", "<C-b>zz")
 set("v", "<leader>C", "<CMD>'<,'>center<CR>")
 
 ------------
