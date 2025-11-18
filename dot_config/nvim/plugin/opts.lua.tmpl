@@ -113,4 +113,12 @@ end
 
 opt.statusline = "%#StatusLine# %f %y%=%{v:lua.GitStatus()} %l:%c "
 
+vim.filetype.add {
+  pattern = {
+    ['openapi.*%.ya?ml'] = 'yaml.openapi',
+    ['openapi.*%.json'] = 'json.openapi',
+  },
+}
+
+
 -- vim:ft=lua

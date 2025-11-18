@@ -63,12 +63,12 @@ local function colorschemes()
         vim.g.alabaster_floatborder = true
       end,
     },
-    { "navarasu/onedark.nvim", name = "onedark" },
-    { "Mofiqul/vscode.nvim", name = "vscode" },
+    { "navarasu/onedark.nvim",          name = "onedark" },
+    { "Mofiqul/vscode.nvim",            name = "vscode" },
     { "rockerBOO/boo-colorscheme-nvim", name = "boo-colorscheme", colorscheme = "radioactive_waste" },
-    { "Shatur/neovim-ayu", name = "neovim-ayu" },
-    { "lifepillar/vim-solarized8", name = "solarized8", branch = "neovim" },
-    { "dasupradyumna/midnight.nvim", name = "midnight" },
+    { "Shatur/neovim-ayu",              name = "neovim-ayu" },
+    { "lifepillar/vim-solarized8",      name = "solarized8",      branch = "neovim" },
+    { "dasupradyumna/midnight.nvim",    name = "midnight" },
     {
       "vague2k/vague.nvim",
       name = "vague",
