@@ -77,32 +77,37 @@ layout {
   }
 }
 environment {
-    XDG_SESSION_TYPE "wayland"
-    GDK_BACKEND "wayland,x11"
-    QT_QPA_PLATFORMTHEME "qt6ct"
-    QT_QPA_PLATFORM "wayland;xcb"
-    SDL_VIDEODRIVER "wayland,x11"
-    CLUTTER_BACKEND "wayland"
-    GTK_USE_PORTAL "1"
-    MOZ_ENABLE_WAYLAND "1"
-    MOZ_WAYLAND_USE_VAAPI "1"
-    ELECTRON_OZONE_PLATFORM_HINT "auto"
     BROWSER "firefox"
     EDITOR "nvim"
-    VISUAL "nvim"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    // GDK_BACKEND "wayland,x11"
+    // GTK_USE_PORTAL "1"
     MANPAGER "nvim +Man!"
+    // MOZ_ENABLE_WAYLAND "1"
+    // MOZ_WAYLAND_USE_VAAPI "1"
+    QT_QPA_PLATFORM "wayland"
+    // QT_QPA_PLATFORM "wayland;xcb"
+    QT_QPA_PLATFORMTHEME "gtk3"
+    QT_QPA_PLATFORMTHEME_QT6 "gtk3"
+    // SDL_VIDEODRIVER "wayland,x11"
+    TERMINAL "kitty"
+    VISUAL "nvim"
+    XDG_CURRENT_DESKTOP "niri"
+    XDG_SESSION_TYPE "wayland"
 }
 
 
-spawn-at-startup "swaybg" "-i" "{{ or .wallpaper.path (joinPath .chezmoi.homeDir "Pictures" "wallpaper.png") }}"
-spawn-at-startup "emacs" "--fg-daemon"
+spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
+spawn-at-startup "dms" "run"
+// spawn-at-startup "swaybg" "-i" "/home/jp/Pictures/wallpaper.png"
+// spawn-at-startup "emacs" "--fg-daemon"
 spawn-at-startup "kanshi"
-spawn-at-startup "copyq" "--start-server"
+// spawn-at-startup "copyq" "--start-server"
 spawn-at-startup "sh" "-c" "sleep 1 && lxpolkit"
-spawn-at-startup "nm-applet" "--indicator"
+// spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "mpd"
 spawn-at-startup "udiskie" "-s"
-spawn-at-startup "sh" "-c" "sleep 1 && blueman-applet"
+// spawn-at-startup "sh" "-c" "sleep 1 && blueman-applet"
 
 prefer-no-csd
 
@@ -254,27 +259,57 @@ binds {
   Mod+E { spawn "kitty" "-e" "yazi"; }
   Mod+Shift+E { spawn "nautilus"; }
   Mod+N { spawn "kitty" "-e" "nvim"; }
-  Mod+D { spawn "fuzzel"; }
+  // Mod+D { spawn "fuzzel"; }
+  Mod+D hotkey-overlay-title="Application Launcher" {
+      spawn "dms" "ipc" "call" "spotlight" "toggle";
+  }
   Mod+Shift+D { spawn "keepassxc"; }
-  Mod+Alt+L { spawn "swaylock"; }
+  // Mod+Alt+L { spawn "swaylock"; }
+  Mod+Alt+L hotkey-overlay-title="Lock Screen" {
+      spawn "dms" "ipc" "call" "lock" "lock";
+  }
+
   // Mod+W { spawn "chromium" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
   Mod+W { spawn "zen-browser" ; }
   Mod+Shift+W { spawn "~/.local/bin/web-picker.sh" ; }
   Mod+Control+W { spawn "kitty" "-e" "btop" ; }
   Mod+Control+d { spawn "kitty" "-e" "lazydocker" ; }
-  Mod+Backspace { spawn "wlogout" "-b" "5" "-T" "400" "-B" "400"; }
+  Mod+Backspace { spawn "dms" "ipc" "call" "powermenu" "toggle" ; }
   Mod+Shift+Backspace { switch-layout "next"; }
   Mod+B { spawn "killall" "-SIGUSR1" "waybar"; }
   Mod+P { spawn "~/Code/scripts/bin/niri-mirror.sh" ; }
 
 
-  XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
-  XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
-  XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-  XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+  // XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
+  // XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
+  // XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+  // XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
 
-  XF86MonBrightnessUp { spawn "brightnessctl" "s" "+10"; }
-  XF86MonBrightnessDown { spawn "brightnessctl" "s" "10-"; }
+  // XF86MonBrightnessUp { spawn "brightnessctl" "s" "+10"; }
+  // XF86MonBrightnessDown { spawn "brightnessctl" "s" "10-"; }
+
+  // === Audio Controls ===
+  XF86AudioRaiseVolume allow-when-locked=true {
+      spawn "dms" "ipc" "call" "audio" "increment" "3";
+  }
+  XF86AudioLowerVolume allow-when-locked=true {
+      spawn "dms" "ipc" "call" "audio" "decrement" "3";
+  }
+  XF86AudioMute allow-when-locked=true {
+      spawn "dms" "ipc" "call" "audio" "mute";
+  }
+  XF86AudioMicMute allow-when-locked=true {
+      spawn "dms" "ipc" "call" "audio" "micmute";
+  }
+
+  // === Brightness Controls ===
+  XF86MonBrightnessUp allow-when-locked=true {
+      spawn "dms" "ipc" "call" "brightness" "increment" "5" "";
+  }
+  XF86MonBrightnessDown allow-when-locked=true {
+      spawn "dms" "ipc" "call" "brightness" "decrement" "5" "";
+  }
+
 
   Mod+equal allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05+"; }
   Mod+minus allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.05-"; }
