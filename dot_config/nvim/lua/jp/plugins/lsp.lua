@@ -48,7 +48,6 @@ return {
         -- gopls = {},
         -- phpactor = {},
         -- rust_analyzer = {},
-        -- ts_ls = {},
         basedpyright = {},
         qmlls = {},
         svelte = {},
@@ -122,7 +121,7 @@ return {
 
         -- jedi_language_server = {},
 
-        -- marksman = {},
+        marksman = {},
 
         -- clangd = {
         --   -- TODO: Could include cmd, but not sure those were all relevant flags.
@@ -220,7 +219,7 @@ return {
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
-            if server_name ~= "rust_analyzer" and server_name ~= "ts_ls" then
+            if server_name ~= "rust_analyzer" and server_name ~= "tsserver" then
               lspconfig[server_name].setup(server)
             end
           end,

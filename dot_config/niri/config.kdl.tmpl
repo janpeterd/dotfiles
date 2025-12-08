@@ -108,7 +108,7 @@ spawn-at-startup "mpd"
 spawn-at-startup "udiskie" "-s"
 // spawn-at-startup "sh" "-c" "sleep 1 && blueman-applet"
 
-prefer-no-csd
+// prefer-no-csd
 
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
@@ -201,6 +201,12 @@ window-rule {
 
 window-rule {
   match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+  default-floating-position x=10 y=10 relative-to="bottom-right"
+}
+
+window-rule {
+  match app-id=r#"zen$"# title="^Picture-in-Picture$"
+  open-floating true
   default-floating-position x=10 y=10 relative-to="bottom-right"
 }
 
@@ -335,6 +341,7 @@ binds {
   Mod+Ctrl+Home { move-column-to-first; }
   Mod+Ctrl+End  { move-column-to-last; }
 
+  Mod+m    { spawn "rofimoji" "-a" "clipboard"; }
   Mod+Period    { focus-monitor-right; }
   Mod+Comma    { focus-monitor-left; }
   Mod+Shift+Period   { move-column-to-monitor-right; }
