@@ -85,8 +85,7 @@ environment {
     MANPAGER "nvim +Man!"
     // MOZ_ENABLE_WAYLAND "1"
     // MOZ_WAYLAND_USE_VAAPI "1"
-    QT_QPA_PLATFORM "wayland"
-    // QT_QPA_PLATFORM "wayland;xcb"
+    QT_QPA_PLATFORM "wayland;xcb"
     QT_QPA_PLATFORMTHEME "gtk3"
     QT_QPA_PLATFORMTHEME_QT6 "gtk3"
     // SDL_VIDEODRIVER "wayland,x11"
@@ -102,7 +101,7 @@ spawn-at-startup "dms" "run"
 // spawn-at-startup "swaybg" "-i" "/home/jp/Pictures/wallpaper.png"
 // spawn-at-startup "emacs" "--fg-daemon"
 spawn-at-startup "kanshi"
-// spawn-at-startup "copyq" "--start-server"
+spawn-at-startup "copyq" "--start-server"
 spawn-at-startup "sh" "-c" "sleep 1 && lxpolkit"
 // spawn-at-startup "nm-applet" "--indicator"
 spawn-at-startup "mpd"
@@ -259,22 +258,17 @@ binds {
   Mod+E { spawn "kitty" "-e" "yazi"; }
   Mod+Shift+E { spawn "nautilus"; }
   Mod+N { spawn "kitty" "-e" "nvim"; }
-  // Mod+D { spawn "fuzzel"; }
-  Mod+D hotkey-overlay-title="Application Launcher" {
-      spawn "dms" "ipc" "call" "spotlight" "toggle";
-  }
+  Mod+D hotkey-overlay-title="Application Launcher" { spawn "fuzzel"; }
   Mod+Shift+D { spawn "keepassxc"; }
-  // Mod+Alt+L { spawn "swaylock"; }
-  Mod+Alt+L hotkey-overlay-title="Lock Screen" {
-      spawn "dms" "ipc" "call" "lock" "lock";
-  }
+  Mod+Alt+L hotkey-overlay-title="Lock Screen" { spawn "swaylock"; }
 
   // Mod+W { spawn "chromium" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
   Mod+W { spawn "zen-browser" ; }
   Mod+Shift+W { spawn "~/.local/bin/web-picker.sh" ; }
   Mod+Control+W { spawn "kitty" "-e" "btop" ; }
   Mod+Control+d { spawn "kitty" "-e" "lazydocker" ; }
-  Mod+Backspace { spawn "dms" "ipc" "call" "powermenu" "toggle" ; }
+  // Mod+Backspace { spawn "dms" "ipc" "call" "powermenu" "toggle" ; }
+  Mod+Backspace { spawn "wlogout" "-b" "5" "-T" "400" "-B" "400"; }
   Mod+Shift+Backspace { switch-layout "next"; }
   Mod+B { spawn "killall" "-SIGUSR1" "waybar"; }
   Mod+P { spawn "~/Code/scripts/bin/niri-mirror.sh" ; }
@@ -456,7 +450,6 @@ binds {
   Mod+Shift+S { screenshot; }
   Ctrl+Print { screenshot-screen; }
   Alt+Print { screenshot-window; }
-  Alt+Tab { focus-window-previous; }
 
   Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
   Ctrl+Alt+Delete { quit; }

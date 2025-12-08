@@ -1,7 +1,7 @@
 return {
   {
     "L3MON4D3/LuaSnip",
-    lazy = true,
+    lazy = false,
     -- follow latest release.
     version = "2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
     -- install jsregexp (optional!).
@@ -28,7 +28,7 @@ return {
         enable_autosnippets = true,
       }
 
-      -- <c-s> is my expansion key
+      -- <c-k> is my expansion key
       -- this will expand the current item or jump to the next item within the snippet.
       vim.keymap.set({ "i", "s" }, "<c-k>", function()
         if ls.expand_or_jumpable() then

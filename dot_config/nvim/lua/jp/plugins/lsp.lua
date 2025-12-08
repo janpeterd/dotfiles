@@ -15,6 +15,26 @@ return {
   },
   { "Bilal2453/luvit-meta", lazy = true },
   {
+    "aznhe21/actions-preview.nvim",
+    config = function()
+      require("actions-preview").setup {
+        telescope = {
+          sorting_strategy = "ascending",
+          layout_strategy = "vertical",
+          layout_config = {
+            width = 0.8,
+            height = 0.9,
+            prompt_position = "top",
+            preview_cutoff = 20,
+            preview_height = function(_, _, max_lines)
+              return max_lines - 15
+            end,
+          },
+        },
+      }
+    end,
+  },
+  {
     "neovim/nvim-lspconfig",
     lazy = false,
     config = function()
@@ -237,20 +257,6 @@ return {
             vim.lsp.buf.declaration,
             { buffer = opts.buffer, desc = "[G]o to [D]eclaration (symbol under cursor)" }
           )
-          -- goto -> implementation
-          vim.keymap.set(
-            "n",
-            "gi",
-            vim.lsp.buf.implementation,
-            { buffer = opts.buffer, desc = "[G]o to [I]mplementation (symbol under cursor)" }
-          )
-          -- Code -> type
-          vim.keymap.set(
-            "n",
-            "<leader>ct",
-            vim.lsp.buf.type_definition,
-            { buffer = opts.buffer, desc = "[C]ode [T]ype (symbol under cursor)" }
-          )
           -- Show fucntion signature!
           vim.keymap.set(
             "n",
@@ -282,23 +288,11 @@ return {
           vim.keymap.set("n", "<leader>cwl", function()
             print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
           end, { buffer = opts.buffer, desc = "[C]ode [W]orkspace [L]ist" })
-          -- if pcall(require, "telescope") then
-          --   vim.keymap.set("n", "grr", require("telescope.builtin").lsp_references, opts)
-          -- else
-          -- end
-          vim.keymap.set("n", "grr", vim.lsp.buf.references, { buffer = opts.buffer, desc = "LSP Buf [R]eferences" })
 
           -- NOTE: I want to use the default mapping: grn
-          -- remember with code -> rename
-          vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { buffer = opts.buffer, desc = "[C]ode [R]ename" })
+          -- vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { buffer = opts.buffer, desc = "[C]ode [R]ename" })
           -- remember with code -> actions
           -- NOTE: I want to use the default mapping: gra
-          vim.keymap.set(
-            { "n", "v" },
-            "<leader>ca",
-            vim.lsp.buf.code_action,
-            { buffer = opts.buffer, desc = "[C]ode [A]ction" }
-          )
           -- remember with goto -> references (under cursors)
 
           -- The following two autocommands are used to highlight references of the
@@ -365,6 +359,11 @@ return {
             stop_after_first = true,
           },
           javascriptreact = {
+            "prettierd",
+            "prettier",
+            stop_after_first = true,
+          },
+          typescriptreact = {
             "prettierd",
             "prettier",
             stop_after_first = true,
