@@ -21,8 +21,8 @@ return {
             cursorline = false,
             scrolloff = 99999,
           },
-          width = 0.90, -- width will be 85% of the editor width
-          height = 0.80, -- height of the Zen window
+          -- width = 0.80,  -- width will be 85% of the editor width
+          -- height = 1.00, -- height of the Zen window
         },
       }
 

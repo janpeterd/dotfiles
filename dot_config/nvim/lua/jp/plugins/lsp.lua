@@ -48,7 +48,7 @@ return {
         -- gopls = {},
         -- phpactor = {},
         -- rust_analyzer = {},
-        basedpyright = {},
+        -- basedpyright = {},
         qmlls = {},
         svelte = {},
         emmet_language_server = {},
@@ -219,7 +219,7 @@ return {
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
-            if server_name ~= "rust_analyzer" and server_name ~= "tsserver" then
+            if server_name ~= "rust_analyzer" and server_name ~= "tsserver" and server_name ~= "ts_ls" then
               lspconfig[server_name].setup(server)
             end
           end,

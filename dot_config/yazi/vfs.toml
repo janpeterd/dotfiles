@@ -1,0 +1,5 @@
+[services.jpserv]
+type = "sftp"
+host = "jpserv"
+user = "jp"
+port = 22
