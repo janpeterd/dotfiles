@@ -48,12 +48,12 @@ return {
         -- gopls = {},
         -- phpactor = {},
         -- rust_analyzer = {},
-        -- basedpyright = {},
+        -- pyright = {},
+        ty = {},
         qmlls = {},
         svelte = {},
         emmet_language_server = {},
         cssls = {},
-        copilot = {},
         lua_ls = {
           on_init = function(client, initialization_result)
             if client.server_capabilities then
@@ -327,9 +327,6 @@ return {
           sh = {
             "shfmt",
           },
-          kotlin = {
-            "ktfmt",
-          },
           bash = {
             "shfmt",
           },
@@ -343,7 +340,6 @@ return {
           },
           -- Conform will run multiple formatters sequentially
           go = {
-            "goimports",
             "gofmt",
           },
           -- Use a sub-list to run only the first available formatter
@@ -375,8 +371,6 @@ return {
             "prettier",
             stop_after_first = true,
           },
-          blade = { "pint" },
-          php = { "pint" },
           c = { "clang-format" },
           cpp = { "clang-format" },
           c_sharp = { "clang-format" },

@@ -49,8 +49,8 @@ end)
 -- Editing
 ------------
 
-set("n", "<leader>th", "<cmd>drop ~/Sync/Notes/docs/index.md<CR>/# Index<CR>:cd %:p:h<CR>") -- [t]ab [h]ome?
-set("n", "<leader>tv", "<cmd>drop ~/Sync/org/vito.org<CR>")
+set("n", "<leader>th", "<cmd>drop ~/Sync/Notes/docs/index.md<CR>/# Index<CR>") -- [t]ab [h]ome?
+set("n", "<leader>tv", "<cmd>drop ~/Sync/Notes/docs/vito/index.md<CR>/# Index<CR>")
 set("i", "<C-BS>", "<C-w>")
 set("c", "<C-p>", "<Up>")
 set("c", "<C-n>", "<Down>")
