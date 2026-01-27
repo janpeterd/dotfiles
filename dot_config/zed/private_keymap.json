@@ -1,0 +1,107 @@
+[
+  {
+    "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight",
+
+      "space f f": "file_finder::Toggle",
+      "space ,": "file_finder::Toggle",
+
+      // buffers
+      "space b n": "pane::ActivateNextItem",
+      "space b p": "pane::ActivatePreviousItem",
+      "space b k": "pane::CloseActiveItem",
+      "space b l": "pane::ActivateLastItem",
+      "space b c": "pane::CloseActiveItem",
+
+      // tabs
+      "space t c": "workspace::NewFile",
+      "space t n": "pane::ActivateNextItem",
+      "space t p": "pane::ActivatePreviousItem",
+      "space t k": "pane::CloseActiveItem",
+      "space t l": "pane::ActivateLastItem",
+
+      // git
+      "space g g": "git_panel::ToggleFocus",
+
+      // panes
+      "space w v": "pane::SplitRight",
+      "space w s": "pane::SplitDown",
+      "space w h": "workspace::ActivatePaneLeft",
+      "space w j": "workspace::ActivatePaneDown",
+      "space w k": "workspace::ActivatePaneUp",
+      "space w l": "workspace::ActivatePaneRight",
+      "space w c": "pane::CloseActiveItem",
+
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w m": "vim::MaximizePane",
+      "space w o": [
+        "action::Sequence",
+        ["pane::CloseOtherItems", "workspace::CloseAllDocks"],
+      ],
+      "space c d": "editor::Hover",
+      "space c e": "editor::Format",
+      "space c f": "editor::Format",
+      "space c m": "editor::Hover",
+
+      "[ g": "editor::GoToHunk",
+      "] g": "editor::GoToPreviousHunk",
+
+      "space g h d": "editor::ToggleSelectedDiffHunks",
+      "space g h r": "git::Restore",
+
+      "g o": "editor::MoveToBeginning",
+    },
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "space o t": "workspace::NewTerminal",
+      "space f f": "file_finder::Toggle",
+      "space f r": "projects::OpenRecent",
+      "space s j": "project_symbols::Toggle",
+      "space g c": "git::Commit",
+      "space g C": "git::StashAll",
+      "space g b": "git::Branch",
+      "space g g": "git_panel::ToggleFocus",
+      "space t c": "workspace::NewFile",
+      "space t n": "pane::ActivateNextItem",
+      "space t p": "pane::ActivatePreviousItem",
+      "space t k": "pane::CloseActiveItem",
+      "space t l": "pane::ActivateLastItem",
+      "space b b": "pane::ActivateNextItem",
+      "space ,": "pane::ActivateNextItem",
+      "space b n": "pane::ActivateNextItem",
+      "space b p": "pane::ActivatePreviousItem",
+      "space b k": "pane::CloseActiveItem",
+      "space b l": "pane::ActivateLastItem",
+      "space b c": "pane::CloseActiveItem",
+      "space w v": "pane::SplitRight",
+      "space w s": "pane::SplitDown",
+      "space w h": "workspace::ActivatePaneLeft",
+      "space w j": "workspace::ActivatePaneDown",
+      "space w k": "workspace::ActivatePaneUp",
+      "space w l": "workspace::ActivatePaneRight",
+      "space w c": "pane::CloseActiveItem",
+      "space w m": "workspace::ToggleZoom",
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w m": "workspace::ToggleZoom",
+      "<leader> w m": "workspace::ToggleZoom",
+    },
+  },
+  {
+    "context": "EmptyPane || SharedScreen",
+    "bindings": {
+      "space f r": "projects::OpenRecent",
+    },
+  },
+]
