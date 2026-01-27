@@ -3,3 +3,4 @@ type = "sftp"
 host = "jpserv"
 user = "jp"
 port = 22
+key_file = "~/.ssh/id_ed25519"
