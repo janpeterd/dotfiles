@@ -234,10 +234,10 @@ return {
           local client = assert(vim.lsp.get_client_by_id(ev.data.client_id), "must have valid client")
 
           -- Enable completion triggered by <c-x><c-o>
-          vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-          vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
-            autotrigger = true,
-          })
+          -- vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+          -- vim.lsp.completion.enable(true, ev.data.client_id, ev.buf, {
+          --   autotrigger = true,
+          -- })
 
           -- Buffer local mappings.
           -- See `:help vim.lsp.*` for documentation on any of the below functions

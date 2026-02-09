@@ -1,12 +1,12 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "alabaster"
+Colorscheme = "kanagawa"
 
 local function colorschemes()
   return {
     {
       "rebelot/kanagawa.nvim",
       name = "kanagawa",
-      colorscheme = "kanagawa-dragon",
+      colorscheme = "kanagawa-wave",
       config = function()
         require "jp.colors.kanagawa"
       end,

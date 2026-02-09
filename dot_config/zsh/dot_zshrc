@@ -199,7 +199,7 @@ hour=$(date "+%H")
   fi
   cowsay -f bud-frogs $greeting | lolcat
 }
-greeting
+# greeting
 
 [ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
 
