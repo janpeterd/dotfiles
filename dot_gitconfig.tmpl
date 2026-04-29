@@ -17,6 +17,13 @@
   dshow = -c diff.external=difft show --ext-diff
   ddiff = -c diff.external=difft diff
 
+  # project forensics
+  hotspots = "!f(){ git log --format=format: --name-only --since=\"${1:-1 year ago}\" | grep . | sort | uniq -c | sort -nr | head -20; }; f"
+  builders = shortlog -sn --no-merges
+  bughotspots = "!f(){ git log -i -E --grep='fix|bug|broken' --name-only --format='' --since=\"${1:-1 year ago}\" | grep . | sort | uniq -c | sort -nr | head -20; }; f"
+  pulse = "!git log --format='%ad' --date=format:'%Y-%m' | sort | uniq -c"
+  incidents = "!f(){ git log --oneline --since=\"${1:-1 year ago}\" | grep -iE 'revert|hotfix|emergency|rollback'; }; f"
+
 [commit]
   verbose = true
 
@@ -63,5 +70,15 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 
+[coderabbit]
+	machineId = cli/f21a7815154540ca91a5ebd5d2cf2e80
+
+[credential "https://github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/usr/bin/gh auth git-credential
 
 # vim:ft=gitconfig

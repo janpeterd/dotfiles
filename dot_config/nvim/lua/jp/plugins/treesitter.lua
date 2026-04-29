@@ -37,12 +37,12 @@ return {
           end, { desc = "[A]fter [S]cope" })
         end,
       },
-      {
-        "JoosepAlviste/nvim-ts-context-commentstring",
-        lazy = true,
-        dependencies = { "nvim-treesitter/nvim-treesitter" },
-        event = "VeryLazy",
-      },
+      -- {
+      --   "JoosepAlviste/nvim-ts-context-commentstring",
+      --   lazy = true,
+      --   dependencies = { "nvim-treesitter/nvim-treesitter" },
+      --   event = "VeryLazy",
+      -- },
     },
   },
   {

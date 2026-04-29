@@ -18,7 +18,7 @@ input {
   focus-follows-mouse max-scroll-amount="0%"
 }
 
-workspace "1"
+workspace "common"
 workspace "2"
 workspace "3"
 workspace "4"
@@ -271,7 +271,8 @@ binds {
   Mod+Alt+L hotkey-overlay-title="Lock Screen" { spawn "swaylock"; }
 
   // Mod+W { spawn "chromium" "--ozone-platform=wayland" "--enable-blink-features=MiddleClickAutoscroll"; }
-  Mod+W { spawn "zen-browser" ; }
+  // Mod+W { spawn "zen-browser" ; }
+  Mod+W { spawn "helium-browser" ; }
   Mod+Shift+W { spawn "~/.local/bin/web-picker.sh" ; }
   Mod+Control+W { spawn "kitty" "-e" "btop" ; }
   Mod+Control+d { spawn "kitty" "-e" "lazydocker" ; }
@@ -428,6 +429,7 @@ binds {
   Mod+Shift+BracketRight { expel-window-from-column; }
 
   Mod+R { switch-preset-column-width; }
+  Mod+F2 { spawn-sh "name=$(printf '\n' | fuzzel --dmenu --prompt 'Rename workspace: '); [ -n \"$name\" ] && niri msg action set-workspace-name \"$name\""; }
   Mod+Shift+R { switch-preset-window-height; }
   Mod+Ctrl+R { reset-window-height; }
   Mod+F { maximize-column; }
@@ -467,8 +469,8 @@ binds {
 }
 
 
-switch-events {
-  lid-close { spawn "systemctl" "suspend-then-hibernate" ; }
-}
+// switch-events {
+//   lid-close { spawn "systemctl" "suspend-then-hibernate" ; }
+// }
 
 // vim: ft=kdl

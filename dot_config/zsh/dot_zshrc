@@ -166,9 +166,44 @@ source "$ZDOTDIR/aliases"
 # Add custom completion fucntions:
 export FPATH=$ZDOTDIR/completions:$FPATH
 
+
+export PATH="/home/jp/.bun/bin:$PATH"
+export PATH="/home/jp/.npm-global/bin:$PATH"
+export PATH="/home/jp/go/bin:$PATH"
+
 # Uncomment this when using different node versions, may increase shell startup time
 # see https://github.com/nvm-sh/nvm
 # source /usr/share/nvm/init-nvm.sh
+#
+#
+# 
+# >>> forge initialize >>>
+# !! Contents within this block are managed by 'forge zsh setup' !!
+# !! Do not edit manually - changes will be overwritten !!
+
+# Add required zsh plugins if not already present
+if [[ ! " ${plugins[@]} " =~ " zsh-autosuggestions " ]]; then
+    plugins+=(zsh-autosuggestions)
+fi
+if [[ ! " ${plugins[@]} " =~ " zsh-syntax-highlighting " ]]; then
+    plugins+=(zsh-syntax-highlighting)
+fi
+
+# Load forge shell plugin (commands, completions, keybindings) if not already loaded
+if [[ -z "$_FORGE_PLUGIN_LOADED" ]]; then
+    eval "$(forge zsh plugin)"
+fi
+
+# Load forge shell theme (prompt with AI context) if not already loaded
+if [[ -z "$_FORGE_THEME_LOADED" ]]; then
+    eval "$(forge zsh theme)"
+fi
+
+# Editor for editing prompts (set during setup)
+# To change: update FORGE_EDITOR or remove to use $EDITOR
+export FORGE_EDITOR="nvim"
+# <<< forge initialize <<<
+
 
 
 # Pyenv python version manager
@@ -178,6 +213,8 @@ export FPATH=$ZDOTDIR/completions:$FPATH
 
 # Atuin magical shell history
 eval "$(atuin init zsh)"
+
+eval "$(pixi completion --shell zsh)"
 
 
 

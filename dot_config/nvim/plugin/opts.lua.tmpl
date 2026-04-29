@@ -1,5 +1,7 @@
 local opt = vim.opt
 local global = vim.g
+require('vim._core.ui2').enable()
+
 
 opt.nu = true                                      -- Show line numbers
 opt.relativenumber = true                          -- Relative numbers
@@ -20,6 +22,7 @@ opt.expandtab = true                               -- Use spaces instead of tabs
 opt.smartindent = true                             -- Auto indent
 opt.splitright = true                              -- Prefer windows splitting to the right
 opt.splitbelow = true                              -- Prefer windows splitting to the bottom
+opt.exrc = true
 opt.wrap = false                                   -- wrap
 opt.breakindent = true
 opt.backup = false
@@ -53,6 +56,8 @@ opt.ignorecase = true -- Ignore cases in query
 opt.smartcase = true  -- unless query contains capital letters
 opt.clipboard = "unnamedplus"
 opt.grepprg = [[rg --vimgrep]]
+
+vim.cmd("packadd nvim.undotree")
 
 if vim.fn.has "win32" == 1 then
   opt.shell = "bash"

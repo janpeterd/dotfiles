@@ -14,14 +14,17 @@ return {
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "sindrets/diffview.nvim",
+      {
+        "esmuellert/codediff.nvim",
+        cmd = "CodeDiff",
+      },
     },
     config = function()
       local neogit = require "neogit"
       neogit.setup {
         integrations = {
-          snacks = true,
-          diffview = true,
+          telescope = true,
+          codediff = true,
           auto_show_console_on = "always",
         },
       }
@@ -37,8 +40,8 @@ return {
     config = function()
       require("gitsigns").setup {
         signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
-        numhl = false,     -- Toggle with `:Gitsigns toggle_numhl`
-        linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
+        numhl = false, -- Toggle with `:Gitsigns toggle_numhl`
+        linehl = false, -- Toggle with `:Gitsigns toggle_linehl`
         word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
         on_attach = function(bufnr)
           local gs = package.loaded.gitsigns
