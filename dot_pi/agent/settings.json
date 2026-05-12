@@ -1,0 +1,26 @@
+{
+  "lastChangelogVersion": "0.73.0",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "kimi-k2.6",
+  "defaultThinkingLevel": "high",
+  "enableInstallTelemetry": false,
+  "theme": "dark",
+  "enabledModels": [
+    "opencode-go/kimi-k2.6",
+    "openai-codex/gpt-5.5",
+    "opencode/minimax-m2.5-free",
+    "opencode/nemotron-3-super-free",
+    "openrouter/moonshotai/kimi-k2.6",
+    "openrouter/deepseek/deepseek-v4-pro",
+    "github-copilot/claude-sonnet-4.6",
+    "anthropic/claude-opus-4-7"
+  ],
+  "packages": [
+    "npm:pi-web-access",
+    "npm:pi-goal"
+  ],
+  "extensions": [
+    "/home/jp/Code/Other/pi-nvim/extension.ts"
+  ],
+  "hideThinkingBlock": false
+}

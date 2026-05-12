@@ -1,0 +1,9 @@
+# pi agent sensitive files
+.pi/agent/auth.json
+.pi/agent/account-switcher.json
+
+# pi agent generated/state files
+.pi/agent/sessions
+.pi/agent/.venv
+.pi/agent/uv.lock
+.pi/codex-limit-overlay.log
