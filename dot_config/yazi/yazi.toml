@@ -2,20 +2,20 @@
 cache_dir = "$HOME/.cache/yazi"
 
 [[plugin.prepend_previewers]]
-name = "*.odt"
+url = "*.odt"
 run  = 'piper -- odt2txt "$1"'
 
 [[plugin.prepend_previewers]]
-name = "*.docx"
+url = "*.docx"
 run  = 'piper -- docx2txt "$1" -'
 
 [[plugin.prepend_fetchers]]
-id  = "git"
+group  = "git"
 url = "*"
 run = "git"
 
 [[plugin.prepend_fetchers]]
-id  = "git"
+group  = "git"
 url = "*/"
 run = "git"
 
@@ -45,11 +45,11 @@ rules = [
   { mime = "text/*", use = ["edit", "open"] },
   { mime = "video/*", use = ["play", "open"] },
   { mime = "image/*", use = ["view", "open"] },
-  { name = "*.json", use = ["edit", "open"] },
+  { url = "*.json", use = ["edit", "open"] },
 
   # Multiple openers for a single rule
-  { name = "*.html", use = ["open", "edit"] },
-  { name = "*.lua", use = ["edit"] },
+  { url = "*.html", use = ["open", "edit"] },
+  { url = "*.lua", use = ["edit"] },
 
   { mime = "application/zip", use = ["extract", "reveal"] },
   { mime = "application/gzip", use = ["extract", "reveal"] },

@@ -1,0 +1,85 @@
+# Ghostty config migrated from Kitty
+# https://ghostty.org/docs/config
+
+# ------------------------------------------------------------------------------
+# Font
+# ------------------------------------------------------------------------------
+font-family = JetBrains Mono
+font-size = 13
+
+# ------------------------------------------------------------------------------
+# Appearance
+# ------------------------------------------------------------------------------
+background-opacity = 0.95
+
+# Blur only works on macOS and KDE Plasma (Wayland/X11).
+# If you are on another DE (e.g. GNOME, Hyprland, Niri) this will have no effect.
+# background-blur = true
+
+# Theme is defined in ~/.config/ghostty/themes/moonfly
+theme = moonfly
+
+# ------------------------------------------------------------------------------
+# Scrollback
+# ------------------------------------------------------------------------------
+scrollback-limit = 100000
+
+# Kitty had a custom nvim pager — Ghostty doesn't support a configurable pager,
+# but you can pipe scrollback to a file or use the default scrollback behaviour.
+
+# ------------------------------------------------------------------------------
+# Window / Surface behaviour
+# ------------------------------------------------------------------------------
+# Inherit working directory for new tabs/splits
+window-inherit-working-directory = true
+
+# Shell integration (kitty: shell_integration enabled)
+shell-integration = detect
+
+# ------------------------------------------------------------------------------
+# Keybindings (kitty_mod = ctrl+shift)
+# ------------------------------------------------------------------------------
+
+# Tabs
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+1=goto_tab:1
+keybind = ctrl+shift+2=goto_tab:2
+keybind = ctrl+shift+3=goto_tab:3
+keybind = ctrl+shift+4=goto_tab:4
+keybind = ctrl+shift+5=goto_tab:5
+keybind = ctrl+shift+6=goto_tab:6
+keybind = ctrl+shift+7=goto_tab:7
+keybind = ctrl+shift+8=goto_tab:8
+keybind = ctrl+shift+9=goto_tab:9
+
+# Splits (kitty calls them "windows")
+keybind = ctrl+shift+enter=new_split:auto
+keybind = ctrl+shift+j=goto_split:next
+keybind = ctrl+shift+k=goto_split:previous
+
+# Scrollback
+keybind = ctrl+shift+r=scroll_page_up
+
+# Resizing splits
+keybind = ctrl+shift+alt+h=resize_split:left,2
+keybind = ctrl+shift+alt+l=resize_split:right,2
+keybind = ctrl+shift+alt+k=resize_split:up,2
+keybind = ctrl+shift+alt+j=resize_split:down,2
+
+# Send extended key sequences for apps that need them
+keybind = shift+enter=text:\x1b[13;2u
+keybind = ctrl+enter=text:\x1b[13;5u
+
+# ------------------------------------------------------------------------------
+# Kitty features not directly available in Ghostty
+# ------------------------------------------------------------------------------
+# - cursor_trail / cursor_trail_decay
+# - adjust_line_height  (mapped to adjust-cell-height above)
+# - enabled_layouts (Grid, Fat, Tall, Vertical, Horizontal)
+# - tab_bar_style / tab_powerline_style / tab_title_template
+# - draw_minimal_borders / window_border_width
+# - move_window_forward / move_window_backward
+# - detach_window new-tab / new_os_window
+# - alt+tab goto_tab -1 (last-used tab)
+# - start_resizing_window mode
+# ------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # DEFAULT BINDINGS: https://github.com/sxyazi/yazi/blob/shipped/yazi-config/preset/keymap-default.toml
 
-"$schema" = "https://yazi-rs.github.io/schemas/keymap.json"
+#:schema https://yazi-rs.github.io/schemas/keymap.json
 
 [[mgr.prepend_keymap]]
 on = ["g", "c"]
@@ -24,7 +24,7 @@ desc = "Show Git file changes"
 [[mgr.prepend_keymap]]
 on = ["A", "z"]
 run = """
-    shell 'printf "ZIP Name: "; read name; zip -r "$name.zip" "$(basename \"$1\")"' --block --confirm
+    shell 'printf "ZIP Name: "; read name; zip -r "$name.zip" "$(basename \"$1\")"' --block
 """
 desc = "Create zip archive from directory."
 
@@ -146,18 +146,14 @@ run = "shell lazygit --block"
 desc = "Open LAZYGIT"
 
 [[mgr.prepend_keymap]]
+on = ["c", "w"]
+run = "plugin clipboard -- cwd"
+desc = "Copy current working directory to clipboard"
+
+[[mgr.prepend_keymap]]
 on = ["c", "C"]
-run = '''
-shell '
-if [-d "$1"]; then
-  wl-copy "$(ls "$1")"
-else
-  wl-copy < "$1"
-fi
-notify-send -i "$1" "File contents copied to clipboard" "    [ $1 ]"
-'
-'''
-desc = "Copy file content"
+run = "plugin clipboard -- contents"
+desc = "Copy file or directory contents to clipboard"
 
 [[mgr.prepend_keymap]]
 on = ["W"]
@@ -172,9 +168,8 @@ run = '''
 
 [[mgr.prepend_keymap]]
 on = "y"
-run = ['''
-    shell 'for path in "$@"; do echo "file://$path"; done | wl-copy -t text/uri-list'
-    ''', "yank"]
+run = ["plugin clipboard -- uris", "yank"]
+desc = "Copy file URIs to clipboard"
 
 [[mgr.prepend_keymap]]
 on = "l"
