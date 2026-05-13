@@ -16,6 +16,8 @@
   dlog = -c diff.external=difft log --ext-diff
   dshow = -c diff.external=difft show --ext-diff
   ddiff = -c diff.external=difft diff
+  hdiff = "-c core.pager=\"hunk pager\" diff"
+  hshow = "-c core.pager=\"hunk pager\" show"
 
   # project forensics
   hotspots = "!f(){ git log --format=format: --name-only --since=\"${1:-1 year ago}\" | grep . | sort | uniq -c | sort -nr | head -20; }; f"

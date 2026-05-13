@@ -159,6 +159,7 @@ bindkey -s '^X^f' '^Cchezmoi edit --apply ~/$(chezmoi managed | fzf)\n'
 bindkey -s '^X^p' '^uproject-launcher-zsh\n'
 bindkey -s '^X^k' '^ukitty-session-launcher-zsh\n'
 bindkey -s '^X^t' '^usesh connect $(sesh list -i  | fzf +s --ansi --highlight-line --scheme=path)\n'
+bindkey '^X^o' fzf-file-widget
 
 
 source "$ZDOTDIR/aliases"

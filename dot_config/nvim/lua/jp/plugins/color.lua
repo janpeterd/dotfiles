@@ -1,5 +1,5 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "moonfly"
+Colorscheme = "kanagawa"
 
 local function colorschemes()
   return {

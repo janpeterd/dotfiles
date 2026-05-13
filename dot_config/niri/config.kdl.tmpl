@@ -77,6 +77,7 @@ layout {
   }
 }
 environment {
+    auto_proxy "http://127.0.0.1:8091/proxy.pac"
     BROWSER "firefox"
     EDITOR "nvim"
     ELECTRON_OZONE_PLATFORM_HINT "auto"
@@ -108,7 +109,7 @@ spawn-at-startup "mpd"
 spawn-at-startup "udiskie" "-s"
 // spawn-at-startup "sh" "-c" "sleep 1 && blueman-applet"
 
-// prefer-no-csd
+prefer-no-csd
 
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
@@ -117,6 +118,15 @@ animations {
   // slowdown 0.5
 }
 
+
+
+window-rule {
+    match app-id="^kitty$"
+
+    background-effect {
+        blur true
+    }
+}
 
 
 window-rule {
