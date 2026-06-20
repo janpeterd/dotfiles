@@ -1,7 +1,7 @@
 TERMINAL="kitty" 
 VISUAL="nvim"
 EDITOR="nvim"
-BROWSER="google-chrome-stable"
+BROWSER="helium-browser"
 ZDOTDIR="$HOME/.config/zsh"
 PATH="$PATH:${$(find ~/.local/bin -type d -printf %p:)%%:}"
 PATH="$HOME/.local/bin:$PATH"
