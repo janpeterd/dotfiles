@@ -23,6 +23,30 @@ local get_hovered = ya.sync(function()
 	}
 end)
 
+local function get_mime_type(url)
+	local out = Command("file")
+		:arg({ "--brief", "--dereference", "--mime-type", "--", url })
+		:output()
+	if not out or not out.status.success then return nil end
+	return out.stdout:match("^%s*(.-)%s*$")
+end
+
+local function copy_image(url, mime)
+	local source, source_err = Command("cat")
+		:arg({ "--", url })
+		:stdout(Command.PIPED)
+		:spawn()
+	if not source then return false, source_err end
+
+	local out, copy_err = Command("wl-copy")
+		:arg({ "--type", mime })
+		:stdin(source:take_stdout())
+		:output()
+	if not out then return false, copy_err end
+	if not out.status.success then return false, out.stderr end
+	return true
+end
+
 return {
 	entry = function(_, job)
 		local action = job.args[1]
@@ -42,6 +66,24 @@ return {
 			local h = get_hovered()
 			if not h then return end
 
+			if not h.is_dir then
+				local mime = get_mime_type(h.url)
+				if mime and mime:match("^image/") then
+					local ok, err = copy_image(h.url, mime)
+					if ok then
+						ya.notify({ title = "Clipboard", content = h.url, timeout = 3 })
+					else
+						ya.notify({
+							title = "Clipboard",
+							content = "Could not copy image: " .. tostring(err),
+							level = "error",
+							timeout = 5,
+						})
+					end
+					return
+				end
+			end
+
 			local text
 			if h.is_dir then
 				local out = Command("ls"):arg({ h.url }):output()
@@ -55,6 +97,16 @@ return {
 			end
 
 			if text then
+				if not utf8.len(text) then
+					ya.notify({
+						title = "Clipboard",
+						content = "Only text and image contents can be copied",
+						level = "warn",
+						timeout = 3,
+					})
+					return
+				end
+
 				ya.clipboard(text)
 				ya.notify({ title = "Clipboard", content = h.url, timeout = 3 })
 			end
