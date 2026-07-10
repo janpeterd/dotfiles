@@ -7,5 +7,6 @@
   "app.model.cycleBackward": ["ctrl+shift+n"],
   "app.session.rename": ["f2"],
   "tui.input.newLine": ["shift+enter", "ctrl+j"],
-  "app.session.tree": ["alt+t"]
+  "app.session.tree": ["alt+t"],
+  "app.session.resume": ["alt+r"]
 }
