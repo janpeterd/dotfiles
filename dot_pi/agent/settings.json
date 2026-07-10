@@ -19,10 +19,8 @@
   ],
   "packages": [
     "npm:pi-web-access",
-    "npm:pi-goal"
-  ],
-  "extensions": [
-    "/home/jp/Code/Other/pi-nvim/extension.ts"
+    "npm:pi-goal",
+    "git:git@github.com:janpeterd/pinvim.git"
   ],
   "hideThinkingBlock": false
 }
