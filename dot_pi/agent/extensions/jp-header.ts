@@ -1,13 +1,13 @@
 import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/pi-coding-agent";
 import { Text, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
-const FRAME_MS = 90;
+const FRAME_MS = 70;
 const ANIMATION_MS = 30_000;
 // Braille cells increase dot density without jumping from punctuation to
 // near-solid block characters. This keeps shadows and highlights continuous.
 const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
-type Tone = "dim" | "muted" | "accent";
+type Tone = "dim" | "muted" | "accent" | "label";
 type Cell = { char: string; tone: Tone };
 
 const PATCHED = Symbol.for("jp-header:compact-update-notices");
@@ -43,7 +43,7 @@ function paintLine(cells: Cell[], theme: Theme): string {
 
 	const flush = () => {
 		if (!run || !tone) return;
-		result += theme.fg(tone, run);
+		result += tone === "label" ? theme.bold(theme.fg("accent", run)) : theme.fg(tone, run);
 		run = "";
 	};
 
@@ -68,7 +68,7 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 	const radiusY = compact ? 5.5 : 7.5;
 	const centerX = (canvasWidth - 1) / 2;
 	const centerY = (canvasHeight - 1) / 2;
-	const rotation = phase * 0.34;
+	const rotation = phase * 0.52;
 	const cosRotation = Math.cos(rotation);
 	const sinRotation = Math.sin(rotation);
 	const lines: string[] = [];
@@ -88,14 +88,26 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 				// sphere while the material appears to roll and fold internally.
 				const sx = nx * cosRotation + z * sinRotation;
 				const sz = -nx * sinRotation + z * cosRotation;
+
+				// Domain-warped currents fold through one another instead of merely
+				// sliding across the surface. Different velocities keep the motion
+				// visibly alive during the brief startup window.
+				const warpX =
+					sx +
+					0.2 * Math.sin(ny * 4.2 + phase * 1.08) +
+					0.08 * Math.sin(sz * 5.1 - phase * 0.71);
+				const warpY =
+					ny +
+					0.17 * Math.sin(sz * 3.5 - phase * 0.86) +
+					0.06 * Math.sin(sx * 6.2 + phase * 0.63);
 				const current =
-					Math.sin(sx * 4.1 + Math.sin(ny * 3.2 + phase * 0.42) * 1.5 - phase * 0.74) +
-					0.62 * Math.sin(ny * 5.4 - sz * 3.1 + phase * 0.51) +
-					0.34 * Math.sin((sx + ny - sz) * 7.3 - phase * 0.29);
-				const fluid = current / 1.96;
+					Math.sin(warpX * 4.5 + warpY * 1.2 - phase * 1.24) +
+					0.68 * Math.sin(warpY * 5.3 - warpX * 2.4 + phase * 0.91) +
+					0.4 * Math.sin((warpX + warpY - sz) * 7.4 - phase * 0.53);
+				const fluid = current / 2.08;
 				const light = -0.32 * nx - 0.4 * ny + 0.86 * z;
-				const specular = Math.pow(Math.max(0, light), 9) * 0.18;
-				let value = Math.max(0, Math.min(1, 0.3 + light * 0.42 + fluid * 0.24 + specular));
+				const specular = Math.pow(Math.max(0, light), 9) * 0.16;
+				let value = Math.max(0, Math.min(1, 0.31 + light * 0.36 + fluid * 0.32 + specular));
 
 				// A soft antialiased rim makes the fixed circular boundary read as a
 				// polished volume rather than a hard character-cell cutout.
@@ -107,6 +119,15 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 			}
 
 			cells.push({ char: " ", tone: "dim" });
+		}
+
+		if (y === Math.round(centerY)) {
+			const signature = "    JP    ";
+			const start = Math.floor((canvasWidth - signature.length) / 2);
+			for (let index = 0; index < signature.length; index++) {
+				const char = signature[index]!;
+				cells[start + index] = { char, tone: char === " " ? "dim" : "label" };
+			}
 		}
 
 		lines.push(center(paintLine(cells, theme), width));
@@ -157,7 +178,7 @@ class FluidOrbHeader {
 		private readonly theme: Theme,
 	) {
 		this.timer = setInterval(() => {
-			this.phase += 0.075;
+			this.phase += 0.12;
 			this.tui.requestRender();
 		}, FRAME_MS);
 		this.stopTimer = setTimeout(() => this.stop(), ANIMATION_MS);
@@ -168,7 +189,7 @@ class FluidOrbHeader {
 			return ["", center(this.theme.fg("accent", this.theme.bold("◉  JP  ◉")), width), ""];
 		}
 
-		return ["", ...renderBlob(width, this.phase, this.theme), center(this.theme.bold("JP"), width), ""];
+		return ["", ...renderBlob(width, this.phase, this.theme), ""];
 	}
 
 	invalidate(): void {}
