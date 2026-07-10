@@ -4,7 +4,6 @@ import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/
 import { type Component, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
 const FRAME_MS = 70;
-const ANIMATION_MS = 30_000;
 const BLOOM_MS = 1_100;
 const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
@@ -320,7 +319,6 @@ class FluidOrbHeader implements Component {
 	private git: GitInfo;
 	private animationTimer: ReturnType<typeof setInterval> | undefined;
 	private clockTimer: ReturnType<typeof setInterval> | undefined;
-	private stopTimer: ReturnType<typeof setTimeout> | undefined;
 	private readonly requestRender: () => void;
 
 	constructor(
@@ -343,7 +341,6 @@ class FluidOrbHeader implements Component {
 			if (clockTicks % 5 === 0) this.git = readGitInfo(this.cwd);
 			this.tui.requestRender();
 		}, 1_000);
-		this.stopTimer = setTimeout(() => this.stopAnimation(), ANIMATION_MS);
 	}
 
 	render(width: number): string[] {
@@ -371,9 +368,7 @@ class FluidOrbHeader implements Component {
 
 	private stopAnimation(): void {
 		if (this.animationTimer) clearInterval(this.animationTimer);
-		if (this.stopTimer) clearTimeout(this.stopTimer);
 		this.animationTimer = undefined;
-		this.stopTimer = undefined;
 	}
 }
 
