@@ -7,7 +7,7 @@ const ANIMATION_MS = 30_000;
 // near-solid block characters. This keeps shadows and highlights continuous.
 const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
-type Tone = "dim" | "muted" | "accent" | "label";
+type Tone = "dim" | "muted" | "accent" | "syntaxKeyword" | "syntaxType" | "thinkingHigh" | "label";
 type Cell = { char: string; tone: Tone };
 
 const PATCHED = Symbol.for("jp-header:compact-update-notices");
@@ -30,10 +30,13 @@ function center(text: string, width: number): string {
 	return `${" ".repeat(Math.max(0, Math.floor((width - visibleWidth(clipped)) / 2)))}${clipped}`;
 }
 
-function toneFor(value: number): Tone {
-	if (value < 0.3) return "dim";
-	if (value < 0.9) return "muted";
-	return "accent";
+function toneFor(value: number, fluid: number): Tone {
+	if (value < 0.27) return "dim";
+	if (value < 0.43) return "muted";
+	if (value > 0.9) return "accent";
+	if (fluid < -0.2) return "syntaxKeyword";
+	if (fluid > 0.24) return "thinkingHigh";
+	return "syntaxType";
 }
 
 function paintLine(cells: Cell[], theme: Theme): string {
@@ -114,7 +117,7 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 				if (radius > 0.93) value *= Math.max(0.18, (1 - radius) / 0.07);
 
 				const paletteIndex = Math.min(PALETTE.length - 1, Math.floor(value * PALETTE.length));
-				cells.push({ char: PALETTE[paletteIndex]!, tone: toneFor(value) });
+				cells.push({ char: PALETTE[paletteIndex]!, tone: toneFor(value, fluid) });
 				continue;
 			}
 
@@ -122,7 +125,7 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 		}
 
 		if (y === Math.round(centerY)) {
-			const signature = "    JP    ";
+			const signature = "JP";
 			const start = Math.floor((canvasWidth - signature.length) / 2);
 			for (let index = 0; index < signature.length; index++) {
 				const char = signature[index]!;
