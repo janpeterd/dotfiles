@@ -5,6 +5,7 @@
   "defaultThinkingLevel": "high",
   "enableInstallTelemetry": false,
   "theme": "dark",
+  "quietStartup": true,
   "enabledModels": [
     "opencode-go/kimi-k2.6",
     "openai-codex/gpt-5.5",

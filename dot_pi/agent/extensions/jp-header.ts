@@ -1,5 +1,5 @@
-import { VERSION, type ExtensionAPI, type Theme } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
+import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/pi-coding-agent";
+import { Text, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
 const FRAME_MS = 90;
 const ANIMATION_MS = 30_000;
@@ -7,6 +7,21 @@ const PALETTE = ["·", ".", ":", "░", "▒", "▓"] as const;
 
 type Tone = "dim" | "muted" | "text" | "accent";
 type Cell = { char: string; tone: Tone };
+
+const PATCHED = Symbol.for("jp-header:compact-update-notices");
+const NOTICE_STATE = Symbol.for("jp-header:update-notice-state");
+
+type UpdateNoticeState = {
+	component?: Text;
+	piVersion?: string;
+	packages?: string[];
+};
+
+type PatchableInteractiveMode = {
+	chatContainer: { addChild(component: Text): void };
+	ui: { requestRender(): void };
+	[NOTICE_STATE]?: UpdateNoticeState;
+};
 
 function center(text: string, width: number): string {
 	const clipped = truncateToWidth(text, width, "");
@@ -99,6 +114,38 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 	return lines;
 }
 
+function installCompactUpdateNotices(): void {
+	const prototype = InteractiveMode.prototype as unknown as Record<PropertyKey, unknown>;
+	if (prototype[PATCHED]) return;
+	prototype[PATCHED] = true;
+
+	const renderNotice = (mode: PatchableInteractiveMode): void => {
+		const state = (mode[NOTICE_STATE] ??= {});
+		const parts: string[] = [];
+		if (state.piVersion) parts.push(`pi ${state.piVersion} available → pi update`);
+		if (state.packages?.length) {
+			parts.push(`${state.packages.length} extension update${state.packages.length === 1 ? "" : "s"} → pi update --extensions`);
+		}
+		if (!state.component) {
+			state.component = new Text("", 1, 0);
+			mode.chatContainer.addChild(state.component);
+		}
+		state.component.setText(`↑ ${parts.join("  ·  ")}`);
+		mode.ui.requestRender();
+	};
+
+	prototype.showNewVersionNotification = function (this: PatchableInteractiveMode, release: { version: string }) {
+		const state = (this[NOTICE_STATE] ??= {});
+		state.piVersion = release.version;
+		renderNotice(this);
+	};
+	prototype.showPackageUpdateNotification = function (this: PatchableInteractiveMode, packages: string[]) {
+		const state = (this[NOTICE_STATE] ??= {});
+		state.packages = packages;
+		renderNotice(this);
+	};
+}
+
 class FluidOrbHeader {
 	private phase = 0;
 	private timer: ReturnType<typeof setInterval> | undefined;
@@ -120,9 +167,7 @@ class FluidOrbHeader {
 			return ["", center(this.theme.fg("accent", this.theme.bold("◉  JP  ◉")), width), ""];
 		}
 
-		const title = `${this.theme.bold("JP")}  ${this.theme.fg("dim", "/ FLUID STUDY 001")}`;
-		const subtitle = `${this.theme.fg("muted", "developer · always learning")}  ${this.theme.fg("dim", `pi v${VERSION}`)}`;
-		return ["", ...renderBlob(width, this.phase, this.theme), center(title, width), center(subtitle, width), ""];
+		return ["", ...renderBlob(width, this.phase, this.theme), center(this.theme.bold("JP"), width), ""];
 	}
 
 	invalidate(): void {}
@@ -140,6 +185,8 @@ class FluidOrbHeader {
 }
 
 export default function jpHeader(pi: ExtensionAPI): void {
+	installCompactUpdateNotices();
+
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
 		ctx.ui.setHeader((tui, theme) => new FluidOrbHeader(tui, theme));
