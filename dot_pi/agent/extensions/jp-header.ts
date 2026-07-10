@@ -1,9 +1,9 @@
 import { VERSION, type ExtensionAPI, type Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
-const FRAME_MS = 120;
+const FRAME_MS = 90;
 const ANIMATION_MS = 30_000;
-const PALETTE = ["·", ".", ":", "-", "=", "+", "*", "#", "%", "█"] as const;
+const PALETTE = ["·", ".", ":", "░", "▒", "▓"] as const;
 
 type Tone = "dim" | "muted" | "text" | "accent";
 type Cell = { char: string; tone: Tone };
@@ -11,11 +11,6 @@ type Cell = { char: string; tone: Tone };
 function center(text: string, width: number): string {
 	const clipped = truncateToWidth(text, width, "");
 	return `${" ".repeat(Math.max(0, Math.floor((width - visibleWidth(clipped)) / 2)))}${clipped}`;
-}
-
-function hash(x: number, y: number, frame: number): number {
-	const value = Math.sin(x * 12.9898 + y * 78.233 + frame * 0.173) * 43_758.5453;
-	return value - Math.floor(value);
 }
 
 function toneFor(value: number): Tone {
@@ -48,13 +43,18 @@ function paintLine(cells: Cell[], theme: Theme): string {
 }
 
 function renderBlob(width: number, phase: number, theme: Theme): string[] {
-	const canvasWidth = Math.min(62, Math.max(22, width - 2));
-	const canvasHeight = canvasWidth < 38 ? 11 : 16;
-	const radiusX = Math.min(23, canvasWidth / 2 - 4);
-	const radiusY = canvasHeight / 2 - 1.5;
+	const compact = width < 44;
+	const canvasWidth = Math.min(compact ? 34 : 48, Math.max(22, width - 2));
+	const canvasHeight = compact ? 13 : 17;
+	// Terminal cells are much taller than they are wide. These radii produce a
+	// visually circular silhouette in a typical monospace terminal.
+	const radiusX = Math.min(compact ? 13.5 : 18.5, canvasWidth / 2 - 1.5);
+	const radiusY = compact ? 5.5 : 7.5;
 	const centerX = (canvasWidth - 1) / 2;
 	const centerY = (canvasHeight - 1) / 2;
-	const frame = Math.floor(phase * 3);
+	const rotation = phase * 0.34;
+	const cosRotation = Math.cos(rotation);
+	const sinRotation = Math.sin(rotation);
 	const lines: string[] = [];
 
 	for (let y = 0; y < canvasHeight; y++) {
@@ -62,40 +62,35 @@ function renderBlob(width: number, phase: number, theme: Theme): string[] {
 		for (let x = 0; x < canvasWidth; x++) {
 			const nx = (x - centerX) / radiusX;
 			const ny = (y - centerY) / radiusY;
-			const angle = Math.atan2(ny, nx);
 			const radius = Math.sqrt(nx * nx + ny * ny);
-			const boundary =
-				1 +
-				0.075 * Math.sin(angle * 3 + phase * 0.82) +
-				0.045 * Math.sin(angle * 5 - phase * 0.57) +
-				0.025 * Math.sin(angle * 7 + phase * 0.31);
-			const normalizedRadius = radius / boundary;
 
-			if (normalizedRadius <= 1) {
-				const z = Math.sqrt(Math.max(0, 1 - normalizedRadius * normalizedRadius));
-				const light = -0.34 * nx - 0.42 * ny + 0.86 * z;
-				const flow =
-					0.16 * Math.sin(nx * 5.2 + Math.sin(ny * 3.4 + phase) * 1.8 - phase * 0.9) +
-					0.08 * Math.sin(ny * 7.1 - nx * 2.3 + phase * 0.63);
-				const value = Math.max(0, Math.min(1, 0.26 + light * 0.5 + flow));
+			if (radius <= 1) {
+				const z = Math.sqrt(Math.max(0, 1 - radius * radius));
+
+				// Rotate the sampled point around the sphere, then advect several
+				// low-frequency fields through it. The outline remains a perfect
+				// sphere while the material appears to roll and fold internally.
+				const sx = nx * cosRotation + z * sinRotation;
+				const sz = -nx * sinRotation + z * cosRotation;
+				const current =
+					Math.sin(sx * 4.1 + Math.sin(ny * 3.2 + phase * 0.42) * 1.5 - phase * 0.74) +
+					0.62 * Math.sin(ny * 5.4 - sz * 3.1 + phase * 0.51) +
+					0.34 * Math.sin((sx + ny - sz) * 7.3 - phase * 0.29);
+				const fluid = current / 1.96;
+				const light = -0.32 * nx - 0.4 * ny + 0.86 * z;
+				const specular = Math.pow(Math.max(0, light), 9) * 0.18;
+				let value = Math.max(0, Math.min(1, 0.3 + light * 0.42 + fluid * 0.24 + specular));
+
+				// A soft antialiased rim makes the fixed circular boundary read as a
+				// polished volume rather than a hard character-cell cutout.
+				if (radius > 0.93) value *= Math.max(0.18, (1 - radius) / 0.07);
+
 				const paletteIndex = Math.min(PALETTE.length - 1, Math.floor(value * PALETTE.length));
 				cells.push({ char: PALETTE[paletteIndex]!, tone: toneFor(value) });
 				continue;
 			}
 
-			const nearSurface = normalizedRadius < 1.42;
-			const dust = nearSurface && hash(x, y, frame) > 0.965 + Math.max(0, normalizedRadius - 1) * 0.06;
-			cells.push({ char: dust ? "·" : " ", tone: "dim" });
-		}
-
-		// Carve the signature into the moving material rather than placing a
-		// separate logo beneath it.
-		if (y === Math.round(centerY) && canvasWidth >= 38) {
-			const signature = "  J P  ";
-			const start = Math.floor((canvasWidth - signature.length) / 2);
-			for (let index = 0; index < signature.length; index++) {
-				cells[start + index] = { char: signature[index]!, tone: "accent" };
-			}
+			cells.push({ char: " ", tone: "dim" });
 		}
 
 		lines.push(center(paintLine(cells, theme), width));
@@ -114,7 +109,7 @@ class FluidOrbHeader {
 		private readonly theme: Theme,
 	) {
 		this.timer = setInterval(() => {
-			this.phase += 0.12;
+			this.phase += 0.075;
 			this.tui.requestRender();
 		}, FRAME_MS);
 		this.stopTimer = setTimeout(() => this.stop(), ANIMATION_MS);
