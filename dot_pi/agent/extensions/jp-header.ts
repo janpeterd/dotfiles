@@ -3,9 +3,11 @@ import { Text, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/p
 
 const FRAME_MS = 90;
 const ANIMATION_MS = 30_000;
-const PALETTE = ["·", ".", ":", "░", "▒", "▓"] as const;
+// Braille cells increase dot density without jumping from punctuation to
+// near-solid block characters. This keeps shadows and highlights continuous.
+const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
-type Tone = "dim" | "muted" | "text" | "accent";
+type Tone = "dim" | "muted" | "accent";
 type Cell = { char: string; tone: Tone };
 
 const PATCHED = Symbol.for("jp-header:compact-update-notices");
@@ -29,9 +31,8 @@ function center(text: string, width: number): string {
 }
 
 function toneFor(value: number): Tone {
-	if (value < 0.28) return "dim";
-	if (value < 0.53) return "muted";
-	if (value < 0.82) return "text";
+	if (value < 0.3) return "dim";
+	if (value < 0.9) return "muted";
 	return "accent";
 }
 
