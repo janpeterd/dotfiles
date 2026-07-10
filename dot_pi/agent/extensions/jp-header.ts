@@ -329,14 +329,24 @@ class FluidOrbHeader implements Component {
 		private readonly getThinking: () => string,
 	) {
 		this.git = readGitInfo(cwd);
-		this.requestRender = () => this.tui.requestRender();
+		this.requestRender = () => {
+			if (this.isVisible()) this.tui.requestRender();
+		};
 		UPDATE_RENDERERS.add(this.requestRender);
 		this.animationTimer = setInterval(() => {
+			if (!this.isVisible()) {
+				this.freezeOffscreen();
+				return;
+			}
 			this.phase += 0.12;
 			this.tui.requestRender();
 		}, FRAME_MS);
 		let clockTicks = 0;
 		this.clockTimer = setInterval(() => {
+			if (!this.isVisible()) {
+				this.freezeOffscreen();
+				return;
+			}
 			clockTicks++;
 			if (clockTicks % 5 === 0) this.git = readGitInfo(this.cwd);
 			this.tui.requestRender();
@@ -364,6 +374,21 @@ class FluidOrbHeader implements Component {
 		if (this.clockTimer) clearInterval(this.clockTimer);
 		this.clockTimer = undefined;
 		UPDATE_RENDERERS.delete(this.requestRender);
+	}
+
+	private isVisible(): boolean {
+		// Pi's component interface has no visibility callback. The renderer keeps
+		// its logical viewport position, so a non-zero top means this first
+		// component has scrolled away. Avoid changing off-screen lines: Pi must
+		// otherwise perform a full redraw, which clears terminal scrollback.
+		const viewport = this.tui as unknown as { previousViewportTop?: number };
+		return (viewport.previousViewportTop ?? 0) === 0;
+	}
+
+	private freezeOffscreen(): void {
+		this.stopAnimation();
+		if (this.clockTimer) clearInterval(this.clockTimer);
+		this.clockTimer = undefined;
 	}
 
 	private stopAnimation(): void {
