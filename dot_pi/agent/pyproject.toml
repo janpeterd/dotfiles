@@ -1,8 +1,0 @@
-[project]
-name = "pi-agent"
-version = "0.1.0"
-description = "Python dependencies for pi agent extensions"
-requires-python = ">=3.11"
-dependencies = [
-    "faster-whisper",
-]
