@@ -4,7 +4,7 @@
   "defaultModel": "kimi-k2.6",
   "defaultThinkingLevel": "high",
   "enableInstallTelemetry": false,
-  "theme": "dark",
+  "theme": "jp",
   "quietStartup": true,
   "treeFilterMode": "no-tools",
   "enabledModels": [
