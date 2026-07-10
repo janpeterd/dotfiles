@@ -4,8 +4,10 @@
 # ------------------------------------------------------------------------------
 # Font
 # ------------------------------------------------------------------------------
-font-family = JetBrains Mono
-font-size = 13
+# font-family = JetBrains Mono
+font-family = Ioskeley Mono
+font-style = Semibold
+font-size = 14
 
 # ------------------------------------------------------------------------------
 # Appearance
@@ -66,20 +68,9 @@ keybind = ctrl+shift+alt+l=resize_split:right,2
 keybind = ctrl+shift+alt+k=resize_split:up,2
 keybind = ctrl+shift+alt+j=resize_split:down,2
 
+# Make Ctrl-M behave like Enter (CR). Without this Ghostty can emit CSI-u (e.g. 9;5u).
+keybind = ctrl+m=text:\x0D
+
 # Send extended key sequences for apps that need them
 keybind = shift+enter=text:\x1b[13;2u
 keybind = ctrl+enter=text:\x1b[13;5u
-
-# ------------------------------------------------------------------------------
-# Kitty features not directly available in Ghostty
-# ------------------------------------------------------------------------------
-# - cursor_trail / cursor_trail_decay
-# - adjust_line_height  (mapped to adjust-cell-height above)
-# - enabled_layouts (Grid, Fat, Tall, Vertical, Horizontal)
-# - tab_bar_style / tab_powerline_style / tab_title_template
-# - draw_minimal_borders / window_border_width
-# - move_window_forward / move_window_backward
-# - detach_window new-tab / new_os_window
-# - alt+tab goto_tab -1 (last-used tab)
-# - start_resizing_window mode
-# ------------------------------------------------------------------------------
