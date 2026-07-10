@@ -394,14 +394,18 @@ export default function jpHeader(pi: ExtensionAPI): void {
 				),
 		);
 		ctx.ui.setFooter((tui, theme, footerData) => {
-			const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
+			let git = readGitInfo(ctx.cwd);
+			const unsubscribe = footerData.onBranchChange(() => {
+				git = readGitInfo(ctx.cwd);
+				tui.requestRender();
+			});
 			return {
 				dispose: unsubscribe,
 				invalidate(): void {},
 				render(width: number): string[] {
 					const separator = theme.fg("dim", " · ");
-					const branch = footerData.getGitBranch();
-					const leftParts = [formatCwd(ctx.cwd), branch].filter((part): part is string => Boolean(part));
+					const branch = footerData.getGitBranch() ?? git.branch;
+					const leftParts = [formatCwd(ctx.cwd), branch, git.tag].filter((part): part is string => Boolean(part));
 					const usage = ctx.getContextUsage();
 					const context = usage
 						? `${usage.percent === null ? "?" : Math.round(usage.percent)}%/${formatTokens(usage.contextWindow)}`
