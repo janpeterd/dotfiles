@@ -1,0 +1,84 @@
+onboarding = false
+
+[theme]
+name = "nord"
+
+[terminal]
+# Use your default shell (bash/zsh etc.)
+# default_shell = ""
+
+[keys]
+# === PREFIX ===
+# Match your tmux prefix: Alt+Space
+prefix = "alt+space"
+
+# === LAST PANE (like tmux last-window) ===
+last_pane = "prefix+o"
+open_notification_target = ""
+
+# === PANE NAVIGATION ===
+# Mirror both your prefix+hjkl and Alt+hjkl bindings
+focus_pane_left  = "prefix+h"
+focus_pane_down  = "prefix+j"
+focus_pane_up    = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# === SPLITS (same letters as your tmux) ===
+# Note: tmux "split-window -h" = left/right = herdr split_vertical
+#       tmux "split-window -v" = top/bottom = herdr split_horizontal
+split_vertical   = "prefix+v"
+split_horizontal = "prefix+minus"
+close_pane       = ["prefix+x"]
+
+# === ZOOM ===
+zoom = "prefix+z"
+
+# === RESIZE MODE ===
+# Enter resize mode, then use hjkl/arrows, Enter/Esc to exit
+resize_mode = "prefix+r"
+
+# === WORKSPACE / SESSION ===
+previous_workspace = "prefix+shift+left"
+next_workspace     = "prefix+shift+right"
+new_workspace      = "prefix+shift+n"
+rename_workspace   = "prefix+shift+w"
+close_workspace    = "prefix+shift+d"
+workspace_picker   = "prefix+w"
+goto               = "prefix+g"
+
+# === TABS ===
+new_tab        = "prefix+c"
+rename_tab     = "prefix+shift+t"
+previous_tab   = "prefix+p"
+next_tab       = "prefix+n"
+switch_tab     = "prefix+1..9"
+close_tab      = "prefix+shift+x"
+cycle_pane_next     = "prefix+tab"
+cycle_pane_previous = "prefix+shift+tab"
+
+# === OTHER ESSENTIALS ===
+detach         = "prefix+q"
+toggle_sidebar = "prefix+b"
+help           = "prefix+?"
+reload_config  = "prefix+shift+r"
+
+# === CUSTOM COMMANDS ===
+# Optional: sesh launcher (matching your tmux prefix+f binding)
+# [[keys.command]]
+# key = "prefix+f"
+# type = "pane"
+# command = "sesh connect \"$(sesh list -i  | fzf +s --ansi --highlight-line --scheme=path --height=-0)\""
+# description = "sesh session picker"
+
+[ui]
+agent_panel_scope = "all"
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+delivery = "herdr"
+
+[ui.sound]
+enabled = false
+
+[experimental]
+pane_history = true
