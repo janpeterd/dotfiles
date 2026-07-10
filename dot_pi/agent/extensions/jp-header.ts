@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/pi-coding-agent";
 import { type Component, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
@@ -7,7 +8,8 @@ const BLOOM_MS = 1_100;
 const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
 const PATCHED = Symbol.for("jp-header:compact-update-notices");
-const NOTICE_STATE = Symbol.for("jp-header:update-notice-state");
+const UPDATE_STATE: UpdateNoticeState = {};
+const UPDATE_RENDERERS = new Set<() => void>();
 
 type ThemeTone = "dim" | "muted" | "accent" | "syntaxKeyword" | "label";
 type CellColor = ThemeTone | `rgb:${number}:${number}:${number}`;
@@ -15,15 +17,17 @@ type Cell = { char: string; color: CellColor };
 type Rgb = readonly [number, number, number];
 
 type UpdateNoticeState = {
-	component?: CenteredUpdateNotice;
 	piVersion?: string;
 	packages?: string[];
 };
 
 type PatchableInteractiveMode = {
-	chatContainer: { addChild(component: Component): void };
 	ui: { requestRender(): void };
-	[NOTICE_STATE]?: UpdateNoticeState;
+};
+
+type GitInfo = {
+	branch?: string;
+	tag?: string;
 };
 
 function center(text: string, width: number): string {
@@ -119,11 +123,14 @@ function marbleColor(value: number, teal: number, blue: number, violet: number, 
 function renderOrb(width: number, phase: number, birthProgress: number, theme: Theme): string[] {
 	const compact = width < 44;
 	const canvasWidth = Math.min(compact ? 36 : 54, Math.max(22, width - 2));
-	const canvasHeight = compact ? 13 : 18;
+	const canvasHeight = compact ? 14 : 19;
 	const radiusX = Math.min(compact ? 13.5 : 19.5, canvasWidth / 2 - 4);
 	const radiusY = compact ? 5.5 : 7.7;
 	const centerX = (canvasWidth - 1) / 2;
-	const centerY = (canvasHeight - 1) / 2;
+	const centerY = (canvasHeight - 3) / 2;
+	const shadowCenterX = centerX + Math.sin(phase * 0.72) * (compact ? 0.8 : 1.4);
+	const shadowCenterY = centerY + radiusY + 0.9;
+	const shadowWidth = radiusX * (0.68 + 0.06 * Math.sin(phase * 0.9));
 	const rotation = phase * 0.46;
 	const cosRotation = Math.cos(rotation);
 	const sinRotation = Math.sin(rotation);
@@ -139,14 +146,6 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 			const ny = (y - centerY) / radiusY;
 			const radius = Math.sqrt(nx * nx + ny * ny);
 
-			// Tilted orbital ellipse. The lower half is drawn over the sphere;
-			// the upper half disappears behind it.
-			const orbitX = nx / 1.27;
-			const orbitY = (ny + nx * 0.23) / 0.43;
-			const orbitRadius = Math.sqrt(orbitX * orbitX + orbitY * orbitY);
-			const onOrbit = Math.abs(orbitRadius - 1) < (compact ? 0.12 : 0.075);
-			const orbitInFront = orbitY > 0;
-			const orbitChar = Math.sin(x * 0.8 - phase * 1.8) > 0.25 ? "⠒" : "·";
 
 			if (radius <= 1 && hash(x, y) <= reveal) {
 				const z = Math.sqrt(Math.max(0, 1 - radius * radius));
@@ -176,11 +175,8 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 
 				const paletteIndex = Math.min(PALETTE.length - 1, Math.floor(value * PALETTE.length));
 				cells.push({
-					char: onOrbit && orbitInFront && birth > 0.45 ? orbitChar : PALETTE[paletteIndex]!,
-					color:
-						onOrbit && orbitInFront && birth > 0.45
-							? "syntaxKeyword"
-							: marbleColor(value, teal, blue, violet, specular),
+					char: PALETTE[paletteIndex]!,
+					color: marbleColor(value, teal, blue, violet, specular),
 				});
 				continue;
 			}
@@ -190,8 +186,14 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 				continue;
 			}
 
-			if (onOrbit && (radius > 1 || orbitInFront) && birth > 0.35) {
-				cells.push({ char: orbitChar, color: orbitInFront ? "syntaxKeyword" : "dim" });
+			const shadowX = (x - shadowCenterX) / shadowWidth;
+			const shadowY = (y - shadowCenterY) / 0.9;
+			const shadowDensity =
+				Math.exp(-(shadowX * shadowX * 2 + shadowY * shadowY * 1.55)) *
+				(0.84 + 0.1 * Math.sin(phase * 1.15 + x * 0.12)) *
+				birth;
+			if (radius > 1 && shadowDensity > 0.08 && hash(x + 83, y + 29) < shadowDensity * 1.12) {
+				cells.push({ char: shadowDensity > 0.48 ? "⠶" : shadowDensity > 0.24 ? "⠤" : "·", color: shadowDensity > 0.27 ? "muted" : "dim" });
 				continue;
 			}
 
@@ -199,7 +201,7 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 		}
 
 		if (y === Math.round(centerY)) {
-			const signature = "JP";
+			const signature = "π - JP";
 			const start = Math.floor((canvasWidth - signature.length) / 2);
 			for (let index = 0; index < signature.length; index++) {
 				cells[start + index] = { char: signature[index]!, color: "label" };
@@ -212,48 +214,22 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 	return lines;
 }
 
-class CenteredUpdateNotice implements Component {
-	constructor(private message = "") {}
-
-	setText(message: string): void {
-		this.message = message;
-	}
-
-	render(width: number): string[] {
-		return [center(this.message, width)];
-	}
-
-	invalidate(): void {}
-}
-
 function installCompactUpdateNotices(): void {
 	const prototype = InteractiveMode.prototype as unknown as Record<PropertyKey, unknown>;
 	if (prototype[PATCHED]) return;
 	prototype[PATCHED] = true;
 
 	const renderNotice = (mode: PatchableInteractiveMode): void => {
-		const state = (mode[NOTICE_STATE] ??= {});
-		const parts: string[] = [];
-		if (state.piVersion) parts.push(`pi ${state.piVersion} → pi update`);
-		if (state.packages?.length) {
-			parts.push(`${state.packages.length} extension update${state.packages.length === 1 ? "" : "s"} → pi update --extensions`);
-		}
-		if (!state.component) {
-			state.component = new CenteredUpdateNotice();
-			mode.chatContainer.addChild(state.component);
-		}
-		state.component.setText(`↑ ${parts.join("  ·  ")}`);
 		mode.ui.requestRender();
+		for (const requestRender of UPDATE_RENDERERS) requestRender();
 	};
 
 	prototype.showNewVersionNotification = function (this: PatchableInteractiveMode, release: { version: string }) {
-		const state = (this[NOTICE_STATE] ??= {});
-		state.piVersion = release.version;
+		UPDATE_STATE.piVersion = release.version;
 		renderNotice(this);
 	};
 	prototype.showPackageUpdateNotification = function (this: PatchableInteractiveMode, packages: string[]) {
-		const state = (this[NOTICE_STATE] ??= {});
-		state.packages = packages;
+		UPDATE_STATE.packages = packages;
 		renderNotice(this);
 	};
 }
@@ -262,6 +238,73 @@ function formatCwd(cwd: string): string {
 	const home = process.env.HOME;
 	if (!home) return cwd;
 	return cwd === home ? "~" : cwd.startsWith(`${home}/`) ? `~${cwd.slice(home.length)}` : cwd;
+}
+
+function readGitInfo(cwd: string): GitInfo {
+	const git = (...args: string[]) => {
+		try {
+			return execFileSync("git", ["-C", cwd, ...args], {
+				encoding: "utf8",
+				stdio: ["ignore", "pipe", "ignore"],
+				timeout: 800,
+			}).trim();
+		} catch {
+			return "";
+		}
+	};
+	return {
+		branch: git("branch", "--show-current") || undefined,
+		tag: git("describe", "--tags", "--exact-match", "HEAD") || undefined,
+	};
+}
+
+function formatDateTime(date: Date): string {
+	const pad = (value: number) => String(value).padStart(2, "0");
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function formatUptime(milliseconds: number): string {
+	const totalSeconds = Math.max(0, Math.floor(milliseconds / 1_000));
+	const hours = Math.floor(totalSeconds / 3_600);
+	const minutes = Math.floor((totalSeconds % 3_600) / 60);
+	const seconds = totalSeconds % 60;
+	if (hours > 0) return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+	return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+function renderInfoCard(
+	width: number,
+	theme: Theme,
+	info: { cwd: string; model: string; thinking: string; git: GitInfo; startedAt: number },
+): string[] {
+	const cardWidth = Math.max(18, Math.min(48, width - 2));
+	const innerWidth = cardWidth - 4;
+	const border = (text: string) => theme.fg("dim", text);
+	const row = (label: string, value: string, highlight = false) => {
+		const labelWidth = 7;
+		const clipped = truncateToWidth(value, Math.max(1, innerWidth - labelWidth), "…");
+		const content = `${theme.fg(highlight ? "accent" : "muted", label.padEnd(labelWidth))}${
+			highlight ? theme.fg("accent", clipped) : theme.fg("text", clipped)
+		}`;
+		const padding = " ".repeat(Math.max(0, innerWidth - labelWidth - visibleWidth(clipped)));
+		return center(`${border("│")} ${content}${padding} ${border("│")}`, width);
+	};
+
+	const lines = [center(border(`╭${"─".repeat(cardWidth - 2)}╮`), width)];
+	lines.push(row("model", `${info.model} · ${info.thinking}`));
+	lines.push(row("dir", formatCwd(info.cwd)));
+	const git = [info.git.branch, info.git.tag].filter((part): part is string => Boolean(part));
+	if (git.length) lines.push(row("git", git.join(" · ")));
+	lines.push(row("now", `${formatDateTime(new Date())} · up ${formatUptime(Date.now() - info.startedAt)}`));
+
+	const updates: string[] = [];
+	if (UPDATE_STATE.piVersion) updates.push(`pi ${UPDATE_STATE.piVersion}`);
+	if (UPDATE_STATE.packages?.length) {
+		updates.push(`${UPDATE_STATE.packages.length} extension${UPDATE_STATE.packages.length === 1 ? "" : "s"}`);
+	}
+	if (updates.length) lines.push(row("update", `↑ ${updates.join(" · ")}`, true));
+	lines.push(center(border(`╰${"─".repeat(cardWidth - 2)}╯`), width));
+	return lines;
 }
 
 function formatTokens(tokens: number): string {
@@ -273,38 +316,63 @@ function formatTokens(tokens: number): string {
 class FluidOrbHeader implements Component {
 	private phase = 0;
 	private readonly startedAt = Date.now();
-	private timer: ReturnType<typeof setInterval> | undefined;
+	private git: GitInfo;
+	private animationTimer: ReturnType<typeof setInterval> | undefined;
+	private clockTimer: ReturnType<typeof setInterval> | undefined;
 	private stopTimer: ReturnType<typeof setTimeout> | undefined;
+	private readonly requestRender: () => void;
 
 	constructor(
 		private readonly tui: TUI,
 		private readonly theme: Theme,
+		private readonly cwd: string,
+		private readonly getModel: () => string,
+		private readonly getThinking: () => string,
 	) {
-		this.timer = setInterval(() => {
+		this.git = readGitInfo(cwd);
+		this.requestRender = () => this.tui.requestRender();
+		UPDATE_RENDERERS.add(this.requestRender);
+		this.animationTimer = setInterval(() => {
 			this.phase += 0.12;
 			this.tui.requestRender();
 		}, FRAME_MS);
-		this.stopTimer = setTimeout(() => this.stop(), ANIMATION_MS);
+		let clockTicks = 0;
+		this.clockTimer = setInterval(() => {
+			clockTicks++;
+			if (clockTicks % 5 === 0) this.git = readGitInfo(this.cwd);
+			this.tui.requestRender();
+		}, 1_000);
+		this.stopTimer = setTimeout(() => this.stopAnimation(), ANIMATION_MS);
 	}
 
 	render(width: number): string[] {
-		if (width < 24) {
-			return ["", center(this.theme.fg("accent", this.theme.bold("◉ JP ◉")), width), ""];
+		if (width < 20) {
+			return ["", center(this.theme.fg("accent", this.theme.bold("π - JP")), width), ""];
 		}
 		const birthProgress = (Date.now() - this.startedAt) / BLOOM_MS;
-		return ["", ...renderOrb(width, this.phase, birthProgress, this.theme), ""];
+		const card = renderInfoCard(width, this.theme, {
+			cwd: this.cwd,
+			model: this.getModel(),
+			thinking: this.getThinking(),
+			git: this.git,
+			startedAt: this.startedAt,
+		});
+		return ["", ...renderOrb(width, this.phase, birthProgress, this.theme), "", ...card, ""];
 	}
 
 	invalidate(): void {}
 
 	dispose(): void {
-		this.stop();
+		this.stopAnimation();
+		if (this.clockTimer) clearInterval(this.clockTimer);
+		this.clockTimer = undefined;
+		UPDATE_RENDERERS.delete(this.requestRender);
 	}
 
-	private stop(): void {
-		if (this.timer) clearInterval(this.timer);
+	private stopAnimation(): void {
+		if (this.animationTimer) clearInterval(this.animationTimer);
 		if (this.stopTimer) clearTimeout(this.stopTimer);
-		this.timer = undefined;
+		this.animationTimer = undefined;
 		this.stopTimer = undefined;
 	}
 }
@@ -315,7 +383,16 @@ export default function jpHeader(pi: ExtensionAPI): void {
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
 
-		ctx.ui.setHeader((tui, theme) => new FluidOrbHeader(tui, theme));
+		ctx.ui.setHeader(
+			(tui, theme) =>
+				new FluidOrbHeader(
+					tui,
+					theme,
+					ctx.cwd,
+					() => ctx.model?.id ?? "no model",
+					() => pi.getThinkingLevel(),
+				),
+		);
 		ctx.ui.setFooter((tui, theme, footerData) => {
 			const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
 			return {
