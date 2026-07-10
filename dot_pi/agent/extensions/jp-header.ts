@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { uptime as systemUptime } from "node:os";
 import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/pi-coding-agent";
 import { type Component, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
 
@@ -275,7 +276,7 @@ function formatUptime(milliseconds: number): string {
 function renderInfoCard(
 	width: number,
 	theme: Theme,
-	info: { cwd: string; model: string; thinking: string; git: GitInfo; startedAt: number },
+	info: { cwd: string; model: string; thinking: string; git: GitInfo },
 ): string[] {
 	const cardWidth = Math.max(18, Math.min(48, width - 2));
 	const innerWidth = cardWidth - 4;
@@ -295,7 +296,7 @@ function renderInfoCard(
 	lines.push(row("dir", formatCwd(info.cwd)));
 	const git = [info.git.branch, info.git.tag].filter((part): part is string => Boolean(part));
 	if (git.length) lines.push(row("git", git.join(" · ")));
-	lines.push(row("now", `${formatDateTime(new Date())} · up ${formatUptime(Date.now() - info.startedAt)}`));
+	lines.push(row("now", `${formatDateTime(new Date())} · up ${formatUptime(systemUptime() * 1_000)}`));
 
 	const updates: string[] = [];
 	if (UPDATE_STATE.piVersion) updates.push(`pi ${UPDATE_STATE.piVersion}`);
@@ -355,7 +356,6 @@ class FluidOrbHeader implements Component {
 			model: this.getModel(),
 			thinking: this.getThinking(),
 			git: this.git,
-			startedAt: this.startedAt,
 		});
 		return ["", ...renderOrb(width, this.phase, birthProgress, this.theme), "", ...card, ""];
 	}
