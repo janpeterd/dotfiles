@@ -5,13 +5,20 @@ import { type Component, truncateToWidth, type TUI, visibleWidth } from "@earend
 
 const FRAME_MS = 70;
 const BLOOM_MS = 1_100;
+const BREAKOUT_MS = 4_800;
+const FIRST_BREAKOUT_DELAY_MS = 4_800;
+const BREAKOUT_DELAY_MIN_MS = 12_000;
+const BREAKOUT_DELAY_VARIANCE_MS = 8_000;
+// The terminal font used here has cells about 2.33× taller than wide.
+// Scale the horizontal radius accordingly so the orb is circular in pixels.
+const CELL_HEIGHT_TO_WIDTH = 2.33;
 const PALETTE = ["⠁", "⠂", "⠃", "⠇", "⠧", "⠷", "⠿"] as const;
 
 const PATCHED = Symbol.for("jp-header:compact-update-notices");
 const UPDATE_STATE: UpdateNoticeState = {};
 const UPDATE_RENDERERS = new Set<() => void>();
 
-type ThemeTone = "dim" | "muted" | "accent" | "syntaxKeyword" | "label";
+type ThemeTone = "dim" | "muted" | "text" | "accent" | "syntaxKeyword" | "label";
 type CellColor = ThemeTone | `rgb:${number}:${number}:${number}`;
 type Cell = { char: string; color: CellColor };
 type Rgb = readonly [number, number, number];
@@ -42,6 +49,16 @@ function clamp(value: number, min = 0, max = 1): number {
 function smoothstep(value: number): number {
 	const x = clamp(value);
 	return x * x * (3 - 2 * x);
+}
+
+function smootherstep(value: number): number {
+	const x = clamp(value);
+	return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
+function easeOutCubic(value: number): number {
+	const x = clamp(value);
+	return 1 - (1 - x) ** 3;
 }
 
 function hash(x: number, y: number): number {
@@ -120,12 +137,62 @@ function marbleColor(value: number, teal: number, blue: number, violet: number, 
 	return quantizedRgb(channel(0), channel(1), channel(2));
 }
 
-function renderOrb(width: number, phase: number, birthProgress: number, theme: Theme): string[] {
+function overlayRefractedSignature(canvas: Cell[][], centerX: number, centerY: number, phase: number): void {
+	const signature = "π - JP";
+	const startX = Math.floor(centerX - (signature.length - 1) / 2);
+	const baseY = Math.round(centerY);
+
+	for (let index = 0; index < signature.length; index++) {
+		const char = signature[index]!;
+		if (char === " ") continue;
+
+		const x = startX + index;
+		if (!canvas[baseY]?.[x]) continue;
+
+		// A travelling sine wave bends the logo one terminal row at a time.
+		// Color builds before the discrete shift, which keeps the movement fluid
+		// rather than making the letters appear to flicker between rows.
+		const wave = Math.sin(phase * 0.92 - index * 0.78);
+		const refraction = smoothstep((Math.abs(wave) - 0.38) / 0.62);
+		const offset = refraction > 0.62 ? (wave > 0 ? -1 : 1) : 0;
+		const targetY = baseY + offset;
+
+		if (offset === 0) {
+			canvas[baseY]![x] = {
+				char,
+				color: refraction > 0.18
+					? quantizedRgb(92 + refraction * 50, 176 + refraction * 42, 205 + refraction * 34)
+					: "label",
+			};
+			continue;
+		}
+
+		// Keep a dim chromatic trace on the original baseline and a fainter
+		// counter-echo on the other side, like lettering seen through curved glass.
+		canvas[baseY]![x] = {
+			char,
+			color: quantizedRgb(70, 116 + refraction * 34, 148 + refraction * 42),
+		};
+		if (canvas[targetY]?.[x]) canvas[targetY]![x] = { char, color: "label" };
+		const echoY = baseY - offset;
+		if (canvas[echoY]?.[x] && refraction > 0.82) {
+			canvas[echoY]![x] = { char, color: quantizedRgb(116, 82, 142) };
+		}
+	}
+}
+
+function renderOrb(
+	width: number,
+	phase: number,
+	birthProgress: number,
+	theme: Theme,
+	backdrop?: Cell[][],
+): string[] {
 	const compact = width < 44;
 	const canvasWidth = Math.min(compact ? 36 : 54, Math.max(22, width - 2));
 	const canvasHeight = compact ? 14 : 19;
-	const radiusX = Math.min(compact ? 13.5 : 19.5, canvasWidth / 2 - 4);
 	const radiusY = compact ? 5.5 : 7.7;
+	const radiusX = Math.min(radiusY * CELL_HEIGHT_TO_WIDTH, canvasWidth / 2 - 4);
 	const centerX = (canvasWidth - 1) / 2;
 	const centerY = (canvasHeight - 3) / 2;
 	const shadowCenterX = centerX + Math.sin(phase * 0.72) * (compact ? 0.8 : 1.4);
@@ -137,7 +204,7 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 	const birth = smoothstep(birthProgress);
 	const spread = 1.42 - birth * 0.42;
 	const reveal = 0.08 + birth * 0.92;
-	const lines: string[] = [];
+	const canvas: Cell[][] = [];
 
 	for (let y = 0; y < canvasHeight; y++) {
 		const cells: Cell[] = [];
@@ -200,18 +267,18 @@ function renderOrb(width: number, phase: number, birthProgress: number, theme: T
 			cells.push({ char: " ", color: "dim" });
 		}
 
-		if (y === Math.round(centerY)) {
-			const signature = "π - JP";
-			const start = Math.floor((canvasWidth - signature.length) / 2);
-			for (let index = 0; index < signature.length; index++) {
-				cells[start + index] = { char: signature[index]!, color: "label" };
-			}
-		}
-
-		lines.push(center(paintLine(cells, theme), width));
+		canvas.push(cells);
 	}
 
-	return lines;
+	overlayRefractedSignature(canvas, centerX, centerY, phase);
+	const offsetX = Math.floor((width - canvasWidth) / 2);
+	return canvas.map((cells, y) => {
+		const fullLine = backdrop?.[y]?.map((cell) => ({ ...cell })) ?? blankCellLine(width);
+		for (let x = 0; x < cells.length; x++) {
+			if (cells[x]!.char !== " " && fullLine[offsetX + x]) fullLine[offsetX + x] = cells[x]!;
+		}
+		return paintLine(fullLine, theme);
+	});
 }
 
 function installCompactUpdateNotices(): void {
@@ -272,39 +339,150 @@ function formatUptime(milliseconds: number): string {
 	return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
 }
 
+function blankCellLine(width: number): Cell[] {
+	return Array.from({ length: width }, () => ({ char: " ", color: "dim" as CellColor }));
+}
+
+function writeCells(line: Cell[], start: number, text: string, color: CellColor): void {
+	let x = start;
+	for (const char of text) {
+		if (x >= 0 && x < line.length) line[x] = { char, color };
+		x += visibleWidth(char);
+	}
+}
+
+function renderBreakoutLayer(
+	width: number,
+	height: number,
+	progress: number | undefined,
+	originY = 0,
+): Cell[][] {
+	const layer = Array.from({ length: height }, () => blankCellLine(width));
+	if (progress === undefined) return layer;
+
+	// The main breach owns the first part of the event. Its wake clears in
+	// time for several smaller, offset pressure pockets to burst afterward.
+	const mainProgress = progress / 0.66;
+	const arrival = smootherstep(mainProgress / 0.12);
+	const grow = easeOutCubic((mainProgress - 0.045) / 0.64);
+	const fade = smootherstep((1 - mainProgress) / 0.3);
+	const centerX = (width - 1) / 2;
+	const maxRadiusX = Math.min(46, width * 0.49);
+	const verticalReach = Math.max(originY + 1, height - originY);
+	const maxRadiusY = Math.max(5, verticalReach * 1.08);
+	const afterbursts = [
+		{ start: 0.52, duration: 0.28, x: -0.16, y: 0.12, scaleX: 0.42, scaleY: 0.46, seed: 311 },
+		{ start: 0.67, duration: 0.25, x: 0.2, y: -0.08, scaleX: 0.32, scaleY: 0.36, seed: 487 },
+		{ start: 0.8, duration: 0.2, x: -0.04, y: 0.22, scaleX: 0.22, scaleY: 0.28, seed: 653 },
+	] as const;
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const dx = x - centerX;
+			const dy = y - originY;
+			const radial = Math.sqrt((dx / maxRadiusX) ** 2 + (dy / maxRadiusY) ** 2);
+			const turbulence = 0.055 * Math.sin(x * 0.53 + y * 1.71 + progress * 18) + 0.035 * Math.sin(x * 1.17 - y * 0.8);
+			const distance = radial + turbulence;
+			const shell = Math.exp(-((distance - grow) ** 2) / 0.0075);
+			const interior = distance < grow ? Math.max(0, 1 - distance / Math.max(0.001, grow)) * 0.28 : 0;
+			const wings = 0.55 + 0.65 * Math.min(1, Math.abs(dx) / Math.max(1, maxRadiusX * grow));
+			let density = (shell * wings + interior) * arrival * fade;
+
+			// Sparse droplets run ahead of the main liquid front.
+			if (distance > grow && distance < grow + 0.22 && hash(x + 191, y + 73) > 0.965) density = Math.max(density, 0.48 * fade);
+			// The narrow center stream visually connects the orb to the impact.
+			const streamWidth = 0.7 + 1.8 * Math.sin(Math.min(1, mainProgress / 0.2) * Math.PI);
+			const belowOrb = dy > 4 && dy < Math.max(7, height - originY - 2);
+			if (belowOrb && Math.abs(dx + Math.sin(mainProgress * 20 + y) * 1.3) < streamWidth && mainProgress < 0.72) {
+				density = Math.max(density, arrival * (1 - mainProgress * 0.75) * fade);
+			}
+
+			let afterburstIndex = -1;
+			for (let index = 0; index < afterbursts.length; index++) {
+				const burst = afterbursts[index]!;
+				const local = (progress - burst.start) / burst.duration;
+				if (local < 0 || local > 1) continue;
+				const burstGrow = easeOutCubic(local / 0.72);
+				const burstOpacity = smootherstep(local / 0.14) * smootherstep((1 - local) / 0.32);
+				const burstX = centerX + maxRadiusX * burst.x;
+				const burstY = originY + maxRadiusY * burst.y;
+				const burstRadius = Math.sqrt(
+					((x - burstX) / (maxRadiusX * burst.scaleX)) ** 2 +
+					((y - burstY) / (maxRadiusY * burst.scaleY)) ** 2,
+				);
+				const ripple = 0.045 * Math.sin(x * 0.79 - y * 1.43 + local * 14 + burst.seed);
+				const burstShell = Math.exp(-((burstRadius + ripple - burstGrow) ** 2) / 0.012);
+				let burstDensity = burstShell * burstOpacity * (0.82 - index * 0.1);
+				if (
+					burstRadius > burstGrow &&
+					burstRadius < burstGrow + 0.3 &&
+					hash(x + burst.seed, y + burst.seed / 2) > 0.972
+				) {
+					burstDensity = Math.max(burstDensity, 0.5 * burstOpacity);
+				}
+				if (burstDensity > density) {
+					density = burstDensity;
+					afterburstIndex = index;
+				}
+			}
+
+			if (density < 0.08 || hash(x + 41, y + 109) > Math.min(0.94, density)) continue;
+			const energy = clamp(density + hash(x + 7, y + 13) * 0.28);
+			const paletteIndex = Math.min(PALETTE.length - 1, Math.floor(energy * PALETTE.length));
+			const violet = clamp(Math.abs(dx) / Math.max(1, maxRadiusX * grow));
+			const colorShift = afterburstIndex < 0 ? violet : afterburstIndex / Math.max(1, afterbursts.length - 1);
+			layer[y]![x] = {
+				char: PALETTE[paletteIndex]!,
+				color: quantizedRgb(
+					52 + colorShift * 112,
+					126 + energy * 92 - colorShift * 28,
+					188 + energy * 55,
+				),
+			};
+		}
+	}
+	return layer;
+}
+
 function renderInfoCard(
 	width: number,
 	theme: Theme,
 	info: { cwd: string; model: string; thinking: string; git: GitInfo },
+	backdrop?: Cell[][],
 ): string[] {
 	const cardWidth = Math.max(18, Math.min(48, width - 2));
 	const innerWidth = cardWidth - 4;
-	const border = (text: string) => theme.fg("dim", text);
-	const row = (label: string, value: string, highlight = false) => {
-		const labelWidth = 7;
-		const clipped = truncateToWidth(value, Math.max(1, innerWidth - labelWidth), "…");
-		const content = `${theme.fg(highlight ? "accent" : "muted", label.padEnd(labelWidth))}${
-			highlight ? theme.fg("accent", clipped) : theme.fg("text", clipped)
-		}`;
-		const padding = " ".repeat(Math.max(0, innerWidth - labelWidth - visibleWidth(clipped)));
-		return center(`${border("│")} ${content}${padding} ${border("│")}`, width);
-	};
-
-	const lines = [center(border(`╭${"─".repeat(cardWidth - 2)}╮`), width)];
-	lines.push(row("model", `${info.model} · ${info.thinking}`));
-	lines.push(row("dir", formatCwd(info.cwd)));
+	const labelWidth = 7;
+	const startX = Math.floor((width - cardWidth) / 2);
+	const rows: Array<{ label: string; value: string; highlight?: boolean }> = [
+		{ label: "model", value: `${info.model} · ${info.thinking}` },
+		{ label: "dir", value: formatCwd(info.cwd) },
+	];
 	const git = [info.git.branch, info.git.tag].filter((part): part is string => Boolean(part));
-	if (git.length) lines.push(row("git", git.join(" · ")));
-	lines.push(row("now", `${formatDateTime(new Date())} · up ${formatUptime(systemUptime() * 1_000)}`));
+	if (git.length) rows.push({ label: "git", value: git.join(" · ") });
+	rows.push({ label: "now", value: `${formatDateTime(new Date())} · up ${formatUptime(systemUptime() * 1_000)}` });
 
 	const updates: string[] = [];
 	if (UPDATE_STATE.piVersion) updates.push(`pi ${UPDATE_STATE.piVersion}`);
 	if (UPDATE_STATE.packages?.length) {
 		updates.push(`${UPDATE_STATE.packages.length} extension${UPDATE_STATE.packages.length === 1 ? "" : "s"}`);
 	}
-	if (updates.length) lines.push(row("update", `↑ ${updates.join(" · ")}`, true));
-	lines.push(center(border(`╰${"─".repeat(cardWidth - 2)}╯`), width));
-	return lines;
+	if (updates.length) rows.push({ label: "update", value: `↑ ${updates.join(" · ")}`, highlight: true });
+
+	const lines = Array.from({ length: rows.length + 2 }, (_, index) =>
+		backdrop?.[index]?.map((cell) => ({ ...cell })) ?? blankCellLine(width),
+	);
+	writeCells(lines[0]!, startX, `╭${"─".repeat(cardWidth - 2)}╮`, "dim");
+	rows.forEach((row, index) => {
+		const line = lines[index + 1]!;
+		writeCells(line, startX, "│", "dim");
+		writeCells(line, startX + cardWidth - 1, "│", "dim");
+		writeCells(line, startX + 2, row.label, row.highlight ? "accent" : "muted");
+		const clipped = truncateToWidth(row.value, Math.max(1, innerWidth - labelWidth), "…");
+		writeCells(line, startX + 2 + labelWidth, clipped, row.highlight ? "accent" : "text");
+	});
+	writeCells(lines[lines.length - 1]!, startX, `╰${"─".repeat(cardWidth - 2)}╯`, "dim");
+	return lines.map((line) => paintLine(line, theme));
 }
 
 function formatTokens(tokens: number): string {
@@ -317,6 +495,8 @@ class FluidOrbHeader implements Component {
 	private phase = 0;
 	private readonly startedAt = Date.now();
 	private git: GitInfo;
+	private breakoutAgeMs: number | undefined;
+	private breakoutDelayMs = FIRST_BREAKOUT_DELAY_MS;
 	private animationTimer: ReturnType<typeof setInterval> | undefined;
 	private clockTimer: ReturnType<typeof setInterval> | undefined;
 	private readonly requestRender: () => void;
@@ -339,6 +519,16 @@ class FluidOrbHeader implements Component {
 				return;
 			}
 			this.phase += 0.12;
+			if (this.breakoutAgeMs === undefined) {
+				this.breakoutDelayMs -= FRAME_MS;
+				if (this.breakoutDelayMs <= 0) this.breakoutAgeMs = 0;
+			} else {
+				this.breakoutAgeMs += FRAME_MS;
+				if (this.breakoutAgeMs >= BREAKOUT_MS) {
+					this.breakoutAgeMs = undefined;
+					this.breakoutDelayMs = BREAKOUT_DELAY_MIN_MS + Math.random() * BREAKOUT_DELAY_VARIANCE_MS;
+				}
+			}
 			this.tui.requestRender();
 		}, FRAME_MS);
 		let clockTicks = 0;
@@ -358,13 +548,31 @@ class FluidOrbHeader implements Component {
 			return ["", center(this.theme.fg("accent", this.theme.bold("π - JP")), width), ""];
 		}
 		const birthProgress = (Date.now() - this.startedAt) / BLOOM_MS;
-		const card = renderInfoCard(width, this.theme, {
+		const info = {
 			cwd: this.cwd,
 			model: this.getModel(),
 			thinking: this.getThinking(),
 			git: this.git,
-		});
-		return ["", ...renderOrb(width, this.phase, birthProgress, this.theme), "", ...card, ""];
+		};
+		const cardHeight = renderInfoCard(width, this.theme, info).length;
+		const orbHeight = width < 44 ? 14 : 19;
+		const breakoutProgress = this.breakoutAgeMs === undefined ? undefined : this.breakoutAgeMs / BREAKOUT_MS;
+		const totalHeight = 1 + orbHeight + 1 + cardHeight;
+		const orbOriginY = 1 + (orbHeight - 3) / 2;
+		const breakout = renderBreakoutLayer(width, totalHeight, breakoutProgress, orbOriginY);
+		const top = paintLine(breakout[0]!, this.theme);
+		const orbStart = 1;
+		const bridgeIndex = orbStart + orbHeight;
+		const orb = renderOrb(
+			width,
+			this.phase,
+			birthProgress,
+			this.theme,
+			breakout.slice(orbStart, bridgeIndex),
+		);
+		const bridge = paintLine(breakout[bridgeIndex]!, this.theme);
+		const card = renderInfoCard(width, this.theme, info, breakout.slice(bridgeIndex + 1));
+		return [top, ...orb, bridge, ...card, ""];
 	}
 
 	invalidate(): void {}

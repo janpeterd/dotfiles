@@ -1,24 +1,27 @@
 {
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.80.5",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-sol",
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "enableInstallTelemetry": false,
   "theme": "jp",
+  "externalEditor": "nvim",
   "quietStartup": true,
   "treeFilterMode": "no-tools",
   "enabledModels": [
-    "openai-codex/gpt-5.6-sol",
     "opencode-go/kimi-k2.6",
-    "openrouter/moonshotai/kimi-k2.6",
-    "openrouter/deepseek/deepseek-v4-pro",
+    "openai-codex/gpt-5.5",
     "github-copilot/claude-sonnet-4.6",
-    "anthropic/claude-opus-4-7"
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-terra",
+    "openai-codex/gpt-5.6-luna"
   ],
   "packages": [
     "npm:pi-web-access",
-    "npm:pi-goal",
-    "git:git@github.com:janpeterd/pinvim.git"
+    "npm:pi-goal"
+  ],
+  "extensions": [
+    "/home/jp/Code/Other/pi-nvim/extension.ts"
   ],
   "hideThinkingBlock": false
 }
