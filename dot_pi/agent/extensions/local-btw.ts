@@ -44,20 +44,6 @@ function currentThread(ctx: ExtensionContext): BtwThread | undefined {
 	return file ? getState().threads.get(file) : undefined;
 }
 
-function lastFinishedCheckpoint(ctx: ExtensionContext): string | undefined {
-	const branch = ctx.sessionManager.getBranch();
-	for (let index = branch.length - 1; index >= 0; index--) {
-		const entry = branch[index]!;
-		if (entry.type === "message" && entry.message.role === "user") {
-			// While an agent is running, its latest user message starts the in-flight
-			// turn. Fork from that entry's parent so no partial assistant/tool output
-			// leaks into the BTW thread.
-			return entry.parentId ?? undefined;
-		}
-	}
-	return undefined;
-}
-
 async function deleteSessionFile(file: string): Promise<void> {
 	try {
 		await unlink(file);
@@ -169,23 +155,16 @@ export default function localBtw(pi: ExtensionAPI): void {
 				return;
 			}
 
-			const wasBusy = !ctx.isIdle();
+			await ctx.waitForIdle();
+
 			const mainSessionFile = sessionFile(ctx);
-			const checkpointId = wasBusy ? lastFinishedCheckpoint(ctx) : ctx.sessionManager.getLeafId();
-			if (!mainSessionFile || !checkpointId) {
-				ctx.ui.notify("/btw needs a finished message to fork from", "error");
+			const leafId = ctx.sessionManager.getLeafId();
+			if (!mainSessionFile || !leafId) {
+				ctx.ui.notify("/btw needs a saved conversation with at least one message", "error");
 				return;
 			}
 
-			// Extension commands run immediately during streaming. Cancel the active
-			// turn instead of waiting for it to finish, then replace the session at
-			// the last completed checkpoint captured above.
-			if (wasBusy) {
-				ctx.abort();
-				await ctx.waitForIdle();
-			}
-
-			const result = await ctx.fork(checkpointId, {
+			const result = await ctx.fork(leafId, {
 				position: "at",
 				withSession: async (sideCtx) => {
 					const sideSessionFile = sessionFile(sideCtx);
