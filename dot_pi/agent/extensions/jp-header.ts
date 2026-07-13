@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { uptime as systemUptime } from "node:os";
 import { type ExtensionAPI, InteractiveMode, type Theme } from "@earendil-works/pi-coding-agent";
 import { type Component, truncateToWidth, type TUI, visibleWidth } from "@earendil-works/pi-tui";
+import { HeaderLifecycle } from "./header-lifecycle";
 
 const FRAME_MS = 70;
 const BLOOM_MS = 1_100;
@@ -495,10 +496,10 @@ class FluidOrbHeader implements Component {
 	private phase = 0;
 	private readonly startedAt = Date.now();
 	private git: GitInfo;
+	private cachedRender: { width: number; lines: string[] } | undefined;
 	private breakoutAgeMs: number | undefined;
 	private breakoutDelayMs = FIRST_BREAKOUT_DELAY_MS;
-	private animationTimer: ReturnType<typeof setInterval> | undefined;
-	private clockTimer: ReturnType<typeof setInterval> | undefined;
+	private readonly lifecycle = new HeaderLifecycle();
 	private readonly requestRender: () => void;
 
 	constructor(
@@ -513,9 +514,11 @@ class FluidOrbHeader implements Component {
 			if (this.isVisible()) this.tui.requestRender();
 		};
 		UPDATE_RENDERERS.add(this.requestRender);
-		this.animationTimer = setInterval(() => {
+		this.lifecycle.add(() => UPDATE_RENDERERS.delete(this.requestRender));
+
+		const animationTimer = setInterval(() => {
 			if (!this.isVisible()) {
-				this.freezeOffscreen();
+				this.stop();
 				return;
 			}
 			this.phase += 0.12;
@@ -531,21 +534,30 @@ class FluidOrbHeader implements Component {
 			}
 			this.tui.requestRender();
 		}, FRAME_MS);
+		this.lifecycle.add(() => clearInterval(animationTimer));
+
 		let clockTicks = 0;
-		this.clockTimer = setInterval(() => {
+		const clockTimer = setInterval(() => {
 			if (!this.isVisible()) {
-				this.freezeOffscreen();
+				this.stop();
 				return;
 			}
 			clockTicks++;
 			if (clockTicks % 5 === 0) this.git = readGitInfo(this.cwd);
 			this.tui.requestRender();
 		}, 1_000);
+		this.lifecycle.add(() => clearInterval(clockTimer));
 	}
 
 	render(width: number): string[] {
+		if (!this.lifecycle.isActive && this.cachedRender?.width === width) {
+			return this.cachedRender.lines;
+		}
+
 		if (width < 20) {
-			return ["", center(this.theme.fg("accent", this.theme.bold("π - JP")), width), ""];
+			const lines = ["", center(this.theme.fg("accent", this.theme.bold("π - JP")), width), ""];
+			this.cachedRender = { width, lines };
+			return lines;
 		}
 		const birthProgress = (Date.now() - this.startedAt) / BLOOM_MS;
 		const info = {
@@ -572,16 +584,19 @@ class FluidOrbHeader implements Component {
 		);
 		const bridge = paintLine(breakout[bridgeIndex]!, this.theme);
 		const card = renderInfoCard(width, this.theme, info, breakout.slice(bridgeIndex + 1));
-		return [top, ...orb, bridge, ...card, ""];
+		const lines = [top, ...orb, bridge, ...card, ""];
+		this.cachedRender = { width, lines };
+		return lines;
 	}
 
 	invalidate(): void {}
 
 	dispose(): void {
-		this.stopAnimation();
-		if (this.clockTimer) clearInterval(this.clockTimer);
-		this.clockTimer = undefined;
-		UPDATE_RENDERERS.delete(this.requestRender);
+		this.stop();
+	}
+
+	stop(): void {
+		this.lifecycle.stop();
 	}
 
 	private isVisible(): boolean {
@@ -593,33 +608,26 @@ class FluidOrbHeader implements Component {
 		return (viewport.previousViewportTop ?? 0) === 0;
 	}
 
-	private freezeOffscreen(): void {
-		this.stopAnimation();
-		if (this.clockTimer) clearInterval(this.clockTimer);
-		this.clockTimer = undefined;
-	}
-
-	private stopAnimation(): void {
-		if (this.animationTimer) clearInterval(this.animationTimer);
-		this.animationTimer = undefined;
-	}
 }
 
 export default function jpHeader(pi: ExtensionAPI): void {
 	installCompactUpdateNotices();
+	let header: FluidOrbHeader | undefined;
 
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
 
 		ctx.ui.setHeader(
-			(tui, theme) =>
-				new FluidOrbHeader(
+			(tui, theme) => {
+				header = new FluidOrbHeader(
 					tui,
 					theme,
 					ctx.cwd,
 					() => ctx.model?.id ?? "no model",
 					() => pi.getThinkingLevel(),
-				),
+				);
+				return header;
+			},
 		);
 		ctx.ui.setFooter((tui, theme, footerData) => {
 			let git = readGitInfo(ctx.cwd);
@@ -651,5 +659,9 @@ export default function jpHeader(pi: ExtensionAPI): void {
 				},
 			};
 		});
+	});
+
+	pi.on("agent_start", () => {
+		header?.stop();
 	});
 }
