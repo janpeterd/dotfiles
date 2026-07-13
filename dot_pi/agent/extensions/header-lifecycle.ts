@@ -21,3 +21,8 @@ export class HeaderLifecycle {
 		this.teardowns.clear();
 	}
 }
+
+// Pi auto-discovers every top-level TypeScript file in the extensions directory.
+// This module primarily supports jp-header, but must also be a valid extension
+// when Pi loads it independently.
+export default function headerLifecycleExtension(): void {}

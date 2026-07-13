@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { HeaderLifecycle } from "../dot_pi/agent/extensions/header-lifecycle";
+import headerLifecycleExtension, { HeaderLifecycle } from "../dot_pi/agent/extensions/header-lifecycle";
+
+test("is also a valid top-level Pi extension", () => {
+	expect(typeof headerLifecycleExtension).toBe("function");
+});
 
 describe("HeaderLifecycle", () => {
 	test("runs every teardown exactly once when stopped", () => {
