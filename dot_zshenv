@@ -12,6 +12,17 @@ XDG_CONFIG_HOME="$HOME/.config"
 XDG_DATA_HOME="$HOME/.local/share"
 XDG_CACHE_HOME="$HOME/.cache"
 XDG_SESSION_TYPE=wayland
+ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+# pnpm's system package lives under /usr, but pnpm globals should stay user-writable.
+export PNPM_HOME="$XDG_DATA_HOME/pnpm"
+
+PATH="$PATH:${$(find ~/.local/bin -type d -printf %p:)%%:}"
+PATH="$PNPM_HOME/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/.yarn/bin:$PATH"
+PATH="$HOME/Code/scripts/bin:$PATH"
+PATH="$HOME/.config/emacs/bin:$PATH"
 XDG_PICTURES_DIR="$HOME/Pictures"
 XDG_SCREENSHOTS_DIR="$HOME/Pictures/Screenshots"
 GRIM_DEFAULT_DIR="$HOME/Pictures/Screenshots"
@@ -36,7 +47,7 @@ GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
 ANSIBLE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ansible/ansible.cfg"
 UNISON="${XDG_DATA_HOME:-$HOME/.local/share}/unison"
 MBSYNCRC="${XDG_CONFIG_HOME:-$HOME/.config}/mbsync/config"
-NPM_CONFIG_USERCONFIG=$XDG_CONFIG_HOME/npm/npmrc
+export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 MOZ_ENABLE_WAYLAND=1
 _JAVA_AWT_WM_NONREPARENTING=1
 JAVA_HOME="/usr/lib/jvm/default"
