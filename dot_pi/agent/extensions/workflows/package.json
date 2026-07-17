@@ -1,0 +1,8 @@
+{
+  "name": "pi-workflows-local",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "acorn": "8.17.0"
+  }
+}

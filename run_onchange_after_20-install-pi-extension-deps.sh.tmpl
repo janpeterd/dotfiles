@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+# Re-run when either pinned dependency lockfile changes.
+# subagents: {{ include "dot_pi/agent/extensions/subagents/package-lock.json" | sha256sum }}
+# workflows: {{ include "dot_pi/agent/extensions/workflows/package-lock.json" | sha256sum }}
+
+for extension in subagents workflows; do
+  directory="$HOME/.pi/agent/extensions/$extension"
+  if [ ! -f "$directory/package-lock.json" ]; then
+    echo "Skipping missing Pi extension dependency directory: $directory" >&2
+    continue
+  fi
+  echo "Installing Pi $extension runtime dependencies"
+  (
+    cd "$directory"
+    npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+  )
+done
