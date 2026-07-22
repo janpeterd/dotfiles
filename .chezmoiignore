@@ -7,3 +7,6 @@
 .pi/agent/.venv
 .pi/agent/uv.lock
 .pi/codex-limit-overlay.log
+
+# Machine-local development secrets
+.config/jpserv/env/**
