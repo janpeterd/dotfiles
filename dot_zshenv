@@ -11,6 +11,12 @@ PATH="$HOME/.config/emacs/bin:$PATH"
 XDG_CONFIG_HOME="$HOME/.config"
 XDG_DATA_HOME="$HOME/.local/share"
 XDG_CACHE_HOME="$HOME/.cache"
+
+# Local development conventions.
+export JP_PROJECTS_ROOT="$HOME/Projects/src"
+export JP_STATE_ROOT="$HOME/Projects/state"
+export JP_ENV_ROOT="$XDG_CONFIG_HOME/jpserv/env"
+PATH="$HOME/.nub/bin:$PATH"
 XDG_SESSION_TYPE=wayland
 ZDOTDIR="$XDG_CONFIG_HOME/zsh"
 

@@ -35,6 +35,12 @@
 [tag]
   sort = -version:refname
 
+[fetch]
+  prune = true
+
+[pull]
+  ff = only
+
 [push]
   autoSetupRemote = true
 
@@ -84,3 +90,7 @@
 	helper = !/usr/bin/gh auth git-credential
 
 # vim:ft=gitconfig
+
+[credential "https://git.janpeterdhalle.com"]
+  username = jp
+  helper = forgejo-systemd

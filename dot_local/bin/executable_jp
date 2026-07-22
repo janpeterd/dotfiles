@@ -1,0 +1,644 @@
+#!/usr/bin/env python3
+"""Local development helper for repositories under ~/Projects/src."""
+
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterator, NoReturn, Sequence
+
+ENV_EXAMPLE_SUFFIXES = (".example", ".sample", ".template")
+WALK_PRUNE = {
+    ".git",
+    ".worktrees",
+    "node_modules",
+    "target",
+    "dist",
+    "build",
+    "runtime",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".cache",
+    ".astro",
+    ".output",
+    ".wrangler",
+}
+PORT_ASSIGNMENT = re.compile(
+    r"^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*['\"]?([0-9]{1,5})['\"]?\s*$"
+)
+
+
+class JpError(RuntimeError):
+    """Expected command failure with a user-facing message."""
+
+
+def fail(message: str) -> NoReturn:
+    raise JpError(message)
+
+
+def run(
+    args: Sequence[str | os.PathLike[str]],
+    *,
+    cwd: Path | None = None,
+    check: bool = True,
+    capture: bool = False,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [os.fspath(arg) for arg in args],
+        cwd=cwd,
+        check=check,
+        text=True,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.PIPE if capture else None,
+    )
+
+
+def git(*args: str, cwd: Path, capture: bool = False, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return run(("git", "-C", cwd, *args), check=check, capture=capture)
+
+
+def output(*args: str, cwd: Path) -> str:
+    return git(*args, cwd=cwd, capture=True).stdout.strip()
+
+
+def configured_path(name: str, default: str) -> Path:
+    return Path(os.path.expandvars(os.path.expanduser(os.environ.get(name, default)))).resolve()
+
+
+def projects_root() -> Path:
+    return configured_path("JP_PROJECTS_ROOT", "~/Projects/src")
+
+
+def state_root() -> Path:
+    return configured_path("JP_STATE_ROOT", "~/Projects/state")
+
+
+def env_root() -> Path:
+    return configured_path("JP_ENV_ROOT", "~/.config/jpserv/env")
+
+
+def is_live_env_name(name: str) -> bool:
+    return name in {".env", ".envrc"} or (
+        name.startswith(".env.") and not name.endswith(ENV_EXAMPLE_SUFFIXES)
+    )
+
+
+def sanitize_slug(raw: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", raw.lower()).strip("-")
+    if not slug:
+        fail(f"cannot derive a worktree name from {raw!r}")
+    return slug
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def ensure_private_directory(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    path.chmod(0o700)
+
+
+@dataclass(frozen=True)
+class RepoContext:
+    checkout: Path
+    common_root: Path
+    relative_repo: Path
+    scope: str
+
+    @classmethod
+    def discover(cls, cwd: Path | None = None) -> "RepoContext":
+        here = (cwd or Path.cwd()).resolve()
+        checkout_text = output("rev-parse", "--show-toplevel", cwd=here)
+        common_text = output(
+            "rev-parse", "--path-format=absolute", "--git-common-dir", cwd=here
+        )
+        checkout = Path(checkout_text).resolve()
+        common_root = Path(common_text).resolve().parent
+        root = projects_root()
+        try:
+            relative_repo = common_root.relative_to(root)
+        except ValueError as error:
+            raise JpError(f"repository is outside JP_PROJECTS_ROOT ({root}): {common_root}") from error
+
+        scope = "root"
+        worktree_parent = common_root / ".worktrees"
+        try:
+            relative_worktree = checkout.relative_to(worktree_parent)
+        except ValueError:
+            if checkout != common_root:
+                fail(f"linked worktree must live below {worktree_parent}: {checkout}")
+        else:
+            if len(relative_worktree.parts) != 1:
+                fail(f"nested worktree layout is unsupported: {checkout}")
+            scope = relative_worktree.name
+
+        return cls(checkout, common_root, relative_repo, scope)
+
+    @property
+    def central_env_dir(self) -> Path:
+        return env_root() / self.relative_repo / self.scope
+
+    @property
+    def external_state_dir(self) -> Path:
+        return state_root() / self.relative_repo / self.scope
+
+
+class EnvironmentStore:
+    """Centralize live environment files without exposing their contents."""
+
+    def __init__(self, context: RepoContext):
+        self.context = context
+
+    def discover_files(self) -> list[Path]:
+        found: list[Path] = []
+        for current, directories, files in os.walk(self.context.checkout, followlinks=False):
+            directories[:] = [name for name in directories if name not in WALK_PRUNE]
+            current_path = Path(current)
+            for name in files:
+                if is_live_env_name(name):
+                    found.append(current_path / name)
+        return sorted(found)
+
+    def centralize(self) -> int:
+        plans: list[tuple[Path, Path]] = []
+        for source in self.discover_files():
+            relative = source.relative_to(self.context.checkout)
+            destination = self.context.central_env_dir / relative
+            if source.is_symlink():
+                if source.resolve() != destination.resolve():
+                    fail(f"environment symlink points outside the central store: {source}")
+                continue
+            if not source.is_file():
+                fail(f"environment path is not a regular file: {source}")
+            if destination.exists() and sha256(source) != sha256(destination):
+                fail(f"central environment file differs; refusing overwrite: {destination}")
+            plans.append((source, destination))
+
+        for source, destination in plans:
+            ensure_private_directory(destination.parent)
+            if not destination.exists():
+                descriptor, temporary_name = tempfile.mkstemp(
+                    prefix=f".{destination.name}.", dir=destination.parent
+                )
+                temporary = Path(temporary_name)
+                try:
+                    with os.fdopen(descriptor, "wb") as target, source.open("rb") as origin:
+                        shutil.copyfileobj(origin, target)
+                    temporary.chmod(0o600)
+                    if sha256(source) != sha256(temporary):
+                        fail(f"checksum mismatch while centralizing {source}")
+                    temporary.replace(destination)
+                finally:
+                    temporary.unlink(missing_ok=True)
+            destination.chmod(0o600)
+            source.unlink()
+            source.symlink_to(destination)
+            print(f"centralized {source.relative_to(self.context.checkout)}")
+        return len(plans)
+
+    def seed_from_root(self) -> int:
+        source_root = env_root() / self.context.relative_repo / "root"
+        if not source_root.is_dir() or self.context.scope == "root":
+            return 0
+        ensure_private_directory(self.context.central_env_dir)
+        copied = 0
+        for source in sorted(path for path in source_root.rglob("*") if path.is_file()):
+            relative = source.relative_to(source_root)
+            checkout_parent = self.context.checkout / relative.parent
+            if relative.parent != Path(".") and not checkout_parent.is_dir():
+                continue
+            destination = self.context.central_env_dir / relative
+            ensure_private_directory(destination.parent)
+            if not destination.exists():
+                shutil.copyfile(source, destination)
+                destination.chmod(0o600)
+                copied += 1
+            link = self.context.checkout / relative
+            if link.exists() or link.is_symlink():
+                if link.is_symlink() and link.resolve() == destination.resolve():
+                    continue
+                fail(f"refusing to replace existing environment path: {link}")
+            link.symlink_to(destination)
+        return copied
+
+
+def archive_directory(path: Path, category: str) -> Path | None:
+    if not path.exists():
+        return None
+    archive_root = path.parent / ".archive"
+    ensure_private_directory(archive_root)
+    destination = archive_root / f"{path.name}-{time.strftime('%Y%m%d-%H%M%S')}"
+    path.rename(destination)
+    print(f"archived {category}: {destination}")
+    return destination
+
+
+def worktree_add(name: str, branch: str | None, start: str) -> None:
+    context = RepoContext.discover()
+    slug = sanitize_slug(name)
+    selected_branch = branch or name
+    destination = context.common_root / ".worktrees" / slug
+    if destination.exists():
+        fail(f"worktree already exists: {destination}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    created_branch = False
+    new_context: RepoContext | None = None
+    try:
+        if git("show-ref", "--verify", "--quiet", f"refs/heads/{selected_branch}", cwd=context.common_root, check=False).returncode == 0:
+            git("worktree", "add", str(destination), selected_branch, cwd=context.common_root)
+        elif git("show-ref", "--verify", "--quiet", f"refs/remotes/origin/{selected_branch}", cwd=context.common_root, check=False).returncode == 0:
+            created_branch = True
+            git(
+                "worktree",
+                "add",
+                "--track",
+                "-b",
+                selected_branch,
+                str(destination),
+                f"origin/{selected_branch}",
+                cwd=context.common_root,
+            )
+        else:
+            created_branch = True
+            git("worktree", "add", "-b", selected_branch, str(destination), start, cwd=context.common_root)
+
+        new_context = RepoContext.discover(destination)
+        EnvironmentStore(new_context).seed_from_root()
+        bootstrap = context.common_root / "scripts" / "bootstrap-worktree.sh"
+        if bootstrap.is_file():
+            run((bootstrap, destination), cwd=context.common_root)
+        EnvironmentStore(new_context).centralize()
+        ensure_private_directory(new_context.external_state_dir)
+    except BaseException:
+        git("worktree", "remove", "--force", str(destination), cwd=context.common_root, check=False)
+        git("worktree", "prune", cwd=context.common_root, check=False)
+        if new_context is not None:
+            archive_directory(new_context.central_env_dir, "incomplete environment")
+            archive_directory(new_context.external_state_dir, "incomplete state")
+        if created_branch:
+            git("branch", "-D", selected_branch, cwd=context.common_root, check=False)
+        raise
+    print(f"created {destination} on branch {selected_branch}")
+
+
+def resolve_worktree(context: RepoContext, name: str) -> Path:
+    candidate = Path(name).expanduser()
+    if candidate.is_absolute():
+        destination = candidate.resolve()
+    else:
+        destination = (context.common_root / ".worktrees" / sanitize_slug(name)).resolve()
+    expected_parent = (context.common_root / ".worktrees").resolve()
+    if destination.parent != expected_parent:
+        fail(f"refusing path outside {expected_parent}: {destination}")
+    return destination
+
+
+def worktree_remove(name: str, force: bool) -> None:
+    context = RepoContext.discover()
+    destination = resolve_worktree(context, name)
+    if not destination.is_dir():
+        fail(f"worktree not found: {destination}")
+    dirty = output("status", "--porcelain", cwd=destination)
+    if dirty and not force:
+        fail(f"worktree is dirty; commit changes or pass --force: {destination}")
+    removed_context = RepoContext.discover(destination)
+    arguments = ["worktree", "remove"]
+    if force:
+        arguments.append("--force")
+    arguments.append(str(destination))
+    git(*arguments, cwd=context.common_root)
+    archive_directory(removed_context.central_env_dir, "environment")
+    archive_directory(removed_context.external_state_dir, "state")
+    git("worktree", "prune", cwd=context.common_root)
+    print(f"removed {destination}")
+
+
+def parse_env_ports(path: Path) -> set[int]:
+    ports: set[int] = set()
+    if not path.is_file():
+        return ports
+    with path.open(errors="replace") as handle:
+        for raw_line in handle:
+            match = PORT_ASSIGNMENT.match(raw_line.strip())
+            if match:
+                name, raw_value = match.groups()
+                if name != "PORT" and not name.endswith("_PORT"):
+                    continue
+                value = int(raw_value)
+                if 0 < value < 65536:
+                    ports.add(value)
+    return ports
+
+
+def docker_conflicts(port: int) -> list[tuple[str, str]]:
+    if shutil.which("docker") is None:
+        return []
+    completed = run(
+        ("docker", "ps", "--filter", f"publish={port}", "--format", "{{.ID}}\t{{.Names}}"),
+        capture=True,
+        check=False,
+    )
+    conflicts: list[tuple[str, str]] = []
+    for line in completed.stdout.splitlines():
+        fields = line.split("\t", 1)
+        if fields and fields[0]:
+            conflicts.append((fields[0], fields[1] if len(fields) > 1 else fields[0]))
+    return conflicts
+
+
+def listening_pids(port: int) -> set[int]:
+    if shutil.which("lsof") is None:
+        fail("lsof is required for developer-takeover port handling")
+    completed = run(
+        ("lsof", "-nP", f"-iTCP:{port}", "-sTCP:LISTEN", "-t"),
+        capture=True,
+        check=False,
+    )
+    return {int(line) for line in completed.stdout.splitlines() if line.isdigit()}
+
+
+def port_has_listener(port: int) -> bool:
+    completed = run(("ss", "-H", "-ltn", f"sport = :{port}"), capture=True, check=False)
+    return bool(completed.stdout.strip())
+
+
+def process_uid(pid: int) -> int | None:
+    try:
+        return (Path("/proc") / str(pid)).stat().st_uid
+    except FileNotFoundError:
+        return None
+
+
+def terminate_processes(pids: set[int], label: str) -> None:
+    live = {pid for pid in pids if process_uid(pid) is not None}
+    foreign = {pid for pid in live if process_uid(pid) != os.getuid()}
+    if foreign:
+        fail(f"refusing to stop non-user process(es) for {label}: {sorted(foreign)}")
+    if not live:
+        return
+    print(f"stopping {label}: {sorted(live)}")
+    for pid in live:
+        os.kill(pid, signal.SIGTERM)
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        live = {pid for pid in live if process_uid(pid) is not None}
+        if not live:
+            return
+        time.sleep(0.1)
+    print(f"force-stopping {label}: {sorted(live)}")
+    for pid in live:
+        os.kill(pid, signal.SIGKILL)
+
+
+def boot_id() -> str:
+    try:
+        return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+    except OSError:
+        return "unknown"
+
+
+def process_start_ticks(pid: int) -> int | None:
+    try:
+        # The comm field may contain spaces and parentheses; fields after the final
+        # ')' begin at proc-stat field 3. starttime is field 22, index 19 here.
+        suffix = (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()
+        return int(suffix[19])
+    except (FileNotFoundError, PermissionError, ValueError, IndexError):
+        return None
+
+
+def process_group_pids(pgid: int) -> set[int]:
+    members: set[int] = set()
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        pid = int(entry.name)
+        try:
+            if os.getpgid(pid) == pgid:
+                members.add(pid)
+        except (ProcessLookupError, PermissionError):
+            continue
+    return members
+
+
+def stop_recorded_dev(state_file: Path, context: RepoContext) -> None:
+    if not state_file.is_file():
+        return
+    try:
+        record = json.loads(state_file.read_text())
+        pgid = int(record["child_pgid"])
+        recorded_start = int(record["child_start_ticks"])
+    except (OSError, ValueError, KeyError, json.JSONDecodeError):
+        state_file.unlink(missing_ok=True)
+        return
+    if record.get("boot_id") != boot_id() or record.get("repository") != str(context.common_root):
+        state_file.unlink(missing_ok=True)
+        return
+    if process_start_ticks(pgid) != recorded_start:
+        state_file.unlink(missing_ok=True)
+        return
+    members = process_group_pids(pgid)
+    if not members:
+        state_file.unlink(missing_ok=True)
+        return
+    foreign = {pid for pid in members if process_uid(pid) != os.getuid()}
+    if foreign:
+        fail(f"recorded dev process group contains non-user processes: {sorted(foreign)}")
+    print(f"stopping previous dev process group: {pgid}")
+    try:
+        os.killpg(pgid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline and process_group_pids(pgid):
+        time.sleep(0.1)
+    if process_group_pids(pgid):
+        try:
+            os.killpg(pgid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    state_file.unlink(missing_ok=True)
+
+
+def free_ports(ports: set[int]) -> None:
+    for port in sorted(ports):
+        containers = docker_conflicts(port)
+        if containers:
+            names = ", ".join(name for _, name in containers)
+            print(f"stopping Docker container(s) publishing port {port}: {names}")
+            run(("docker", "stop", "--time", "5", *(container for container, _ in containers)))
+        terminate_processes(listening_pids(port), f"listener(s) on port {port}")
+        if port_has_listener(port):
+            fail(f"port {port} is still occupied, likely by a system process; refusing to use sudo")
+
+
+@contextmanager
+def exclusive_lock(path: Path) -> Iterator[None]:
+    ensure_private_directory(path.parent)
+    with path.open("a+") as handle:
+        path.chmod(0o600)
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+def write_state(path: Path, payload: dict[str, object]) -> None:
+    ensure_private_directory(path.parent)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=".dev.", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w") as handle:
+            json.dump(payload, handle, indent=2)
+            handle.write("\n")
+        temporary.chmod(0o600)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def dev_run(command: list[str], explicit_ports: list[int], env_files: list[str]) -> int:
+    if not command:
+        fail("missing command after --")
+    context = RepoContext.discover()
+    ports = {port for port in explicit_ports if 0 < port < 65536}
+    for env_file in env_files:
+        ports.update(parse_env_ports((context.checkout / env_file).resolve()))
+    state_file = context.external_state_dir / "dev.json"
+    lock_file = context.external_state_dir / "dev.lock"
+    with exclusive_lock(lock_file):
+        stop_recorded_dev(state_file, context)
+        free_ports(ports)
+        child = subprocess.Popen(command, cwd=context.checkout, start_new_session=True)
+        child_start = process_start_ticks(child.pid)
+        if child_start is None:
+            child.terminate()
+            fail("development command exited before its process identity could be recorded")
+        write_state(
+            state_file,
+            {
+                "helper_pid": os.getpid(),
+                "child_pgid": child.pid,
+                "child_start_ticks": child_start,
+                "boot_id": boot_id(),
+                "repository": str(context.common_root),
+                "scope": context.scope,
+                "ports": sorted(ports),
+                "executable": Path(command[0]).name,
+                "started_at": int(time.time()),
+            },
+        )
+
+    def forward(signum: int, _frame: object) -> None:
+        try:
+            os.killpg(child.pid, signum)
+        except ProcessLookupError:
+            pass
+
+    previous = {
+        sig: signal.signal(sig, forward)
+        for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
+    }
+    try:
+        return child.wait()
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
+        with exclusive_lock(lock_file):
+            try:
+                record = json.loads(state_file.read_text())
+            except (OSError, json.JSONDecodeError):
+                record = {}
+            if record.get("helper_pid") == os.getpid():
+                state_file.unlink(missing_ok=True)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="jp", description=__doc__)
+    subcommands = parser.add_subparsers(dest="command", required=True)
+
+    worktree = subcommands.add_parser("worktree", help="manage .worktrees checkouts")
+    worktree_commands = worktree.add_subparsers(dest="worktree_command", required=True)
+    add = worktree_commands.add_parser("add")
+    add.add_argument("name")
+    add.add_argument("--branch")
+    add.add_argument("--start", default="HEAD")
+    remove = worktree_commands.add_parser("remove")
+    remove.add_argument("name")
+    remove.add_argument("--force", action="store_true")
+    worktree_commands.add_parser("list")
+
+    environment = subcommands.add_parser("env", help="manage central environment files")
+    env_commands = environment.add_subparsers(dest="env_command", required=True)
+    env_commands.add_parser("centralize")
+    env_commands.add_parser("path")
+
+    state = subcommands.add_parser("state", help="show external state location")
+    state.add_argument("action", choices=("path",))
+
+    dev = subcommands.add_parser("dev", help="replace port conflicts and run a dev command")
+    dev.add_argument("--port", type=int, action="append", default=[])
+    dev.add_argument("--env-file", action="append", default=[])
+    dev.add_argument("remainder", nargs=argparse.REMAINDER)
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "worktree":
+            if args.worktree_command == "add":
+                worktree_add(args.name, args.branch, args.start)
+            elif args.worktree_command == "remove":
+                worktree_remove(args.name, args.force)
+            else:
+                context = RepoContext.discover()
+                git("worktree", "list", cwd=context.common_root)
+            return 0
+        if args.command == "env":
+            context = RepoContext.discover()
+            if args.env_command == "centralize":
+                count = EnvironmentStore(context).centralize()
+                print(f"centralized files: {count}")
+            else:
+                print(context.central_env_dir)
+            return 0
+        if args.command == "state":
+            print(RepoContext.discover().external_state_dir)
+            return 0
+        if args.command == "dev":
+            command = list(args.remainder)
+            if command and command[0] == "--":
+                command = command[1:]
+            return dev_run(command, args.port, args.env_file)
+        parser.error("unsupported command")
+    except JpError as error:
+        print(f"jp: {error}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
