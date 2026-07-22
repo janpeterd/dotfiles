@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.81.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-sol",
   "defaultThinkingLevel": "high",
@@ -9,19 +9,16 @@
   "quietStartup": true,
   "treeFilterMode": "no-tools",
   "enabledModels": [
-    "opencode-go/kimi-k2.6",
     "openai-codex/gpt-5.5",
-    "github-copilot/claude-sonnet-4.6",
     "openai-codex/gpt-5.6-sol",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-5.6-luna"
   ],
   "packages": [
     "npm:pi-web-access",
-    "npm:pi-goal"
+    "npm:pi-goal",
+    "git:git@github.com:janpeterd/pinvim.git",
+    "./packages/pi-ask-user"
   ],
-  "extensions": [
-    "/home/jp/Code/Other/pi-nvim/extension.ts"
-  ],
-  "hideThinkingBlock": false
+  "hideThinkingBlock": true
 }
