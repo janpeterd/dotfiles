@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+# Re-run whenever the managed Herdr plugin set changes.
+# plugins: smarzban/herdr-file-viewer
+
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "Skipping Herdr plugins: herdr is not installed" >&2
+  exit 0
+fi
+
+if herdr plugin list --plugin herdr-file-viewer --json \
+  | grep -q '"plugin_id":"herdr-file-viewer"'; then
+  echo "Herdr file viewer plugin is already installed"
+  exit 0
+fi
+
+echo "Installing Herdr file viewer plugin"
+herdr plugin install smarzban/herdr-file-viewer --yes

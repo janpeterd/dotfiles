@@ -63,12 +63,17 @@ help           = "prefix+?"
 reload_config  = "prefix+shift+r"
 
 # === CUSTOM COMMANDS ===
-# Optional: sesh launcher (matching your tmux prefix+f binding)
-# [[keys.command]]
-# key = "prefix+f"
-# type = "pane"
-# command = "sesh connect \"$(sesh list -i  | fzf +s --ansi --highlight-line --scheme=path --height=-0)\""
-# description = "sesh session picker"
+[[keys.command]]
+key = "prefix+f"
+type = "plugin_action"
+command = "herdr-file-viewer.open-file-viewer"
+description = "open file viewer in split"
+
+[[keys.command]]
+key = "prefix+shift+f"
+type = "plugin_action"
+command = "herdr-file-viewer.open-file-viewer-tab"
+description = "open file viewer in tab"
 
 [ui]
 agent_panel_scope = "all"
