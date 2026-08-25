@@ -19,6 +19,7 @@ input {
 }
 
 workspace "common"
+workspace "scratchpad"
 workspace "2"
 workspace "3"
 workspace "4"
@@ -114,20 +115,30 @@ prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 animations {
-  off
-  // slowdown 0.5
+  // off
+  slowdown 0.5
 }
 
 
 
 window-rule {
     match app-id="^kitty$"
+    match app-id="^ghostty$"
 
     background-effect {
         blur true
     }
 }
 
+
+window-rule {
+  // Quake-style terminal, anchored across the top of the screen.
+  match app-id="^dropdown$"
+  open-floating true
+  default-floating-position x=0 y=0 relative-to="top"
+  default-column-width { proportion 0.8; }
+  default-window-height { proportion 0.5; }
+}
 
 window-rule {
   match app-id=r#"^org\.wezfurlong\.wezterm$"#
@@ -185,6 +196,7 @@ window-rule {
   match app-id="^com.github.hluk.copyq$"
   match app-id="^zenity$"
   match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+  match title="^Picture in picture$"
 
   open-floating true
   open-focused true
@@ -273,6 +285,7 @@ binds {
   Mod+Shift+Slash { show-hotkey-overlay; }
 
   Mod+Return { spawn "kitty"; }
+  Mod+Alt+Return hotkey-overlay-title="Quake Terminal" { spawn "~/.local/bin/niri-quake"; }
   Mod+E { spawn "kitty" "-e" "yazi"; }
   Mod+Shift+E { spawn "nautilus"; }
   Mod+N { spawn "kitty" "-e" "nvim"; }
@@ -445,6 +458,11 @@ binds {
   Mod+F { maximize-column; }
   Mod+Shift+F { fullscreen-window; }
   Mod+Ctrl+F { toggle-windowed-fullscreen;  }
+
+  // Reading mode: a centered floating window.
+  Mod+Alt+R hotkey-overlay-title="Reading Mode" {
+    spawn-sh "niri msg action move-window-to-floating && sleep 0.1 && niri msg action set-window-width 66.66667% && niri msg action set-window-height 95% && sleep 0.1 && niri msg action center-window && niri msg action toggle-windowed-fullscreen";
+  }
 
   Mod+V { expand-column-to-available-width; }
   Mod+Ctrl+V hotkey-overlay-title="Handy: toggle transcription" { spawn "handy" "--toggle-transcription"; }

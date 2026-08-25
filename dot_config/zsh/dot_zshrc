@@ -169,6 +169,7 @@ export FPATH=$ZDOTDIR/completions:$FPATH
 
 
 export PATH="/home/jp/.bun/bin:$PATH"
+export PATH="$HOME/.nub/bin:$PATH"
 export PATH="/home/jp/.npm-global/bin:$PATH"
 export PATH="/home/jp/go/bin:$PATH"
 

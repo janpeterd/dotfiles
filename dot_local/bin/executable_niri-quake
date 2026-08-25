@@ -1,0 +1,21 @@
+#!/bin/sh
+
+windows=$(niri msg --json windows)
+id=$(printf '%s' "$windows" | jq -r '[.[] | select(.app_id == "dropdown")][0].id // empty')
+
+if [ -z "$id" ]; then
+  exec kitty --class dropdown
+fi
+
+workspace_id=$(printf '%s' "$windows" | jq -r --argjson id "$id" '.[] | select(.id == $id) | .workspace_id')
+scratchpad_id=$(niri msg --json workspaces | jq -r '.[] | select(.name == "scratchpad") | .id')
+
+if [ "$workspace_id" = "$scratchpad_id" ]; then
+  target=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | (.name // (.idx | tostring))')
+  niri msg action move-window-to-workspace --window-id "$id" --focus false "$target"
+  niri msg action focus-window --id "$id"
+elif [ "$(niri msg --json focused-window | jq -r '.id // empty')" = "$id" ]; then
+  niri msg action move-window-to-workspace --window-id "$id" --focus false scratchpad
+else
+  niri msg action focus-window --id "$id"
+fi
