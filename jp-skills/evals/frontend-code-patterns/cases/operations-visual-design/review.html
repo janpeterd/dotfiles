@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Operations visual-design blinded review</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 0; padding: 2rem; background: Canvas; color: CanvasText; }
+      main { max-width: 96rem; margin: auto; }
+      header, section { margin-bottom: 3rem; }
+      h1, h2, h3 { line-height: 1.2; }
+      p, li { max-width: 72ch; line-height: 1.55; }
+      .variants { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+      .variant { min-width: 0; }
+      figure { margin: 0 0 1.5rem; }
+      figcaption { margin-bottom: 0.5rem; font-weight: 600; }
+      img { display: block; width: 100%; height: auto; border: 1px solid ButtonBorder; background: Canvas; }
+      .mobile { max-width: 24rem; }
+      .score { padding-left: 1.25rem; }
+      @media (max-width: 70rem) { .variants { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Operations visual-design blinded review</h1>
+        <p>Review A, B, and C within each model independently. Do not open <code>review-key.md</code> until you have recorded your preference. All implementations used the same prompt, data, viewport sizes, themes, and deterministic checks.</p>
+        <h2>Questions</h2>
+        <ol class="score">
+          <li>Which first viewport makes the run needing attention and the investigation path clearest?</li>
+          <li>Which feels like one engineering workspace instead of assembled dashboard cards?</li>
+          <li>Which uses hierarchy before surfaces, borders, badges, icons, and color?</li>
+          <li>Which has the strongest peer alignment and long-value handling?</li>
+          <li>Which mobile version recomposes most intentionally?</li>
+          <li>Which preserves equivalent hierarchy in light and dark themes?</li>
+          <li>What is the highest-impact defect that remains in each variant?</li>
+        </ol>
+      </header>
+
+      <section>
+        <h2>Model 1</h2>
+        <div class="variants">
+          <article class="variant">
+            <h3>Variant A</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T124235Z-operations-visual-design-prior-opencode-go-glm-5.3-flash-1-57e2/workspace/artifacts/desktop-light.png" alt="Model 1 variant A desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T124235Z-operations-visual-design-prior-opencode-go-glm-5.3-flash-1-57e2/workspace/artifacts/desktop-dark.png" alt="Model 1 variant A desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T124235Z-operations-visual-design-prior-opencode-go-glm-5.3-flash-1-57e2/workspace/artifacts/mobile-light.png" alt="Model 1 variant A mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T124235Z-operations-visual-design-prior-opencode-go-glm-5.3-flash-1-57e2/workspace/artifacts/mobile-dark.png" alt="Model 1 variant A mobile dark"></figure>
+          </article>
+          <article class="variant">
+            <h3>Variant B</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T124815Z-operations-visual-design-candidate-opencode-go-glm-5.3-flash-1-5bf0/workspace/artifacts/desktop-light.png" alt="Model 1 variant B desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T124815Z-operations-visual-design-candidate-opencode-go-glm-5.3-flash-1-5bf0/workspace/artifacts/desktop-dark.png" alt="Model 1 variant B desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T124815Z-operations-visual-design-candidate-opencode-go-glm-5.3-flash-1-5bf0/workspace/artifacts/mobile-light.png" alt="Model 1 variant B mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T124815Z-operations-visual-design-candidate-opencode-go-glm-5.3-flash-1-5bf0/workspace/artifacts/mobile-dark.png" alt="Model 1 variant B mobile dark"></figure>
+          </article>
+          <article class="variant">
+            <h3>Variant C</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T123854Z-operations-visual-design-absent-opencode-go-glm-5.3-flash-1-4428/workspace/artifacts/desktop-light.png" alt="Model 1 variant C desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T123854Z-operations-visual-design-absent-opencode-go-glm-5.3-flash-1-4428/workspace/artifacts/desktop-dark.png" alt="Model 1 variant C desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T123854Z-operations-visual-design-absent-opencode-go-glm-5.3-flash-1-4428/workspace/artifacts/mobile-light.png" alt="Model 1 variant C mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T123854Z-operations-visual-design-absent-opencode-go-glm-5.3-flash-1-4428/workspace/artifacts/mobile-dark.png" alt="Model 1 variant C mobile dark"></figure>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Model 2</h2>
+        <div class="variants">
+          <article class="variant">
+            <h3>Variant A</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T130705Z-operations-visual-design-candidate-openai-codex-gpt-5.6-sol-1-8888/workspace/artifacts/desktop-light.png" alt="Model 2 variant A desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T130705Z-operations-visual-design-candidate-openai-codex-gpt-5.6-sol-1-8888/workspace/artifacts/desktop-dark.png" alt="Model 2 variant A desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T130705Z-operations-visual-design-candidate-openai-codex-gpt-5.6-sol-1-8888/workspace/artifacts/mobile-light.png" alt="Model 2 variant A mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T130705Z-operations-visual-design-candidate-openai-codex-gpt-5.6-sol-1-8888/workspace/artifacts/mobile-dark.png" alt="Model 2 variant A mobile dark"></figure>
+          </article>
+          <article class="variant">
+            <h3>Variant B</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T125602Z-operations-visual-design-absent-openai-codex-gpt-5.6-sol-1-9550/workspace/artifacts/desktop-light.png" alt="Model 2 variant B desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T125602Z-operations-visual-design-absent-openai-codex-gpt-5.6-sol-1-9550/workspace/artifacts/desktop-dark.png" alt="Model 2 variant B desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T125602Z-operations-visual-design-absent-openai-codex-gpt-5.6-sol-1-9550/workspace/artifacts/mobile-light.png" alt="Model 2 variant B mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T125602Z-operations-visual-design-absent-openai-codex-gpt-5.6-sol-1-9550/workspace/artifacts/mobile-dark.png" alt="Model 2 variant B mobile dark"></figure>
+          </article>
+          <article class="variant">
+            <h3>Variant C</h3>
+            <figure><figcaption>Desktop light</figcaption><img src="../../../../runs/20260901T130031Z-operations-visual-design-prior-openai-codex-gpt-5.6-sol-1-6606/workspace/artifacts/desktop-light.png" alt="Model 2 variant C desktop light"></figure>
+            <figure><figcaption>Desktop dark</figcaption><img src="../../../../runs/20260901T130031Z-operations-visual-design-prior-openai-codex-gpt-5.6-sol-1-6606/workspace/artifacts/desktop-dark.png" alt="Model 2 variant C desktop dark"></figure>
+            <figure class="mobile"><figcaption>Mobile light</figcaption><img src="../../../../runs/20260901T130031Z-operations-visual-design-prior-openai-codex-gpt-5.6-sol-1-6606/workspace/artifacts/mobile-light.png" alt="Model 2 variant C mobile light"></figure>
+            <figure class="mobile"><figcaption>Mobile dark</figcaption><img src="../../../../runs/20260901T130031Z-operations-visual-design-prior-openai-codex-gpt-5.6-sol-1-6606/workspace/artifacts/mobile-dark.png" alt="Model 2 variant C mobile dark"></figure>
+          </article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

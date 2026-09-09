@@ -1,0 +1,1 @@
+Add an optional `display_name` to this transient HTTP response model while keeping existing response payloads valid. Nothing produced by this model is persisted. Make the tests pass without changing unrelated code.

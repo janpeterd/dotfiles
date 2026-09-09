@@ -1,0 +1,33 @@
+{
+  "name": "compatibility-fallbacks",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports findings without editing the fixture."
+    },
+    {
+      "id": "compatibility",
+      "criterion": "The reviewer removes the legacy re-export and forwarding wrapper because every repository caller is controlled and no external compatibility contract is requested."
+    },
+    {
+      "id": "fallback",
+      "criterion": "The reviewer identifies that displaying an unknown status as queued invents domain state and proposes an explicit unknown or unsupported result instead."
+    },
+    {
+      "id": "boundary",
+      "criterion": "The reviewer preserves validation at the external status boundary rather than replacing it with a cast or silent default."
+    },
+    {
+      "id": "proof",
+      "criterion": "Each cut names the smaller implementation and the behavioral evidence that must survive."
+    },
+    {
+      "id": "repository-guidance",
+      "criterion": "The review reads CONTEXT.md and CODING_STANDARDS.md and applies their hard-cutover and unknown-state conventions without treating those filenames as mandatory dependencies."
+    }
+  ]
+}

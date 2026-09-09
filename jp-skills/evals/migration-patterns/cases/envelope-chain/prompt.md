@@ -1,0 +1,1 @@
+Runs persisted by older releases contain logical-plan JSON that the current code can no longer read. Add a migration path for the supplied v1 and v2 examples so callers receive the current v3 JSON shape. These documents remain in database cells and may be stale for years. Keep ordinary reads free of database writes and make malformed or newer documents fail clearly.

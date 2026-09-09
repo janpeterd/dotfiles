@@ -1,0 +1,1 @@
+Add the optional `label` field to stored jobs. This application supports SQLite for local use and PostgreSQL in deployments. SQLite can alter the table directly in this fixture, while PostgreSQL requires the supplied guarded operation. Preserve existing records, support rollback, and add integration coverage. Existing deployed migration history must remain valid.

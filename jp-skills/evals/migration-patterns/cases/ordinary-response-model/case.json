@@ -1,0 +1,21 @@
+{
+  "name": "ordinary-response-model",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest discover -s tests -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "The response model accepts the new optional display_name and existing payloads remain valid."
+    },
+    {
+      "id": "inactive-envelope",
+      "criterion": "No schema_version, envelope registry, migration directory, or historical fixture is added for a transient HTTP response model."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The solution changes only the response model and its direct tests."
+    }
+  ]
+}

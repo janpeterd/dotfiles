@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (( $# != 3 )); then
+  printf 'usage: %s CASE_DIR PROPOSED_SKILL PRIOR_SKILL_OR_DASH\n' "$0" >&2
+  exit 2
+fi
+
+case_dir=$(realpath "$1")
+proposed=$(realpath "$2")
+prior=$3
+if [[ "$prior" != - ]]; then
+  prior=$(realpath "$prior")
+fi
+
+models=${BAKEOFF_MODELS:-openai-codex/gpt-5.6-sol,anthropic/claude-sonnet-4-6}
+trials=${BAKEOFF_TRIALS:-2}
+concurrency=${BAKEOFF_CONCURRENCY:-4}
+IFS=, read -r -a model_entries <<<"$models"
+
+providers=()
+for entry in "${model_entries[@]}"; do
+  if [[ "$entry" != */* ]]; then
+    printf 'model must include provider: %s\n' "$entry" >&2
+    exit 2
+  fi
+  provider=${entry%%/*}
+  [[ " ${providers[*]} " == *" $provider "* ]] || providers+=("$provider")
+done
+if (( ${#providers[@]} < 2 )); then
+  printf 'bakeoff requires at least two model families\n' >&2
+  exit 2
+fi
+
+for provider in "${providers[@]}"; do
+  pi auth check --provider "$provider" --no-refresh >/dev/null
+done
+
+case_name=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["name"])' "$case_dir/case.json")
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+root="runs/bakeoff-${stamp}-${case_name}"
+mkdir -p "$root"
+printf 'arm\tprovider\tmodel\ttrial\tstatus\tresult\n' >"$root/index.tsv"
+
+arms=(absent proposed)
+skills=(- "$proposed")
+if [[ "$prior" != - ]]; then
+  arms+=(prior)
+  skills+=("$prior")
+else
+  printf 'prior arm omitted: this run cannot promote a revision\n' >"$root/notice.txt"
+fi
+
+run_trial() {
+  local arm=$1 skill=$2 provider=$3 model=$4 trial=$5 output status
+  if [[ ${BAKEOFF_DRY_RUN:-0} == 1 ]]; then
+    printf '%s\t%s\t%s\t%s\t0\tdry-run\n' "$arm" "$provider" "$model" "$trial" >>"$root/index.tsv"
+    return
+  fi
+  if [[ "$skill" == - ]]; then
+    if output=$(CASE_ARM="$arm" CASE_TRIAL="$trial" CASE_PROVIDER="$provider" CASE_MODEL="$model" RUN_ROOT="$root" ./scripts/run-case "$case_dir"); then
+      status=0
+    else
+      status=$?
+    fi
+  else
+    if output=$(CASE_ARM="$arm" CASE_TRIAL="$trial" CASE_PROVIDER="$provider" CASE_MODEL="$model" RUN_ROOT="$root" ./scripts/run-case "$case_dir" "$skill"); then
+      status=0
+    else
+      status=$?
+    fi
+  fi
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$arm" "$provider" "$model" "$trial" "$status" "$output" >>"$root/index.tsv"
+}
+
+for index in "${!arms[@]}"; do
+  for entry in "${model_entries[@]}"; do
+    provider=${entry%%/*}
+    model=${entry#*/}
+    for trial in $(seq 1 "$trials"); do
+      run_trial "${arms[$index]}" "${skills[$index]}" "$provider" "$model" "$trial" &
+      while (( $(jobs -rp | wc -l) >= concurrency )); do
+        wait -n || true
+      done
+    done
+  done
+done
+wait || true
+
+printf '%s\n' "$root"

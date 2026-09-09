@@ -1,0 +1,33 @@
+{
+  "name": "adapter-contract-owner",
+  "engagement": "positive",
+  "source": {
+    "repository": "geoflow-core",
+    "commit": "dbc8b0fe"
+  },
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Imports succeed, tests pass, and planned contracts remain serializable."
+    },
+    {
+      "id": "ownership",
+      "criterion": "The Adapter module owns the planned contract and the rules that create and validate it."
+    },
+    {
+      "id": "consumer",
+      "criterion": "Planning stores the contract without owning or repeating Adapter semantics."
+    },
+    {
+      "id": "deletion",
+      "criterion": "The forwarding value_signature module is deleted rather than preserved through lazy imports."
+    },
+    {
+      "id": "minimal",
+      "criterion": "No service layer, registry abstraction, or dependency injection mechanism is added."
+    }
+  ]
+}

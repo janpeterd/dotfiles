@@ -1,0 +1,25 @@
+{
+  "name": "callback-query",
+  "engagement": "positive",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Encoded values, fragments, missing values, and similarly named parameters produce the tested results."
+    },
+    {
+      "id": "structured-parser",
+      "criterion": "The implementation uses the platform URL parser rather than extending the regular expression."
+    },
+    {
+      "id": "contract",
+      "criterion": "The public function signature and null behavior remain unchanged."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The change adds no query parser, decoding helper, or dependency."
+    }
+  ]
+}

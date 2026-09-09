@@ -1,0 +1,1 @@
+An Operator loaded from a plugin works at first, but planning raises `NameError` after the plugin loader releases its module globals. Secret validation and execution can fail on the same postponed annotations. Fix the plugin Operator lifecycle. Keep the `@operator` authoring API and run the tests.

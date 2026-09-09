@@ -1,0 +1,1 @@
+Update this Vite React application so new and existing components receive the standard automatic React optimization during builds. Keep the current Vite React plugin generation and pnpm workflow. Add a lightweight project check that prevents the optimization from being accidentally disconnected later.

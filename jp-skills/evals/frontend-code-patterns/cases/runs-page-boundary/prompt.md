@@ -1,0 +1,3 @@
+The runs screen has become difficult to change safely. Loading can briefly look like an empty result, errors are mixed into the content tree, and routing, fetching, filtering, status presentation, and table markup all live together. Copying the URL also loses the current search, status filter, and sort order.
+
+Refactor this screen so its ownership is obvious, its current view can be shared by URL, and the runs content arrives in a coherent state. Keep the existing shell mounted, preserve the tested filtering and sorting behavior, and keep navigation intuitive on both narrow and wide screens. Use the libraries already declared in `package.json`. Do not change the API contract.

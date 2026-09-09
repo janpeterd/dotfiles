@@ -1,0 +1,41 @@
+{
+  "name": "service-lifecycle-coverage",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports findings without editing the fixture."
+    },
+    {
+      "id": "coverage-map",
+      "criterion": "Before concluding, the reviewer inventories and reports the monitoring evaluation, alert-policy mutation, and delivery lifecycles as separate semantic cores."
+    },
+    {
+      "id": "traces",
+      "criterion": "Every semantic core has a public-input-to-observable-result trace and a CUT, SIMPLIFY, KEEP, or UNPROVEN outcome."
+    },
+    {
+      "id": "monitoring-algorithm",
+      "criterion": "The reviewer finds that monitoring reloads and rescans the complete sensor snapshot for every topic and proposes one indexed snapshot without duplicating state ownership."
+    },
+    {
+      "id": "alerting-owner",
+      "criterion": "The reviewer finds that callers own the repeated begin, mutate, reconcile, audit, commit, and rollback protocol and proposes one transaction-owning alert-policy operation."
+    },
+    {
+      "id": "delivery-keep",
+      "criterion": "The reviewer preserves the delivery idempotency guard and failure recording, or marks a proposed removal unsafe."
+    },
+    {
+      "id": "no-hygiene-stop",
+      "criterion": "The reviewer may report the unused helper but does not let that mechanical cleanup substitute for lifecycle analysis."
+    },
+    {
+      "id": "complete",
+      "criterion": "The reviewer reports all high-confidence findings discovered in the fixture and does not present an untraced subsystem as wholesale KEEP."
+    }
+  ]
+}

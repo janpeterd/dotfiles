@@ -1,0 +1,37 @@
+{
+  "name": "composite-alerting-system",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "recursive-split",
+      "criterion": "The reviewer rejects alerting as one branch and recursively separates policy mutation, observation evaluation, incident transition, and external delivery lifecycles; SPLIT is an intermediate routing result rather than the final report."
+    },
+    {
+      "id": "sequential-contexts",
+      "criterion": "Child lifecycles are reviewed sequentially, using a fresh context and compact parent handoff when the agent environment supports it."
+    },
+    {
+      "id": "semantic-inventory",
+      "criterion": "The reviewer uses ast-grep when available to enumerate definitions, callers, state writes, and external-effect boundaries, then reads the matched control flow; ripgrep is used for lexical discovery rather than as semantic proof."
+    },
+    {
+      "id": "algorithm-trace",
+      "criterion": "Each child records its public input, complete transition or algorithm, canonical and derived state, external effects, failure paths, and dominant work before receiving a verdict."
+    },
+    {
+      "id": "descent-bar",
+      "criterion": "A child receives DESCEND only after the complete trace supports it; incomplete children remain SPLIT or UNPROVEN."
+    },
+    {
+      "id": "unproven-bar",
+      "criterion": "UNPROVEN is reserved for evidence that remains unavailable after an explicit inspection attempt, not for accessible child lifecycles the reviewer deferred."
+    },
+    {
+      "id": "no-sampling",
+      "criterion": "The reviewer does not infer the design of one child from a representative file belonging to another child."
+    }
+  ]
+}

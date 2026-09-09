@@ -1,0 +1,25 @@
+{
+  "name": "cohesive-lifecycle",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer does not edit the fixture."
+    },
+    {
+      "id": "descend",
+      "criterion": "The reviewer returns DESCEND because one module owns observation, missing-data, incident, and outbox transitions."
+    },
+    {
+      "id": "preserve",
+      "criterion": "The reviewer preserves the explicit durable outbox and incident state rather than flattening them into immediate notification side effects."
+    },
+    {
+      "id": "no-speculation",
+      "criterion": "The reviewer does not introduce an event bus, repository hierarchy, plugin seam, or separate state machine framework."
+    }
+  ]
+}

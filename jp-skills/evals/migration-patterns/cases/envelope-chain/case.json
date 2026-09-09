@@ -1,0 +1,33 @@
+{
+  "name": "envelope-chain",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest discover -s tests -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Historical v1 and v2 fixtures migrate one step at a time to the validated current v3 document."
+    },
+    {
+      "id": "interface",
+      "criterion": "One pure JSON-object-in, JSON-object-out function hides registry traversal and validation."
+    },
+    {
+      "id": "versioning",
+      "criterion": "Every envelope has an integer schema_version and every migration advances exactly one version."
+    },
+    {
+      "id": "safety",
+      "criterion": "The input is not mutated; missing, malformed, unsupported, and future versions fail clearly."
+    },
+    {
+      "id": "forward-only",
+      "criterion": "Envelope migration is forward-only and performs no database access or implicit write-back."
+    },
+    {
+      "id": "layout",
+      "criterion": "Registry, schemas, and append-only version steps live under migrations/envelopes."
+    }
+  ]
+}

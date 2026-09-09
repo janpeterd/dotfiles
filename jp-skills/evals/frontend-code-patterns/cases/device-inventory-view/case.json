@@ -1,0 +1,25 @@
+{
+  "name": "device-inventory-view",
+  "engagement": "positive",
+  "checks": [
+    "node --experimental-strip-types --test tests/*.test.ts"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Device search, health filtering, and name sorting retain the tested behavior."
+    },
+    {
+      "id": "shareable-view",
+      "criterion": "The meaningful inventory view state is validated and stored in URL search parameters, so refresh, history navigation, and a copied URL restore the same view."
+    },
+    {
+      "id": "local-state",
+      "criterion": "Ephemeral interaction state stays local rather than being added to the URL."
+    },
+    {
+      "id": "scope",
+      "criterion": "The solution does not add unrelated routing, query, form, or design abstractions."
+    }
+  ]
+}

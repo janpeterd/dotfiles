@@ -1,0 +1,25 @@
+{
+  "name": "codec-variant",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Both codecs round-trip values and the tests pass."
+    },
+    {
+      "id": "preserve-seam",
+      "criterion": "The existing Codec contract remains because two concrete storage representations genuinely vary."
+    },
+    {
+      "id": "shared-path",
+      "criterion": "save and load remain generic and contain no codec-specific branch."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The implementation uses json and gzip from the standard library without new framework code."
+    }
+  ]
+}

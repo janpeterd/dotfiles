@@ -1,0 +1,1 @@
+Adapter registration and value planning now fail during import because `planning`, `value_signature`, and `adapters` depend on each other. Fix the cycle. Planned Adapter contracts must remain serializable, and Adapter key validation must use the same rules as registration. Keep `register_adapter()` and `plan_value()` as the public entry points. Run the tests.

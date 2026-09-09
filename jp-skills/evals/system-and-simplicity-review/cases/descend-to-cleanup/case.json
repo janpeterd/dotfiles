@@ -1,0 +1,29 @@
+{
+  "name": "descend-to-cleanup",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "system-first",
+      "criterion": "The workflow first confirms that IncidentLifecycle is the canonical state and transition owner."
+    },
+    {
+      "id": "handoff",
+      "criterion": "The system stage returns DESCEND with the lifecycle invariants as a compact handoff."
+    },
+    {
+      "id": "simplicity-second",
+      "criterion": "Only then does the simplicity stage identify IncidentFacade as a one-use forwarding module that can be deleted."
+    },
+    {
+      "id": "preserve",
+      "criterion": "The recommendation preserves idempotency, recovery, and durable outbox intent through the IncidentLifecycle interface."
+    },
+    {
+      "id": "sequential",
+      "criterion": "The two stages run sequentially and the simplicity reviewer receives only the accepted leaf scope and invariants."
+    }
+  ]
+}

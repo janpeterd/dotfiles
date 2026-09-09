@@ -1,0 +1,29 @@
+{
+  "name": "tailwind-formatter",
+  "engagement": "positive",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "formatter-owner",
+      "criterion": "The formatter configuration owns Tailwind class ordering rather than documentation or manual editing instructions."
+    },
+    {
+      "id": "tailwind-v4",
+      "criterion": "Tailwind sorting reads the supplied Tailwind v4 stylesheet."
+    },
+    {
+      "id": "helpers",
+      "criterion": "Class strings passed through the repository's cn and cva helpers are included in formatter sorting."
+    },
+    {
+      "id": "checks",
+      "criterion": "The existing format and format-check scripts remain the single write and CI verification paths."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The solution adds no second formatter, Tailwind lint rule, editor-only workaround, or manual class sorter."
+    }
+  ]
+}

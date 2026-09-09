@@ -1,0 +1,1 @@
+Add a gzip-compressed JSON codec. It must implement the same `Codec` contract as `JsonCodec`, round-trip the same values, and work through the existing `save()` and `load()` functions. Use the Python standard library and run the tests.

@@ -1,0 +1,1 @@
+This pnpm project already uses Oxlint and Oxfmt, but coding agents often finish without applying safe fixes and their final lint output is verbose and easy to misread. Add root project instructions that make the editing workflow consistent and give agents the concise Oxlint reporter intended for them. Keep the existing tools and package manager.

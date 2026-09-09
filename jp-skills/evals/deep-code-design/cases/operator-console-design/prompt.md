@@ -1,0 +1,1 @@
+Design the incident workflow described in `brief.md`. Write the proposed product flow and software architecture to `proposal.md`. The first release should be small, but it must leave a clear path for the listed operational requirements.

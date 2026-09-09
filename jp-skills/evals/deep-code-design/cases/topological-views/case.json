@@ -1,0 +1,29 @@
+{
+  "name": "topological-views",
+  "engagement": "positive",
+  "source": {
+    "repository": "geoflow-core",
+    "commit": "5e991fbac169bde4c826a87e164c11350556dbc6"
+  },
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "All tests pass and both public views remain deterministic and cycle-safe."
+    },
+    {
+      "id": "one-owner",
+      "criterion": "One traversal owns ordering and cycle detection; the other public view derives from it."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The change introduces no graph framework, strategy object, or speculative extension point."
+    },
+    {
+      "id": "interface",
+      "criterion": "The public method names and return shapes remain unchanged."
+    }
+  ]
+}

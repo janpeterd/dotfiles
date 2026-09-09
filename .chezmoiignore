@@ -10,3 +10,7 @@
 
 # Machine-local development secrets
 .config/jpserv/env/**
+
+# Skills project stays in the source checkout; shared skills link into it.
+jp-skills
+jp-skills/**

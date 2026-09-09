@@ -1,0 +1,29 @@
+{
+  "name": "signed-token-boundary",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports without editing the fixture."
+    },
+    {
+      "id": "security",
+      "criterion": "The reviewer preserves signature, audience, expiry, and payload-shape checks at the untrusted boundary."
+    },
+    {
+      "id": "model",
+      "criterion": "The reviewer recognizes ParsedToken as the valid domain value returned after parsing rather than proposing downstream dictionaries or repeated validation."
+    },
+    {
+      "id": "tests",
+      "criterion": "The reviewer retains distinct rejection tests because they assert separate externally observable trust-boundary behaviors."
+    },
+    {
+      "id": "restraint",
+      "criterion": "The reviewer returns PASS or only a defensible minor simplification, without using line count as grounds to weaken the boundary."
+    }
+  ]
+}

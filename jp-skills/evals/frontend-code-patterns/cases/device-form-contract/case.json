@@ -1,0 +1,44 @@
+{
+  "name": "device-form-contract",
+  "engagement": "positive",
+  "source": {
+    "repository": "iow_frontend",
+    "paths": [
+      "src/hooks/deploymentHooks.ts",
+      "src/components/form/DeploymentForm.tsx"
+    ]
+  },
+  "checks": [
+    "node --experimental-strip-types --test tests/*.test.ts"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "The tested normalization and API payload behavior remain correct."
+    },
+    {
+      "id": "schema-owner",
+      "criterion": "A Zod schema is the runtime validation source and the form value type is derived from it rather than repeated."
+    },
+    {
+      "id": "form-owner",
+      "criterion": "A focused form hook under the hooks directory owns TanStack Form setup, validation, normalization, and submission orchestration. Hook subdirectories appear only when project size makes a flat hooks directory difficult to navigate."
+    },
+    {
+      "id": "component-contract",
+      "criterion": "The form component receives typed initial values, onSubmit, and onCancel callbacks through a named interface without deciding navigation or mutation side effects."
+    },
+    {
+      "id": "layout",
+      "criterion": "The form uses one shared layout and action arrangement rather than recreating field spacing and buttons locally."
+    },
+    {
+      "id": "typing",
+      "criterion": "The implementation introduces no any, broad object type, unchecked cast, non-null assertion, or long-lived unknown value."
+    },
+    {
+      "id": "effects",
+      "criterion": "Derived defaults and prop changes are handled through initialization, controlled state, keys, or event logic rather than synchronization Effects."
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "operations-visual-design",
+  "engagement": "positive",
+  "checks": [
+    "pnpm install --frozen-lockfile",
+    "pnpm run build",
+    "bash tests/capture-screenshots.sh"
+  ],
+  "rubric": [
+    {
+      "id": "primary-job",
+      "criterion": "The first viewport makes the run requiring attention and the primary investigation action immediately apparent."
+    },
+    {
+      "id": "composition",
+      "criterion": "The page uses an open canvas and separators; the run list, filters, and summary data are not enclosed in decorative cards or containers."
+    },
+    {
+      "id": "hierarchy",
+      "criterion": "Typography, spacing, alignment, and density establish hierarchy before borders, surfaces, badges, or color."
+    },
+    {
+      "id": "peers",
+      "criterion": "Repeated run rows share type roles, baselines, value positions, action alignment, and a stable row height regardless of name length."
+    },
+    {
+      "id": "responsive",
+      "criterion": "Desktop and mobile are intentional compositions with no horizontal overflow, clipped controls, or character-level wrapping."
+    },
+    {
+      "id": "themes",
+      "criterion": "Light and dark screenshots preserve equivalent hierarchy, contrast, and state meaning."
+    },
+    {
+      "id": "remote-data",
+      "criterion": "Adversarial remote names are safely constrained while the full value remains available."
+    },
+    {
+      "id": "restraint",
+      "criterion": "Cards, borders, badges, icons, and color appear only where they communicate grouping, interaction, or state."
+    },
+    {
+      "id": "language",
+      "criterion": "The page defaults to one title without a generic subtitle or eyebrow, uses natural case, and omits opaque run IDs from the normal reading path."
+    },
+    {
+      "id": "controls",
+      "criterion": "Controls use established primitives through their intended public composition APIs when the fixture provides them; the implementation does not rebuild their chevrons, icon placement, focus behavior, or interaction state."
+    },
+    {
+      "id": "summary",
+      "criterion": "The implementation removes the ceremonial stat strip and keeps only decision-relevant summary information near the run list."
+    },
+    {
+      "id": "evidence",
+      "criterion": "The trial produces desktop and mobile screenshots in light and dark themes for blinded review."
+    }
+  ]
+}

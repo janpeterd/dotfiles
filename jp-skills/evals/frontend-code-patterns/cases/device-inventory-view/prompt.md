@@ -1,0 +1,1 @@
+Add a device inventory screen to this TanStack Router app. Operators need to search by device name, filter by health, and switch between ascending and descending name order. Use the supplied selector and sample component as the starting point. Keep the change small and preserve the tested selection behavior.

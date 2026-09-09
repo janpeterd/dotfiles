@@ -1,0 +1,45 @@
+{
+  "name": "graph-rendering-core",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports findings without editing the fixture."
+    },
+    {
+      "id": "trace",
+      "criterion": "The reviewer traces the graph from external nodes and edges through validation, ranking, and rendering rather than stopping at local cleanup."
+    },
+    {
+      "id": "algorithm",
+      "criterion": "The reviewer identifies that ranks and ordered nodes are computed by two independent topological traversals with duplicated cycle handling."
+    },
+    {
+      "id": "representation",
+      "criterion": "The reviewer challenges the three overlapping graph representations and proposes one validated graph owner with derived layout and render views."
+    },
+    {
+      "id": "proof",
+      "criterion": "The proposed simplification preserves deterministic order, ranks, cycle rejection, and rendered output, naming the behavioral tests as evidence."
+    },
+    {
+      "id": "grouping",
+      "criterion": "The report groups the duplicated traversal and graph representations as one graph-processing recommendation rather than unrelated numbered findings."
+    },
+    {
+      "id": "visual",
+      "criterion": "The substantial recommendation includes concise pseudocode or a data-flow diagram that makes the current duplication and proposed single owner understandable; trivial cleanup receives no decorative diagram."
+    },
+    {
+      "id": "library-proof",
+      "criterion": "Any recommendation to replace local graph behavior with library behavior identifies the installed library version and cites the matching public API in official documentation or versioned source; memory and search snippets are insufficient."
+    },
+    {
+      "id": "no-regression",
+      "criterion": "The proposed shape has one graph state owner and one derivation of order, ranks, and cycle validity; it does not move duplication into synchronized views, repeated traversals, copies, or caller coordination."
+    }
+  ]
+}

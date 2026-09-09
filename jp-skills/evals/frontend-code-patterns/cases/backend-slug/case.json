@@ -1,0 +1,21 @@
+{
+  "name": "backend-slug",
+  "engagement": "negative",
+  "checks": [
+    "node --experimental-strip-types --test tests/*.test.ts"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "The slug helper passes the test for whitespace runs and punctuation."
+    },
+    {
+      "id": "scope",
+      "criterion": "The solution remains a small framework-free utility and does not add React, routing, form, query, schema, component, or styling machinery."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The implementation changes only what the slug behavior requires."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "checksum-library",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Checksum behavior and its public function remain unchanged."
+    },
+    {
+      "id": "restraint",
+      "criterion": "The agent recognizes that the small library is already coherent and does not invent user journeys, error wrappers, aliases, configuration, or documentation structure."
+    },
+    {
+      "id": "truth",
+      "criterion": "The agent does not replace exact byte-oriented terminology with friendlier but less accurate product language."
+    }
+  ]
+}

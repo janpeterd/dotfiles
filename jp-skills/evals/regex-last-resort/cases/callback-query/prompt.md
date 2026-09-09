@@ -1,0 +1,1 @@
+`readProjectFromCallback` returns the wrong project for encoded names, fragments, and parameters whose names merely end in `project`. Fix the helper so the tests pass. Keep its public signature and avoid adding dependencies.

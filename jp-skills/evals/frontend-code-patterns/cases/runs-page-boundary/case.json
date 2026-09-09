@@ -1,0 +1,49 @@
+{
+  "name": "runs-page-boundary",
+  "engagement": "positive",
+  "source": {
+    "repository": "geoflow-webapp",
+    "path": "src/routes/runs.tsx"
+  },
+  "checks": [
+    "node --experimental-strip-types --test tests/*.test.ts"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Filtering, sorting, status labels, and primary row navigation retain the tested behavior."
+    },
+    {
+      "id": "route-owner",
+      "criterion": "The existing TanStack file route remains a createFileRoute module that validates URL search parameters, owns routing concerns, and passes typed routing state to a separate page component; the change does not introduce a centralized createRoute registry."
+    },
+    {
+      "id": "shareable-view",
+      "criterion": "Search text, status filter, and sort order round-trip through the URL, so opening a copied URL restores the same meaningful page view."
+    },
+    {
+      "id": "data-boundary",
+      "criterion": "Remote runs are read through a suspense query below an error boundary, so the content component receives defined data and cannot render a false empty state while loading."
+    },
+    {
+      "id": "page-shape",
+      "criterion": "The page is a readable composition of focused components and local interaction state rather than a route-sized implementation. Each live React component has its own file and one JSX return path, with substantial conditional branches expressed as named components rather than early returns or local render functions."
+    },
+    {
+      "id": "status-owner",
+      "criterion": "One exhaustive definition owns each API status label, icon, and semantic tone used by filters and rows."
+    },
+    {
+      "id": "responsive",
+      "criterion": "The table remains usable on small screens, remote single-line values truncate, and clicking a row performs its primary navigation action."
+    },
+    {
+      "id": "typing",
+      "criterion": "Object-shaped props use named interfaces, schema-derived search types stay inferred, and the change introduces no any, unchecked cast, or non-null assertion."
+    },
+    {
+      "id": "tokens",
+      "criterion": "Styling uses the existing semantic colors and spacing scale without literal colors or arbitrary length values."
+    }
+  ]
+}

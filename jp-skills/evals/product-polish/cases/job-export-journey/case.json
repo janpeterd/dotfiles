@@ -1,0 +1,33 @@
+{
+  "name": "job-export-journey",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "coverage",
+      "criterion": "The agent traces the export journey across CLI invocation, domain status handling, output, errors, help, and README instead of polishing one file."
+    },
+    {
+      "id": "truth",
+      "criterion": "An unknown backend status remains distinguishable from queued and no valid-looking state is invented."
+    },
+    {
+      "id": "language",
+      "criterion": "The CLI uses one domain term for a job and replaces the generic retry message with accurate consequence and recovery guidance."
+    },
+    {
+      "id": "documentation",
+      "criterion": "Help and README use the real command, current terminology, and behavior."
+    },
+    {
+      "id": "verification",
+      "criterion": "Tests cover the public success and unknown-status paths, and the agent exercises the CLI surface rather than relying only on source inspection."
+    },
+    {
+      "id": "scope",
+      "criterion": "The solution does not redesign storage, add a framework, or create a product-description repository."
+    }
+  ]
+}

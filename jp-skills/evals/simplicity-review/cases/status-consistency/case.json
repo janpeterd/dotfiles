@@ -1,0 +1,33 @@
+{
+  "name": "status-consistency",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports findings without editing the fixture."
+    },
+    {
+      "id": "peer-inventory",
+      "criterion": "The reviewer compares list, detail, and audit status presentation as peers for the same lifecycle concept."
+    },
+    {
+      "id": "semantic-consistency",
+      "criterion": "The reviewer identifies divergent status terms, casing, fallback semantics, and presentation patterns as one root inconsistency rather than isolated style nits."
+    },
+    {
+      "id": "canonical-shape",
+      "criterion": "The recommendation chooses one status vocabulary and presentation owner, then migrates every peer instead of adding another adapter or compatibility layer."
+    },
+    {
+      "id": "test-consistency",
+      "criterion": "The reviewer recommends behavior-level peer coverage that proves the same backend state is represented consistently across surfaces."
+    },
+    {
+      "id": "bounded",
+      "criterion": "The reviewer does not demand identical code where audit serialization and user-facing presentation have genuinely different consumers."
+    }
+  ]
+}

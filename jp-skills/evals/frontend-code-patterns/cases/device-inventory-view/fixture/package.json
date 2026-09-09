@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@tanstack/react-router": "^1.0.0",
+    "react": "^19.0.0",
+    "zod": "^4.0.0"
+  }
+}

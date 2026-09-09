@@ -1,0 +1,53 @@
+{
+  "name": "parallel-health-owners",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer does not edit the fixture."
+    },
+    {
+      "id": "outside-in",
+      "criterion": "The review reconstructs the observation, missing-data, incident, notification, and recovery lifecycle from input to operator-visible result."
+    },
+    {
+      "id": "ownership",
+      "criterion": "The reviewer identifies that monitor state and status presentation independently decide whether the same sensor is missing."
+    },
+    {
+      "id": "transition-owner",
+      "criterion": "The reviewer challenges caller-owned coordination across health, incident, and notification state and recommends one semantic owner for the transition."
+    },
+    {
+      "id": "counterfactual",
+      "criterion": "The reviewer compares the current system with a smaller behavior-first shape whose views derive from one authoritative transition path."
+    },
+    {
+      "id": "feature-group",
+      "criterion": "The report is organized under a descriptive monitoring feature heading rather than a numbered list of findings."
+    },
+    {
+      "id": "architecture",
+      "criterion": "Current and proposed architecture diagrams assign every fact, transition, persistence boundary, and external effect to an owner."
+    },
+    {
+      "id": "algorithm",
+      "criterion": "Pseudocode makes the proposed normal, duplicate, notification-failure, and recovery paths concrete enough to evaluate."
+    },
+    {
+      "id": "recommendation",
+      "criterion": "The reviewer recommends one target shape, explains why it is smaller and more correct than the current system, and names the material tradeoff or rejected alternative."
+    },
+    {
+      "id": "verdict",
+      "criterion": "The branch receives REDESIGN rather than a list of local cleanup suggestions."
+    },
+    {
+      "id": "invariants",
+      "criterion": "The target preserves one incident per missing episode, durable notification intent, explicit delivery failure, and recovery."
+    }
+  ]
+}

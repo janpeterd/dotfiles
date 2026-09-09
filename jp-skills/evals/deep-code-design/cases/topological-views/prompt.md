@@ -1,0 +1,1 @@
+The dependency graph exposes both `topological_order()` and `parallel_groups()`. They must remain deterministic, flatten to the same order, and reject cycles consistently. Fix the implementation so these guarantees cannot drift as the graph evolves. Keep the public methods unchanged and run the tests.

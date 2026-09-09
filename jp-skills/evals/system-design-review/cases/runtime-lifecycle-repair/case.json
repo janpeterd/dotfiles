@@ -1,0 +1,25 @@
+{
+  "name": "runtime-lifecycle-repair",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "verdict",
+      "criterion": "The reviewer returns DESCEND with required repairs because the existing lifespan is the correct runtime owner."
+    },
+    {
+      "id": "smallest-repair",
+      "criterion": "The recommendation repairs startup, readiness, and cleanup in the existing lifespan using ordinary structured cleanup such as try/finally or AsyncExitStack."
+    },
+    {
+      "id": "no-runtime-abstraction",
+      "criterion": "The reviewer does not introduce a Runtime, RuntimeManager, composition-root class, worker framework, or new durable state."
+    },
+    {
+      "id": "preserve",
+      "criterion": "Required startup failures block readiness, optional failures remain observable, and every started worker is stopped in reverse order."
+    }
+  ]
+}

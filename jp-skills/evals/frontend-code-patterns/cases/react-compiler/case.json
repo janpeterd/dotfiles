@@ -1,0 +1,29 @@
+{
+  "name": "react-compiler",
+  "engagement": "positive",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "enabled",
+      "criterion": "React Compiler is enabled for application source through the supported Vite integration."
+    },
+    {
+      "id": "dependencies",
+      "criterion": "The locally installed compiler and build integration dependencies match the installed Vite React plugin generation."
+    },
+    {
+      "id": "official-preset",
+      "criterion": "The Vite 6 configuration uses reactCompilerPreset with the Rolldown Babel integration instead of the removed inline Babel option."
+    },
+    {
+      "id": "verification",
+      "criterion": "The implementation runs the existing build check and leaves a direct way to verify compiler output."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The change does not add manual memoization, compiler opt-outs, or an unrelated lint and formatting stack."
+    }
+  ]
+}

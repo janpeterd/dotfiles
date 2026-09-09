@@ -1,0 +1,33 @@
+{
+  "name": "multi-dialect-chain",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest discover -s tests -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "SQLite and PostgreSQL each pass upgrade, downgrade restoration, and upgrade-again tests."
+    },
+    {
+      "id": "one-chain",
+      "criterion": "Both dialects execute the same date-labelled revision in one append-only versions directory."
+    },
+    {
+      "id": "portable-first",
+      "criterion": "Portable migration behavior is shared and dialect branching is limited to the operation that genuinely differs."
+    },
+    {
+      "id": "separate-tests",
+      "criterion": "SQLite and PostgreSQL have separate integration tests with engine-specific setup and assertions."
+    },
+    {
+      "id": "unsupported",
+      "criterion": "An unsupported dialect fails explicitly before mutation."
+    },
+    {
+      "id": "history",
+      "criterion": "The existing revision is extended by a new child revision rather than edited, replaced, or split by dialect."
+    }
+  ]
+}

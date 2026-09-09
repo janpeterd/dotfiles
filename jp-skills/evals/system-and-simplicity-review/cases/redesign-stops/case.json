@@ -1,0 +1,25 @@
+{
+  "name": "redesign-stops",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "system-first",
+      "criterion": "The system-design stage runs before implementation-level cleanup."
+    },
+    {
+      "id": "redesign",
+      "criterion": "The workflow identifies the parallel health authorities and fragmented transition ownership as a REDESIGN."
+    },
+    {
+      "id": "prune",
+      "criterion": "The workflow stops that branch before simplicity review and does not make the unused formatting helper a primary recommendation."
+    },
+    {
+      "id": "sequential",
+      "criterion": "No system and simplicity passes run in parallel."
+    }
+  ]
+}

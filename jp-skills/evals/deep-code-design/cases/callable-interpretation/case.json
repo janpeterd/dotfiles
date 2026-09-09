@@ -1,0 +1,33 @@
+{
+  "name": "callable-interpretation",
+  "engagement": "positive",
+  "source": {
+    "repository": "geoflow-core",
+    "commits": ["91142f31", "d4d278db"]
+  },
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Tests pass after annotation names are removed from the plugin namespace."
+    },
+    {
+      "id": "one-interpretation",
+      "criterion": "The callable signature and resolved annotations are interpreted once and reused by all phases."
+    },
+    {
+      "id": "deep-interface",
+      "criterion": "Consumers ask one cohesive Operator-owned interface for authored parameters, context parameters, secrets, and execution binding."
+    },
+    {
+      "id": "no-forwarding",
+      "criterion": "No collection of phase-specific wrappers or generic reflection helpers preserves distributed interpretation."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The solution uses standard inspection and typing machinery without a framework or plugin abstraction."
+    }
+  ]
+}

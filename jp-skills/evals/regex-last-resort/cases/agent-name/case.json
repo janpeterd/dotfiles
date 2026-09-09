@@ -1,0 +1,25 @@
+{
+  "name": "agent-name",
+  "engagement": "negative",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "The validator accepts and rejects every tested name according to the stated lexical grammar."
+    },
+    {
+      "id": "justified-regex",
+      "criterion": "A small anchored regular expression directly represents the bounded ASCII grammar."
+    },
+    {
+      "id": "safety",
+      "criterion": "The expression has no dynamic fragments, ambiguous nested repetition, or unbounded input work."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The implementation adds no parser, schema library, state machine, or dependency."
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Oxfmt formats this Tailwind v4 React app, but utility ordering is inconsistent between JSX `className` values and strings passed through the shared `cn` and `cva` helpers. Make formatting produce one stable Tailwind order everywhere. Keep `pnpm format` as the write command and `pnpm format:check` as the CI check. Do not add another formatter.

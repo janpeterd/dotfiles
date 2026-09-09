@@ -1,0 +1,29 @@
+{
+  "name": "oxc-agent-workflow",
+  "engagement": "positive",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "project-instructions",
+      "criterion": "Root AGENTS.md tells coding agents when to apply safe lint fixes, formatting, and the final strict lint check."
+    },
+    {
+      "id": "agent-output",
+      "criterion": "The final Oxlint command rejects warnings and uses the agent output format."
+    },
+    {
+      "id": "package-manager",
+      "criterion": "Commands use pnpm to execute the locally installed Oxlint and Oxfmt packages."
+    },
+    {
+      "id": "order",
+      "criterion": "Safe lint fixes run before formatting."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The solution adds no hook framework, second linter, second formatter, or global package invocation."
+    }
+  ]
+}

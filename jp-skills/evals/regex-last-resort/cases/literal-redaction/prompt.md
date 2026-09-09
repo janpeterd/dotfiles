@@ -1,0 +1,1 @@
+`redactLiteral` treats parts of a secret as pattern syntax, so secrets containing brackets, dots, dollar signs, or backslashes are redacted incorrectly. Fix the helper so it replaces every literal occurrence. Keep the function dependency-free and make the tests pass.

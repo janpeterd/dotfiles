@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (( $# < 1 || $# > 2 )); then
+  printf 'usage: %s CASE_DIR [SKILL]\n' "$0" >&2
+  exit 2
+fi
+
+case_dir=$(realpath "$1")
+skill=${2:+$(realpath "$2")}
+name=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["name"])' "$case_dir/case.json")
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+slug=$(printf '%04x' "$((RANDOM * RANDOM % 65536))")
+workspace=$(mktemp -d "${TMPDIR:-/tmp}/field-notes-${slug}.XXXXXX")
+sessions=$(mktemp -d "${TMPDIR:-/tmp}/session-notes-${slug}.XXXXXX")
+arm=${CASE_ARM:-single}
+trial=${CASE_TRIAL:-1}
+provider=${CASE_PROVIDER:-${PI_PROVIDER:-openai-codex}}
+model=${CASE_MODEL:-${PI_MODEL:-gpt-5.6-sol}}
+result="${RUN_ROOT:-runs}/${stamp}-${name}-${arm}-${provider}-${model//\//_}-${trial}-${slug}"
+mkdir -p "$result"
+cp -R "$case_dir/fixture/." "$workspace/"
+find "$workspace" -type d -name __pycache__ -prune -exec rm -rf {} +
+prompt=$(<"$case_dir/prompt.md")
+if [[ -n ${skill:-} ]]; then
+  if [[ $(basename "$skill") == SKILL.md ]]; then
+    skill_file=$skill
+    skill_name=$(basename "$(dirname "$skill")")
+  else
+    skill_file="$skill/SKILL.md"
+    skill_name=$(basename "$skill")
+  fi
+  skill_body=$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).read_text().split("---", 2)[2].strip())' "$skill_file")
+  prompt=$(printf '<skill name="%s" location="%s">\nReferences are relative to %s.\n\n%s\n</skill>\n\n%s' \
+    "$skill_name" "$skill_file" "$(dirname "$skill_file")" "$skill_body" "$prompt")
+fi
+
+args=(
+  --provider "$provider"
+  --model "$model"
+  --thinking "${PI_THINKING:-high}"
+  --no-context-files
+  --no-extensions
+  --session-dir "$sessions"
+  --mode json
+  --print
+)
+if [[ -n ${skill:-} ]]; then
+  args+=(--no-skills --skill "$skill")
+else
+  args+=(--no-skills)
+fi
+
+skill_present=False
+if [[ -n ${skill:-} ]]; then
+  skill_present=True
+fi
+python3 - "$result/metadata.json" <<PY
+import json
+import sys
+
+json.dump(
+    {
+        "case": "$name",
+        "arm": "$arm",
+        "trial": int("$trial"),
+        "provider": "$provider",
+        "model": "$model",
+        "skill_present": $skill_present,
+    },
+    open(sys.argv[1], "w"),
+    indent=2,
+)
+PY
+
+status=0
+(
+  cd "$workspace"
+  pi "${args[@]}" "$prompt"
+) >"$result/agent.jsonl" 2>"$result/agent.err" || status=$?
+
+mapfile -t checks < <(python3 -c 'import json,sys; print(*json.load(open(sys.argv[1]))["checks"], sep="\n")' "$case_dir/case.json")
+: >"$result/checks.log"
+for check in "${checks[@]}"; do
+  printf '$ %s\n' "$check" >>"$result/checks.log"
+  (cd "$workspace" && bash -lc "$check") >>"$result/checks.log" 2>&1 || status=1
+done
+
+find "$workspace" -type d -name __pycache__ -prune -exec rm -rf {} +
+diff -ru --exclude=__pycache__ --exclude='*.pyc' "$case_dir/fixture" "$workspace" >"$result/changes.diff" || true
+cp -R "$workspace" "$result/workspace"
+cp -R "$sessions" "$result/sessions"
+printf '%s\n' "$status" >"$result/status"
+rm -rf "$workspace" "$sessions"
+printf '%s\n' "$result"
+exit "$status"

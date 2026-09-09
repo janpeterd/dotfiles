@@ -1,0 +1,41 @@
+{
+  "name": "operator-console-design",
+  "engagement": "positive",
+  "checks": [
+    "test -f proposal.md"
+  ],
+  "rubric": [
+    {
+      "id": "experience",
+      "criterion": "The proposal starts with the operator's shortest incident-resolution journey and removes optional dashboard concepts that do not serve it."
+    },
+    {
+      "id": "usage-first",
+      "criterion": "The public usage or interaction is sketched before internal modules and storage."
+    },
+    {
+      "id": "model",
+      "criterion": "One incident model owns lifecycle state; list, detail, notification, and audit views derive from it rather than synchronizing parallel status models."
+    },
+    {
+      "id": "algorithm",
+      "criterion": "The core transition algorithm is stated plainly, including idempotency and failure boundaries."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The design avoids speculative plugin systems, generic workflow engines, and independently mutable read models."
+    },
+    {
+      "id": "verification",
+      "criterion": "The proposal includes a repeatable way to seed an incident, drive assignment and retry through public behavior, observe history and notification outcomes, and clean up test state."
+    },
+    {
+      "id": "fallbacks",
+      "criterion": "Unknown workflow state and notification failure remain explicit; the design does not present them as a valid incident state or successful delivery."
+    },
+    {
+      "id": "replacement",
+      "criterion": "The design converges controlled callers on one incident model without compatibility aliases, parallel legacy modules, or forwarding facades."
+    }
+  ]
+}

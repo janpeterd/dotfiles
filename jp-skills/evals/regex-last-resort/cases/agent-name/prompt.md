@@ -1,0 +1,1 @@
+Implement `isAgentName`. A valid name starts with a lowercase ASCII letter, continues with lowercase ASCII letters, digits, underscores, or hyphens, and has at most 32 characters. Keep this dependency-free and make the tests pass.

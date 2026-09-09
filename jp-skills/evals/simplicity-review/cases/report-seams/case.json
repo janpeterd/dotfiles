@@ -1,0 +1,37 @@
+{
+  "name": "report-seams",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "read-only",
+      "criterion": "The reviewer reports findings without editing the fixture."
+    },
+    {
+      "id": "seams",
+      "criterion": "The reviewer identifies the one-implementation formatter protocol, factory, and forwarding service as incidental structure around one behavior."
+    },
+    {
+      "id": "tests",
+      "criterion": "The reviewer distinguishes the public render_report behavior test from tests that only preserve private helpers, construction, and delegation."
+    },
+    {
+      "id": "counterfactual",
+      "criterion": "The reviewer applies a counterfactual standard: retain tests that fail for a plausible behavioral defect, and remove tests that reproduce implementation logic, assert arranged values without exercising behavior, inspect source, or reprove Python or dependency behavior."
+    },
+    {
+      "id": "slop",
+      "criterion": "The reviewer challenges the narrated comments, unnecessary cast, and broad fallback around a trusted local factory instead of treating them as robustness."
+    },
+    {
+      "id": "replacement",
+      "criterion": "The proposed replacement is a direct render_report implementation using ordinary language features rather than a different abstraction stack."
+    },
+    {
+      "id": "proof",
+      "criterion": "The finding names the public behavior test as the acceptance proof and does not claim that passing tests alone prove an unexamined semantic equivalence."
+    }
+  ]
+}

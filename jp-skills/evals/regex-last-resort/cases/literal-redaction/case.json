@@ -1,0 +1,25 @@
+{
+  "name": "literal-redaction",
+  "engagement": "positive",
+  "checks": [
+    "node --test tests/*.test.mjs"
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Every literal occurrence is redacted, including text containing regex metacharacters and backslashes."
+    },
+    {
+      "id": "literal-operation",
+      "criterion": "The implementation uses a literal string operation rather than escaping dynamic text into a RegExp."
+    },
+    {
+      "id": "safety",
+      "criterion": "No caller-controlled value becomes regex source text."
+    },
+    {
+      "id": "minimal",
+      "criterion": "The change adds no escaping helper, parser, or dependency."
+    }
+  ]
+}
