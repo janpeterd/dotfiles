@@ -1,0 +1,12 @@
+{
+  "id": "timeLeft",
+  "name": "Time Left",
+  "description": "Minutes until 17:00 or 23:30, with workday, evening, year and lifetime progress in Brussels time.",
+  "version": "1.0.0",
+  "author": "jp",
+  "icon": "hourglass_empty",
+  "type": "widget",
+  "component": "./TimeLeft.qml",
+  "settings": "./Settings.qml",
+  "permissions": ["settings_read", "settings_write"]
+}

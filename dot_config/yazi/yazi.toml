@@ -23,22 +23,21 @@ run = "git"
 
 [opener]
 edit = [
-  { run = 'nvim "$@"', block = true, for = "unix" },
-  { run = 'code "%*"', orphan = true, for = "windows" },
+  { run = 'nvim %s', block = true, for = "unix" },
+  { run = 'code %s', orphan = true, for = "windows" },
 ]
 play = [
-  { run = 'mpv "$@"', orphan = true, for = "unix" },
-  { run = '"C:\Program Files\mpv.exe" %*', orphan = true, for = "windows" },
+  { run = 'mpv %s', orphan = true, for = "unix" },
+  { run = '"C:\Program Files\mpv.exe" %s', orphan = true, for = "windows" },
 ]
-view = [{ run = 'imv "$@"', orphan = true, for = "unix" }]
+view = [{ run = 'imv %s', orphan = true, for = "unix" }]
 open = [
-  { run = 'xdg-open "$@"', desc = "Open", for = "linux" },
-  { run = 'open "$@"', desc = "Open", for = "macos" },
-  { run = 'start "%1"', orphan = true, desc = "Open", for = "windows" },
+  { run = 'xdg-open %s1', desc = "Open", for = "linux" },
+  { run = 'open %s', desc = "Open", for = "macos" },
+  { run = 'start "" %s1', orphan = true, desc = "Open", for = "windows" },
 ]
 extract = [
-  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
-  { run = 'ya pub extract --list %*', desc = "Extract here", for = "windows" },
+  { run = 'ya pub extract --list %s', desc = "Extract here" },
 ]
 
 

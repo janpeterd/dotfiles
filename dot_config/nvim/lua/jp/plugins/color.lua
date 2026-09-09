@@ -1,5 +1,5 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "sonokai"
+Colorscheme = "gruvbox"
 
 local function colorschemes()
   return {

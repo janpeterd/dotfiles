@@ -41,6 +41,7 @@ return {
       { "<leader>gc", desc = "[G]it [c]ommits" },
       { "<leader>gC", desc = "[G]it [C]ommits (buffer)" },
       { "<leader>gb", desc = "[G]it [b]ranches" },
+      { "<leader>gs", desc = "[G]it [s]tatus" },
     },
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -341,6 +342,7 @@ return {
         { desc = "[G]it [C]ommits (buffer)" }
       )
       set("n", "<leader>gb", "<cmd>Telescope git_branches<cr>", { desc = "[G]it [b]ranches" })
+      set("n", "<leader>gs", "<cmd>Telescope git_status<cr>", { desc = "[G]it [s]tatus" })
     end,
   },
 }

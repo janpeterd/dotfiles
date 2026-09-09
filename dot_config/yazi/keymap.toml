@@ -59,10 +59,10 @@ desc = "Open directory in nvim"
 [[mgr.prepend_keymap]]
 on = ["e"]
 run = '''
-shell --block 'nvim "$1"'
+shell --block 'nvim %h'
 '''
 
-desc = "Open directory in nvim"
+desc = "Edit hovered file in nvim"
 [[mgr.prepend_keymap]]
 on = ["<A-b>"]
 run = '''
