@@ -1,0 +1,24 @@
+{
+  "name": "mechanical-change",
+  "engagement": "negative",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "oracle_checks": [
+    "python3 \"$EVAL_CASE_DIR/oracle/check.py\""
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Returns correct singular/plural values and adds a meaningful regression."
+    },
+    {
+      "id": "proportionality",
+      "criterion": "Makes a local change without introducing a design ceremony, new policy framework or user clarification."
+    },
+    {
+      "id": "discovery",
+      "criterion": "In discovery mode, deep-code-design remains unloaded. Determine this from recorded tool reads, not a keyword mention in the answer. Execution-mode trials cannot establish invocation behavior."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {BoardStore} from './store.ts';
+test('subscription snapshots are stable, immutable and detached from input', () => {
+  const input = [{id:'a', title:'Read', completed:false}];
+  const store = new BoardStore(input);
+  const before = store.getSnapshot();
+  input[0].title = 'External mutation';
+  assert.equal(before.items[0].title, 'Read');
+  assert.equal(store.getSnapshot(), before);
+  assert.throws(() => { before.items[0].title = 'Changed'; }, TypeError);
+  let observed;
+  const unsubscribe = store.subscribe(() => { observed = store.getSnapshot(); });
+  store.setCompleted('a', true);
+  assert.equal(observed, store.getSnapshot());
+  assert.equal(observed.remaining, 0);
+  assert.equal(before.remaining, 1);
+  unsubscribe();
+  assert.throws(() => store.setCompleted('missing', true));
+});

@@ -1,0 +1,1 @@
+Investigate the inconsistent job outcomes described in request.md. This is read-only planning: trace the failure and give a concrete repair design with Python interfaces and the important transition code, plus tests we should add. Explain whether the recent split helped. Do not edit files.

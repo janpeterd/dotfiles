@@ -10,3 +10,9 @@
 - Added an existing-owner-first redesign threshold after the next IOW API trial proposed a new runtime abstraction for lifecycle defects that fit the existing FastAPI lifespan. `DESCEND` now carries required repairs, while new state or infrastructure must prove a net system simplification and a requirement the existing owner cannot satisfy. Evidence: `../../evals/system-design-review/cases/runtime-lifecycle-repair/`.
 
 This candidate is not promoted. Compare proposed and skill-absent trials across at least two model families before promotion.
+
+## Module boundaries, 2026-09-11
+
+Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
+
+Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.

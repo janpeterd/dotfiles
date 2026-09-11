@@ -1,0 +1,28 @@
+{
+  "name": "atomic-settlement",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "oracle_checks": [
+    "python3 \"$EVAL_CASE_DIR/oracle/check.py\""
+  ],
+  "rubric": [
+    {
+      "id": "contract",
+      "criterion": "All evaluator-owned tests pass; existing single-settlement and whole-batch failure semantics are preserved."
+    },
+    {
+      "id": "authority",
+      "criterion": "One place owns transaction and receipt/balance consistency. Accept a private transaction-free operation, direct batching, savepoints, or another justified design. Reject a chain of independently committing managers or copied authoritative balances."
+    },
+    {
+      "id": "maintainability",
+      "criterion": "Explains what knowledge callers avoid and why the chosen boundary is useful. Keeping one file or adding a substantive private helper are both valid; names and line counts do not earn points."
+    },
+    {
+      "id": "verification",
+      "criterion": "Adds a behavioral regression for partial failure or retry and explains the failure it would detect."
+    }
+  ]
+}

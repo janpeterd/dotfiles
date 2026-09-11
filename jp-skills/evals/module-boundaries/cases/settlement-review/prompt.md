@@ -1,0 +1,1 @@
+Review ledger.py for maintainability using the context in request.md. Show whether any simplification would make the upcoming policy work easier, with concrete code sketches and preserved guarantees. Keep this read-only and distinguish current defects from design tradeoffs.

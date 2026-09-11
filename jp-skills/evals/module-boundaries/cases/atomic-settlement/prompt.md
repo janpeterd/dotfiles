@@ -1,0 +1,1 @@
+Our new settlement endpoint receives batches, but the journal only handles individual transfers. Implement the contract in request.md and run the tests. The existing settle method also keeps attracting complexity warnings; make the resulting code easier to maintain as part of this change. Explain your design and the remaining tradeoffs.

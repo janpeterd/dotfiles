@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Prepare neutral candidate packets; mapping stays outside the review directory."""
+import argparse
+import json
+from pathlib import Path
+import random
+import shutil
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('output', type=Path)
+parser.add_argument('results', nargs='+', type=Path)
+parser.add_argument('--seed', type=int, default=1703)
+args = parser.parse_args()
+if args.output.exists():
+    parser.error('output must be a new directory')
+results = []
+for supplied in args.results:
+    results.extend([supplied] if (supplied / 'metadata.json').exists() else sorted(p.parent for p in supplied.glob('*/metadata.json')))
+random.Random(args.seed).shuffle(results)
+packet = args.output / 'review'
+packet.mkdir(parents=True)
+mapping = []
+excluded = []
+for result in results:
+    metadata = json.loads((result / 'metadata.json').read_text())
+    if metadata.get('outcome') == 'infrastructure_failure':
+        excluded.append({'result': str(result.resolve()), 'reason': 'infrastructure_failure'})
+        continue
+    frozen_case = result / 'evaluator-case'
+    if not frozen_case.exists():
+        excluded.append({'result': str(result.resolve()), 'reason': 'no_frozen_case'})
+        continue
+    case = json.loads((frozen_case / 'case.json').read_text())
+    identifier = f'candidate-{len(mapping) + 1:03d}'
+    target = packet / case['name'] / identifier
+    target.mkdir(parents=True)
+    shutil.copytree(result / 'workspace', target / 'workspace', ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '.git'))
+    shutil.copytree(frozen_case / 'fixture', target / 'baseline', ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '.git'))
+    (target / 'request.md').write_text((frozen_case / 'prompt.md').read_text())
+    (target / 'rubric.json').write_text(json.dumps(case['rubric'], indent=2) + '\n')
+    messages = []
+    process = []
+    for line in (result / 'agent.jsonl').read_text().splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        if event.get('type') == 'tool_execution_start':
+            process.append({'kind': 'tool_start', 'name': event.get('toolName', 'unknown')})
+        message = event.get('message', {})
+        if event.get('type') == 'message_end' and isinstance(message, dict) and message.get('role') == 'assistant':
+            content = message.get('content', [])
+            text = content if isinstance(content, str) else ''.join(p.get('text', '') for p in content if isinstance(p, dict) and p.get('type') == 'text')
+            if text.strip():
+                messages.append(text)
+                process.append({'kind': 'assistant', 'text': text})
+    # Preserve prose rather than secretly rewriting reasoning. Reviewers flag clues.
+    (target / 'response.md').write_text('\n\n'.join(messages) if messages else '[No completed textual response]\n')
+    (target / 'process.json').write_text(json.dumps(process, indent=2) + '\n')
+    (target / 'verification.json').write_text(json.dumps({
+        'read_only_violation': metadata.get('read_only_violation', False),
+        'checks': [{'kind': c['kind'], 'exit_code': c['exit_code'], 'timed_out': c['timed_out']} for c in metadata.get('checks', [])],
+    }, indent=2) + '\n')
+    mapping.append({'id': identifier, 'case': case['name'], 'result': str(result.resolve()),
+                    'arm': metadata['arm'], 'model': metadata['model'], 'trial': metadata['trial'], 'mode': metadata['mode']})
+(args.output / 'identity-map.json').write_text(json.dumps({'seed': args.seed, 'candidates': mapping, 'excluded': excluded}, indent=2) + '\n')
+(packet / 'REVIEW.md').write_text('''# Blind design review
+
+Evaluate each candidate against its request, original fixture and rubric. Inspect the actual proposed code; a confident response does not establish correctness. Record each rubric item as 0 incorrect/missing, 1 partial/unsupported, or 2 supported with evidence and file/symbol references. Give a justified tie when differences do not establish a benefit.
+
+`response.md` preserves all completed assistant prose in order. `process.json` interleaves that prose with tool-start names. Tool arguments and results are withheld because they can expose skill paths and trial identity. A write/edit marker records an attempted tool operation, not successful mutation. A shell tool name alone cannot establish whether or when an edit occurred. Mark disputed process criteria unproven and ask the parent evaluator to audit the raw transcript without revealing trial identity.
+
+Behavioral checks and design judgments are separate. Passing checks do not prove the best boundary; a factual error cannot be excused by choosing a preferred shape. Distinguish internal coordination from public caller burden. State missing evidence and any arm-identifying clues in code or prose. Do not read the identity map or original result directories. Return per-candidate findings before pairwise preferences. These packets omit trial metadata but cannot guarantee prose is perfectly blind.
+''')
+print(packet)

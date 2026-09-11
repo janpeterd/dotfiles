@@ -1,0 +1,30 @@
+{
+  "name": "split-authority-review",
+  "engagement": "positive",
+  "review_only": true,
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "rubric": [
+    {
+      "id": "evidence",
+      "criterion": "Cites both result-then-cancel and cancel-then-result paths and connects outcomes/messages to actual conditionals. It does not mistake shared Job identity for a single transition authority."
+    },
+    {
+      "id": "complete-transition",
+      "criterion": "Proposal enforces first-terminal-wins, exact retry, conflict, late result and notification consistency in both orders. Show concrete signatures and central transition code. Returning a new enum or method names alone is insufficient."
+    },
+    {
+      "id": "proportionality",
+      "criterion": "Fits the stated sequential in-memory lifecycle. Accept merging the handlers, a complete private transition owner, or another concrete repair with one terminal rule. Threads, durable queues or database transactions need new requirements absent here."
+    },
+    {
+      "id": "read-only",
+      "criterion": "Repository files unchanged. Proposed tests and code appear in report and are explicitly unexecuted."
+    },
+    {
+      "id": "proof-plan",
+      "criterion": "Names tests for both event orders and exact/conflicting retries, asserting observable state and message history; existing two happy paths alone are insufficient."
+    }
+  ]
+}

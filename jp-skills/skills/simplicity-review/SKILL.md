@@ -6,7 +6,9 @@ disable-model-invocation: true
 
 # Simplicity review
 
-Review only. Minimize reader load and new structure, not line count. Preserve requested behavior and load-bearing complexity.
+Review only. Minimize the knowledge needed to understand and change the requested behavior. Preserve load-bearing complexity.
+
+For extraction, deduplication or score-driven cleanup, read [module-boundary criteria](../deep-code-design/references/module-boundaries.md). Use it to compare the whole change, including new caller obligations.
 
 ## Scope
 
@@ -24,7 +26,7 @@ For every coverage row, record the public input to observable result trace, stat
 
 - Write the current algorithm in pseudocode and inventory its representations, traversals, state transitions, and asymptotic costs.
 - Look for one derivation replacing parallel computations, a data structure deleting branches, an installed or standard primitive replacing local machinery, and invalid states the types can exclude.
-- Reject a proposed simplification that creates another state owner, synchronized copy, repeated derivation, traversal, conversion, or worse asymptotic cost elsewhere. Trace the proposed path through every affected caller before calling it smaller.
+- Trace the proposed path through every affected caller and account for copies, traversals, conversions and runtime cost. Reject competing authorities; distinguish derived representations and deliberate time/memory tradeoffs by their invariant, freshness and measured benefit. Relocated work still counts.
 - Treat complexity metrics and structural search as candidate locators. Inspect the real control and data flow before judging them.
 
 **Architecture reviewer**

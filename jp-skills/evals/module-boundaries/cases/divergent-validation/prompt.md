@@ -1,0 +1,1 @@
+Implement the international project-name support in README.md. The two validators currently look nearly identical, and a duplication checker flags them. Decide whether to consolidate them while making this change, show the final API, and explain how the next naming change would be made. Keep deployed device provisioning compatible and run the tests.

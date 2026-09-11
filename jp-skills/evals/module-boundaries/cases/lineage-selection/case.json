@@ -1,0 +1,28 @@
+{
+  "name": "lineage-selection",
+  "engagement": "positive",
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "oracle_checks": [
+    "python3 \"$EVAL_CASE_DIR/oracle/check.py\""
+  ],
+  "rubric": [
+    {
+      "id": "behavior",
+      "criterion": "Passes independent oracle for shortest distance, roots, input validation, cycles, induced edges, full binding identity and repeated calls."
+    },
+    {
+      "id": "bounded-algorithm",
+      "criterion": "Traversal terminates on cycles and avoids enumerating all paths. Accept BFS, bounded fixed-point sets or an equivalently justified approach. Assess time/memory honestly; no requirement to choose a named helper."
+    },
+    {
+      "id": "private-decomposition",
+      "criterion": "If extracted, a private traversal consumes bounded graph facts and returns results; callers need not coordinate traversal phases or synchronize a second authoritative graph. A cohesive local implementation also earns full credit."
+    },
+    {
+      "id": "decision",
+      "criterion": "Sketch and explanation identify caller knowledge and state ownership. Extraction is justified by the algorithm it hides rather than reuse count, CC or file length."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "divergent-validation",
+  "engagement": "positive",
+  "mode": "implementation",
+  "checks": [
+    "node --test *.test.ts"
+  ],
+  "oracle_checks": [
+    "node \"$EVAL_CASE_DIR/oracle/check.mjs\""
+  ],
+  "rubric": [
+    {
+      "id": "policy",
+      "criterion": "Accounts for independently changing label policy and firmware protocol. Similar syntax alone is insufficient evidence of a shared domain rule."
+    },
+    {
+      "id": "alternatives",
+      "criterion": "Separate functions, composed small mechanical helpers, and a bounded shared validator can pass if policy authority stays explicit and changing project rules leaves the device protocol untouched. A configurable framework needs evidence of reduced caller knowledge and total cost."
+    },
+    {
+      "id": "specificity",
+      "criterion": "Shows the resulting interface and a concrete next naming change against code rather than asserting that all duplication is good or bad."
+    }
+  ],
+  "false_positives": [
+    "Rejecting every shared mechanical helper regardless of hidden policy and caller burden.",
+    "Requiring a specific number of files or classes."
+  ],
+  "source": {
+    "kind": "synthetic",
+    "purpose": "Portable adversarial case derived from module-boundary research; not copied from a production checkout."
+  }
+}

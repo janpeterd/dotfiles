@@ -17,7 +17,7 @@ These cases measure whether a skill helps an agent find and implement a simpler 
 
 Case prompts must look like normal engineering requests. They state the symptom and goal, not the design behavior in the rubric. Candidate agents do not see grading criteria, comparison labels, or sibling outputs.
 
-A promotion bakeoff uses two or three trials for each arm and prompt on at least two model families. Deterministic checks establish correctness. One blinded rubric pass and human review judge design quality. Candidate synthesis is a separate workflow and never changes a bakeoff output.
+A promotion bakeoff uses two or three matched trials for each arm and prompt on approved models under the repository provider policy. Report the actual model-family coverage and scope any promotion claim to the evidence collected. Deterministic checks establish correctness. One blinded rubric pass and human review judge design quality. Candidate synthesis is a separate workflow and never changes a bakeoff output.
 
 Run one isolated case with `scripts/run-case`. Run the matched arm matrix with:
 

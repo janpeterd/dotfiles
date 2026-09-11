@@ -1,0 +1,33 @@
+{
+  "name": "settlement-review",
+  "engagement": "positive",
+  "review_only": true,
+  "checks": [
+    "python3 -m unittest -v"
+  ],
+  "oracle_checks": [
+    "python3 \"$EVAL_CASE_DIR/oracle/check.py\""
+  ],
+  "rubric": [
+    {
+      "id": "accuracy",
+      "criterion": "Recognizes one connection and transaction around the whole batch. Does not invent partial commits, duplicated balances or a demonstrated concurrency race."
+    },
+    {
+      "id": "coordination",
+      "criterion": "Traces validation, debit, credit and receipt recording; names the knowledge the internal coordinator retains and rehearses fee policy changes without inventing an approved fee contract."
+    },
+    {
+      "id": "design",
+      "criterion": "A concrete smaller shape preserves checks, retry/fencing order and rollback. A justified KEEP is acceptable if it shows hidden knowledge and addresses coordination cost. File/class count alone is insufficient."
+    },
+    {
+      "id": "scope",
+      "criterion": "No source edits, new fee implementation, concurrency framework or compatibility migration without a real consumer."
+    },
+    {
+      "id": "verification",
+      "criterion": "Names behavioral proof across individual and batch paths, prefix failure, exact/conflicting retries and generator error; public happy paths alone are insufficient."
+    }
+  ]
+}

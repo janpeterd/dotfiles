@@ -1,0 +1,1 @@
+The board UI needs multi-select editing. Implement the `applyEdits` behavior described in README.md and review whether the store needs restructuring as this grows. Show the resulting interface and explain the choice using the actual render and update paths. Keep the existing consumer contract working and run the tests.

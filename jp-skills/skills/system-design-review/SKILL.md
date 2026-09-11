@@ -6,9 +6,9 @@ disable-model-invocation: true
 
 # System design review
 
-Review only. Work outside in and sequentially. Judge whether the system is the right way to achieve its required behavior before judging its local implementation.
+Review only. Work outside in and sequentially. For a complexity report, resolve flagged symbols on the current revision and record snapshot drift before treating them as findings. Judge whether the system is the right way to achieve its required behavior before judging its local implementation.
 
-Read [deep-code-design](../deep-code-design/SKILL.md) as the design standard. When present, also read repository `CONTEXT.md`, `CODING_STANDARDS.md`, requirements, and architecture decisions.
+Read [deep-code-design](../deep-code-design/SKILL.md) as the design standard. For a proposed split, shared abstraction or metric-driven redesign, also read its [module-boundary criteria](../deep-code-design/references/module-boundaries.md). When present, also read repository `CONTEXT.md`, `CODING_STANDARDS.md`, requirements, and architecture decisions.
 
 ## Bound the behavior
 
@@ -43,7 +43,7 @@ Preserve complexity that enforces a demonstrated invariant. Challenge complexity
 
 Before choosing `REDESIGN`, try the smallest robust repair in order: fix the existing function, deepen the existing owner, use standard language or framework lifecycle machinery, then consider a new module or durable state. Choose `DESCEND` with required repairs when the existing owner can enforce the invariant cleanly.
 
-A new module, worker, outbox, state machine, cache, projection, or infrastructure dependency earns `REDESIGN` only when a demonstrated requirement cannot be met by the existing owner. The replacement must reduce total concepts, state owners, caller coordination, or failure modes after accounting for what it adds. Unconfirmed product rules and hypothetical scale do not justify architecture.
+A new module, worker, outbox, state machine, cache, projection, or infrastructure dependency earns `REDESIGN` only when a demonstrated requirement cannot be met by the existing owner. The replacement must show a concrete improvement in change locality, caller knowledge, failure behavior or required runtime cost after accounting for what it adds. A useful internal algorithm need not create a new state owner or interchangeable seam. Unconfirmed product rules and hypothetical scale do not justify architecture.
 
 ## Decide
 

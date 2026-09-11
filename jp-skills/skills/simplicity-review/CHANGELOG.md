@@ -26,3 +26,9 @@ This candidate is not promoted. Run matched proposed, prior, and skill-absent tr
 - Formalized the counterfactual test-value standard after the Geoflow planning review found tautological, implementation-bound, and ineffective tests. Evidence: `../../evals/simplicity-review/cases/report-seams/`.
 - Added a bounded consistency pass for repeated peers after user feedback identified drift in terminology, casing, module patterns, and testing patterns as a cross-cutting review concern. Evidence: `../../evals/simplicity-review/cases/status-consistency/`.
 - Replaced repository-wide lens dispatch with a coverage map and semantic-core waves after the IOW API review searched 149 modules but returned a wholesale `KEEP` for alerting and monitoring without tracing either lifecycle. Prior audits now follow the fresh pass because the run anchored on an older audit that excluded those systems. Evidence: `../../evals/simplicity-review/cases/service-lifecycle-coverage/`.
+
+## Module boundaries, 2026-09-11
+
+Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
+
+Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.

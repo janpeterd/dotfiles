@@ -1,0 +1,33 @@
+{
+  "name": "derived-view",
+  "engagement": "positive",
+  "mode": "implementation",
+  "checks": [
+    "node --test *.test.ts"
+  ],
+  "oracle_checks": [
+    "node \"$EVAL_CASE_DIR/oracle/check.mjs\""
+  ],
+  "rubric": [
+    {
+      "id": "authority",
+      "criterion": "Distinguishes the writable board contents from the immutable derived snapshot. Any restructuring preserves one authority for transition acceptance and both update entry points."
+    },
+    {
+      "id": "contract",
+      "criterion": "Explains snapshot identity, historical immutability and notification ordering with code evidence; does not count cached derived data itself as competing authority."
+    },
+    {
+      "id": "proportionality",
+      "criterion": "Shows an actual resulting API and change path. Keeping the class, extracting private batch calculation, or introducing a bounded owner can all pass when their total contract and glue cost are justified."
+    }
+  ],
+  "false_positives": [
+    "Removing or rejecting the cached immutable snapshot solely because it duplicates item data.",
+    "Demanding a separate manager for every operation even though both change one board."
+  ],
+  "source": {
+    "kind": "synthetic",
+    "purpose": "Portable adversarial case derived from module-boundary research; not copied from a production checkout."
+  }
+}

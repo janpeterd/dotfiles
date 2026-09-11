@@ -1,96 +1,205 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env python3
+"""Run one isolated fixture trial; evaluator files stay outside candidate context.
 
-if (( $# < 1 || $# > 2 )); then
-  printf 'usage: %s CASE_DIR [SKILL]\n' "$0" >&2
-  exit 2
-fi
-
-case_dir=$(realpath "$1")
-skill=${2:+$(realpath "$2")}
-name=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["name"])' "$case_dir/case.json")
-stamp=$(date -u +%Y%m%dT%H%M%SZ)
-slug=$(printf '%04x' "$((RANDOM * RANDOM % 65536))")
-workspace=$(mktemp -d "${TMPDIR:-/tmp}/field-notes-${slug}.XXXXXX")
-sessions=$(mktemp -d "${TMPDIR:-/tmp}/session-notes-${slug}.XXXXXX")
-arm=${CASE_ARM:-single}
-trial=${CASE_TRIAL:-1}
-provider=${CASE_PROVIDER:-${PI_PROVIDER:-openai-codex}}
-model=${CASE_MODEL:-${PI_MODEL:-gpt-5.6-sol}}
-result="${RUN_ROOT:-runs}/${stamp}-${name}-${arm}-${provider}-${model//\//_}-${trial}-${slug}"
-mkdir -p "$result"
-cp -R "$case_dir/fixture/." "$workspace/"
-find "$workspace" -type d -name __pycache__ -prune -exec rm -rf {} +
-prompt=$(<"$case_dir/prompt.md")
-if [[ -n ${skill:-} ]]; then
-  if [[ $(basename "$skill") == SKILL.md ]]; then
-    skill_file=$skill
-    skill_name=$(basename "$(dirname "$skill")")
-  else
-    skill_file="$skill/SKILL.md"
-    skill_name=$(basename "$skill")
-  fi
-  skill_body=$(python3 -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).read_text().split("---", 2)[2].strip())' "$skill_file")
-  prompt=$(printf '<skill name="%s" location="%s">\nReferences are relative to %s.\n\n%s\n</skill>\n\n%s' \
-    "$skill_name" "$skill_file" "$(dirname "$skill_file")" "$skill_body" "$prompt")
-fi
-
-args=(
-  --provider "$provider"
-  --model "$model"
-  --thinking "${PI_THINKING:-high}"
-  --no-context-files
-  --no-extensions
-  --session-dir "$sessions"
-  --mode json
-  --print
-)
-if [[ -n ${skill:-} ]]; then
-  args+=(--no-skills --skill "$skill")
-else
-  args+=(--no-skills)
-fi
-
-skill_present=False
-if [[ -n ${skill:-} ]]; then
-  skill_present=True
-fi
-python3 - "$result/metadata.json" <<PY
+This is filesystem separation for honest agents, not an adversarial sandbox.
+"""
+import difflib
+import hashlib
 import json
+import os
+from pathlib import Path
+import re
+import shutil
+import signal
+import subprocess
 import sys
+import tempfile
+import time
 
-json.dump(
-    {
-        "case": "$name",
-        "arm": "$arm",
-        "trial": int("$trial"),
-        "provider": "$provider",
-        "model": "$model",
-        "skill_present": $skill_present,
-    },
-    open(sys.argv[1], "w"),
-    indent=2,
-)
-PY
 
-status=0
-(
-  cd "$workspace"
-  pi "${args[@]}" "$prompt"
-) >"$result/agent.jsonl" 2>"$result/agent.err" || status=$?
+def manifest(root):
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted(root.rglob('*')) if p.is_file()
+            and '__pycache__' not in p.parts and p.suffix != '.pyc'}
 
-mapfile -t checks < <(python3 -c 'import json,sys; print(*json.load(open(sys.argv[1]))["checks"], sep="\n")' "$case_dir/case.json")
-: >"$result/checks.log"
-for check in "${checks[@]}"; do
-  printf '$ %s\n' "$check" >>"$result/checks.log"
-  (cd "$workspace" && bash -lc "$check") >>"$result/checks.log" 2>&1 || status=1
-done
 
-find "$workspace" -type d -name __pycache__ -prune -exec rm -rf {} +
-diff -ru --exclude=__pycache__ --exclude='*.pyc' "$case_dir/fixture" "$workspace" >"$result/changes.diff" || true
-cp -R "$workspace" "$result/workspace"
-cp -R "$sessions" "$result/sessions"
-printf '%s\n' "$status" >"$result/status"
-rm -rf "$workspace" "$sessions"
-printf '%s\n' "$result"
-exit "$status"
+def run(command, cwd, env, stdout, stderr, timeout):
+    started = time.monotonic()
+    try:
+        process = subprocess.Popen(command, cwd=cwd, env=env, stdout=stdout,
+                                   stderr=stderr, stdin=subprocess.DEVNULL, start_new_session=True)
+    except OSError as error:
+        stderr.write(str(error) + '\n')
+        return {'exit_code': None, 'timed_out': False, 'error': str(error),
+                'duration_seconds': time.monotonic() - started}
+    timed_out = False
+    try:
+        code = process.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        os.killpg(process.pid, signal.SIGKILL)
+        code = process.wait()
+    return {'exit_code': code, 'timed_out': timed_out,
+            'duration_seconds': time.monotonic() - started}
+
+
+def transcript_status(path):
+    """Inspect Pi message events, not model prose mentioning success or a skill."""
+    assistants = []
+    skill_reads = []
+    errors = []
+    for line in path.read_text().splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        if event.get('type') == 'error':
+            errors.append(event.get('message', event.get('error', 'provider error')))
+        message = event.get('message', event)
+        if isinstance(message, dict) and message.get('role') == 'assistant':
+            if event.get('type') in ('message_end', None):
+                assistants.append(message)
+        if event.get('type') == 'tool_execution_start' and event.get('toolName') == 'read':
+            arguments = event.get('args', {})
+            if isinstance(arguments, dict) and 'SKILL.md' in str(arguments.get('path', '')):
+                skill_reads.append(arguments)
+    last = assistants[-1] if assistants else {}
+    content = last.get('content', [])
+    text = content if isinstance(content, str) else ''.join(
+        part.get('text', '') for part in content if isinstance(part, dict) and part.get('type') == 'text')
+    complete = bool(text.strip()) and last.get('stopReason') not in ('error', 'aborted', 'toolUse', 'length')
+    return {'completed_assistant_response': complete and not errors, 'last_stop_reason': last.get('stopReason'),
+            'last_error_message': last.get('errorMessage'),
+            'reported_model': last.get('model'), 'reported_provider': last.get('provider'),
+            'provider_errors': errors, 'skill_read_events': skill_reads,
+            'skill_read_coverage': 'explicit Pi read tool events only; absence does not establish non-engagement'}
+
+
+def main():
+    if not 2 <= len(sys.argv) <= 3:
+        sys.exit('usage: run-case CASE_DIR [SKILL]')
+    case_dir = Path(sys.argv[1]).resolve()
+    case = json.loads((case_dir / 'case.json').read_text())
+    mode = os.environ.get('CASE_MODE', 'execution')
+    if mode not in ('execution', 'discovery'):
+        sys.exit('CASE_MODE must be execution or discovery')
+    timeout = float(os.environ.get('CASE_TIMEOUT_SECONDS', '600'))
+    check_timeout = float(os.environ.get('CASE_CHECK_TIMEOUT_SECONDS', '120'))
+    if min(timeout, check_timeout) <= 0:
+        sys.exit('timeouts must be positive')
+    arm = os.environ.get('CASE_ARM', 'single')
+    trial = int(os.environ.get('CASE_TRIAL', '1'))
+    provider = os.environ.get('CASE_PROVIDER', os.environ.get('PI_PROVIDER', 'openai-codex'))
+    model = os.environ.get('CASE_MODEL', os.environ.get('PI_MODEL', 'gpt-5.6-sol'))
+    if any(token in f'{provider}/{model}'.lower() for token in ('anthropic', 'claude')):
+        sys.exit('Anthropic and Claude are forbidden for evaluations, including proxy aliases')
+    # Restrict transports to direct OpenAI to prevent unidentifiable proxy aliases.
+    if provider not in ('openai', 'openai-codex'):
+        sys.exit('Evaluation providers must be direct OpenAI: openai or openai-codex')
+    stem = re.sub(r'[^a-zA-Z0-9_.-]', '_', f'{case["name"]}-{arm}-{provider}-{model}-{trial}')
+    root = Path(os.environ.get('RUN_ROOT', 'runs')).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    result = Path(tempfile.mkdtemp(prefix=time.strftime('%Y%m%dT%H%M%SZ-', time.gmtime()) + stem + '-', dir=root))
+    with tempfile.TemporaryDirectory(prefix='field-notes-') as scratch, tempfile.TemporaryDirectory(prefix='grading-notes-') as grading:
+        original_case_dir = case_dir
+        case_dir = Path(grading) / 'case'
+        shutil.copytree(original_case_dir, case_dir)
+        scratch = Path(scratch)
+        workspace, sessions = scratch / 'workspace', scratch / 'sessions'
+        sessions.mkdir()
+        shutil.copytree(case_dir / 'fixture', workspace, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+        before = manifest(workspace)
+        prompt = (case_dir / 'prompt.md').read_text()
+        skill_file = None
+        bundle_hashes = {}
+        if len(sys.argv) == 3:
+            source = Path(sys.argv[2]).resolve()
+            source = source if source.name == 'SKILL.md' else source / 'SKILL.md'
+            # Snapshot the sibling skill namespace, including shared references.
+            # Evaluation suites, rubrics, and source-repository instructions stay out.
+            bundle = scratch / 'bundle'
+            bundle.mkdir()
+            for sibling in sorted(source.parent.parent.iterdir()):
+                if sibling.is_dir() and (sibling / 'SKILL.md').is_file():
+                    shutil.copytree(sibling, bundle / sibling.name,
+                                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc', '.git'))
+            skill_file = bundle / source.parent.name / 'SKILL.md'
+            if not skill_file.is_file():
+                raise ValueError(f'No skill entrypoint: {source}')
+            bundle_hashes = manifest(bundle)
+            shutil.copytree(bundle, result / 'skill-bundle')
+            if mode == 'execution':
+                body = skill_file.read_text().split('---', 2)[2].strip()
+                prompt = (f'<skill name="{source.parent.name}" location="{skill_file}">\n'
+                          f'References are relative to {skill_file.parent}.\n\n{body}\n</skill>\n\n{prompt}')
+        args = ['pi', '--provider', provider, '--model', model, '--thinking', os.environ.get('PI_THINKING', 'high'),
+                '--no-context-files', '--no-extensions', '--no-prompt-templates', '--session-dir', str(sessions),
+                '--mode', 'json', '--print', '--no-skills']
+        extension = None
+        if provider == 'openai-codex' and model == 'gpt-6-astra':
+            extension = Path(__file__).resolve().with_name('eval-models.ts')
+            args += ['--extension', str(extension)]
+        if skill_file:
+            args += ['--skill', str(skill_file)]
+        args += ['--', prompt]
+        # Keep provider credentials, but remove evaluator hints and inherited cwd.
+        candidate_env = {k: v for k, v in os.environ.items()
+                         if not k.startswith(('CASE_', 'EVAL_', 'BAKEOFF_')) and k not in ('RUN_ROOT', 'PWD', 'OLDPWD')}
+        candidate_env['PWD'] = str(workspace)
+        metadata = {'case': case['name'], 'arm': arm, 'trial': trial, 'provider': provider,
+                    'model': model, 'model_family': 'openai', 'mode': mode,
+                    'eval_model_extension_sha256': hashlib.sha256(extension.read_bytes()).hexdigest() if extension else None,
+                    'pricing_available': False if extension else None, 'skill_present': skill_file is not None,
+                    'command': args, 'timeout_seconds': timeout, 'fixture_hashes': before,
+                    'skill_bundle_hashes': bundle_hashes,
+                    'case_hashes': manifest(case_dir), 'source_case_dir': str(original_case_dir),
+                    'prompt_sha256': hashlib.sha256(prompt.encode()).hexdigest()}
+        with (result / 'agent.jsonl').open('w') as out, (result / 'agent.err').open('w') as err:
+            agent = run(args, workspace, candidate_env, out, err, timeout)
+        transcript = transcript_status(result / 'agent.jsonl')
+        bundle_changed = bool(skill_file and manifest(scratch / 'bundle') != bundle_hashes)
+        after_agent = manifest(workspace)
+        changed = sorted(k for k in before.keys() | after_agent.keys() if before.get(k) != after_agent.get(k))
+        metadata.update(agent=agent, transcript=transcript, skill_bundle_changed=bundle_changed, candidate_changed_paths=changed,
+                        read_only_violation=bool(case.get('review_only', False) and changed))
+        # Preserve the candidate before evaluator commands can create artifacts.
+        shutil.copytree(workspace, result / 'workspace')
+        changes = []
+        for name in changed:
+            old, new = case_dir / 'fixture' / name, workspace / name
+            a = old.read_text(errors='replace').splitlines(True) if old.is_file() else []
+            b = new.read_text(errors='replace').splitlines(True) if new.is_file() else []
+            changes.extend(difflib.unified_diff(a, b, fromfile='before/' + name, tofile='after/' + name))
+        (result / 'changes.diff').write_text(''.join(changes))
+        evaluator_env = dict(os.environ, EVAL_CASE_DIR=str(case_dir), EVAL_RESULT_DIR=str(result))
+        checks = []
+        with (result / 'checks.log').open('w') as log:
+            for kind in ('oracle_checks', 'checks'):
+                check_workspace = scratch / kind
+                shutil.copytree(result / 'workspace', check_workspace)
+                evaluator_env['EVAL_WORKSPACE'] = str(check_workspace)
+                for command in case.get(kind, []):
+                    log.write(f'$ {command}\n')
+                    log.flush()
+                    outcome = run(['bash', '-lc', command], check_workspace, evaluator_env, log, log, check_timeout)
+                    checks.append(dict(kind=kind, command=command, **outcome))
+        infrastructure = (not transcript['completed_assistant_response'] or bundle_changed
+                          or transcript['reported_model'] != model or transcript['reported_provider'] != provider
+                          or agent['timed_out'] or agent['exit_code'] != 0) or any(
+            c['timed_out'] or c['exit_code'] is None for c in checks)
+        behavioral_failure = metadata['read_only_violation'] or any(c['exit_code'] != 0 for c in checks)
+        status = 2 if infrastructure else 1 if behavioral_failure else 0
+        metadata.update(checks=checks, status=status,
+                        outcome='infrastructure_failure' if infrastructure else 'behavioral_failure' if behavioral_failure else 'checks_passed')
+        shutil.copytree(case_dir, result / 'evaluator-case')
+        (result / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
+        (result / 'status').write_text(str(status) + '\n')
+        shutil.copytree(sessions, result / 'sessions')
+    print(result)
+    return status
+
+
+if __name__ == '__main__':
+    sys.exit(main())

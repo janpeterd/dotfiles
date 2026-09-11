@@ -12,7 +12,7 @@ Develop behavioral eval cases before promoting skill instructions. Treat reposit
 - Extract shared skills or references only after a second real consumer appears.
 - Write descriptions as invocation classifiers with distinct positive and false-positive cases.
 
-Keep promotion bakeoffs separate from candidate synthesis. Compare proposed, prior, and skill-absent arms with matched trials across at least two model families. Candidate prompts state organic symptoms and goals, never the behavior being graded. Include cases where the skill should remain inactive. Scripts validate deterministic facts; rubrics and blinded review judge design quality.
+Keep promotion bakeoffs separate from candidate synthesis. Compare proposed, prior, and skill-absent arms with matched trials across approved models. Never use Anthropic or Claude models, including through another provider. Report model-family coverage explicitly: multiple OpenAI models provide within-family evidence, not cross-family validation. Candidate prompts state organic symptoms and goals, never the behavior being graded. Include cases where the skill should remain inactive. Scripts validate deterministic facts; rubrics and blinded review judge design quality.
 
 ## Writing rule
 

@@ -22,3 +22,9 @@ A symptom-only prompt produced a consistent difference. Without the skill, agent
 No new instruction was added because the existing `owner` and `depth` rules already changed behavior.
 
 Evidence: `../../evals/deep-code-design/cases/callable-interpretation/baseline.md`.
+
+## Module boundaries, 2026-09-11
+
+Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
+
+Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.

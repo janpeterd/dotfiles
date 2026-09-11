@@ -1,0 +1,1 @@
+The dependency explorer needs a depth control and sometimes receives cyclic imports. Implement request.md. Before editing, sketch the algorithm and interface you intend to use; after implementing, explain why the code is easier to extend and what you kept. Run the tests.
