@@ -7,3 +7,7 @@
 - Preserved the existing simplicity review as the leaf stage when a cohesive system earns `DESCEND`. Evidence: `../../evals/system-and-simplicity-review/cases/descend-to-cleanup/`.
 
 This candidate is not promoted. Compare proposed and skill-absent trials across at least two model families before promotion.
+
+## Review autonomy pilot
+
+Keep concrete lifecycle and evidence coverage while allowing the reviewer to choose tools, decomposition and report structure. Preserve shared bounded research. Add shared optional Python measurements with cautious interpretation. Validation: two matched Astra reviews on IOW retained deep source tracing and concrete proposals under both versions. Each found issues the other treated less fully; one run per version does not establish general superiority. Repository and bounded collector checks pass.

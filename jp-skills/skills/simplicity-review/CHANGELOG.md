@@ -32,3 +32,15 @@ This candidate is not promoted. Run matched proposed, prior, and skill-absent tr
 Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
 
 Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.
+
+## Bounded follow-up, 2026-09-11
+
+Added a recommendation to enforce recurring, mechanically detectable defects through existing checks, with a real failure and legitimate counterexample. Informed by the Anti-Slop wiki guardrail research; review remains read-only. Applied at the user's explicit request; local validation only.
+
+## Review autonomy pilot
+
+Keep concrete lifecycle and evidence coverage while allowing the reviewer to choose tools, decomposition and report structure. Preserve shared bounded research. Add shared optional Python measurements with cautious interpretation. Validation: two matched Astra reviews on IOW retained deep source tracing and concrete proposals under both versions. Each found issues the other treated less fully; one run per version does not establish general superiority. Repository and bounded collector checks pass.
+
+## Cleanup rules, 2026-09-24
+
+Extended the hygiene list with unused exports, checks the types already guarantee, names that repeat their context, and flattenable conditionals. Library capability now covers helpers that reimplement the repository's shared modules. Applied at the user's explicit request from a general cleanup rule list; no failure case was supplied and no bakeoff has run. The frontend authoring side is recorded in `../../evals/frontend-code-patterns/lean-completion.md`.

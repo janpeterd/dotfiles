@@ -5,6 +5,8 @@ description: Use when building or refactoring a React application page, data vie
 
 # Frontend code patterns
 
+After establishing scope and relevant versions, apply [bounded research](../deep-code-design/references/research-grounding.md) before technical recommendations or implementation. Reuse its brief and shared budget across composed skills and review branches.
+
 Inspect the repository's installed packages, shared components, theme tokens, API contracts and types when present, and check commands before editing.
 
 Require React Compiler for every React application. Verify that the active build path compiles application components, not merely that a compiler package is installed. When creating a React app or finding the compiler disconnected, read [React Compiler](references/react-compiler.md).
@@ -59,7 +61,11 @@ Use an Effect only to synchronize with an external system such as a browser subs
 
 Derive render values during render. Handle user actions in event handlers. Reset subtrees with keys, lift shared state, use TanStack Query for server state, and use `useSyncExternalStore` for external stores. Change the surrounding code instead of suppressing dependency checks.
 
+Let the compiler own ordinary memoization. Add `useMemo`, `useCallback`, or `memo` only when identity is part of a contract or profiling demonstrates a need the compiler does not cover. Keep existing manual memoization outside your change unless the task includes measuring and safely removing it.
+
 ## Completion
+
+Before finishing, cut from your change: dead code and unused exports, one-use wrappers, checks the types already guarantee, comments that restate the code, names that repeat their context, convoluted conditionals, and helpers that duplicate the repository's shared utilities such as `src/lib`.
 
 Run the repository's focused format, lint, typecheck, and test commands. Before finishing, inspect every changed live route and component against the route-to-component shape and one-component-per-file rule. Render every materially changed live screen at narrow and wide widths when a runnable application is available; evidence from an unrelated or trivial route does not cover it.
 

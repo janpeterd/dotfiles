@@ -16,3 +16,7 @@ This candidate is not promoted. Compare proposed and skill-absent trials across 
 Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
 
 Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.
+
+## Review autonomy pilot
+
+Keep concrete lifecycle and evidence coverage while allowing the reviewer to choose tools, decomposition and report structure. Preserve shared bounded research. Add shared optional Python measurements with cautious interpretation. Validation: two matched Astra reviews on IOW retained deep source tracing and concrete proposals under both versions. Each found issues the other treated less fully; one run per version does not establish general superiority. Repository and bounded collector checks pass.

@@ -7,15 +7,15 @@
   "rubric": [
     {
       "id": "recursive-split",
-      "criterion": "The reviewer rejects alerting as one branch and recursively separates policy mutation, observation evaluation, incident transition, and external delivery lifecycles; SPLIT is an intermediate routing result rather than the final report."
+      "criterion": "The review separately accounts for policy mutation, observation evaluation, incident transition and external delivery lifecycles. It continues into their implementation instead of stopping at decomposition; a single context or report may cover them all."
     },
     {
       "id": "sequential-contexts",
-      "criterion": "Child lifecycles are reviewed sequentially, using a fresh context and compact parent handoff when the agent environment supports it."
+      "criterion": "Review organization preserves the contracts and invariants between lifecycles. Judge the resulting coverage and reasoning, not dispatch order or the use of separate agents."
     },
     {
       "id": "semantic-inventory",
-      "criterion": "The reviewer uses ast-grep when available to enumerate definitions, callers, state writes, and external-effect boundaries, then reads the matched control flow; ripgrep is used for lexical discovery rather than as semantic proof."
+      "criterion": "The reviewer finds entry points, callers, state writes and external-effect boundaries and reads their control flow. Tool choice is free; search results alone do not establish semantic coverage."
     },
     {
       "id": "algorithm-trace",
@@ -23,7 +23,7 @@
     },
     {
       "id": "descent-bar",
-      "criterion": "A child receives DESCEND only after the complete trace supports it; incomplete children remain SPLIT or UNPROVEN."
+      "criterion": "A retained system shape is supported by the complete relevant trace. Accessible work not inspected is reported as incomplete, while unavailable evidence is identified specifically."
     },
     {
       "id": "unproven-bar",

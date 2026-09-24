@@ -1,33 +1,21 @@
 ---
 name: system-and-simplicity-review
-description: Run system-design review first, then simplicity review only for branches whose system shape survives.
+description: Review system design and implementation simplicity together, resolving structural problems before polishing the affected implementation.
 disable-model-invocation: true
 ---
 
 # System and simplicity review
 
-Run two read-only reviews sequentially. The system verdict prunes work below it.
+Review only. Use [system-design-review](../system-design-review/SKILL.md) to judge the model, ownership, interfaces and algorithms, and [simplicity-review](../simplicity-review/SKILL.md) to find the least implementation structure that preserves the required behavior.
 
-## 1. Review the system
+After establishing scope and relevant versions, apply [bounded research](../deep-code-design/references/research-grounding.md) before technical recommendations or implementation. Reuse its brief and shared budget across composed skills and review branches.
 
-Read and apply [system-design-review](../system-design-review/SKILL.md). Complete its coverage before starting implementation-level review.
+System judgment comes before polishing the affected implementation. A justified replacement makes cleanup of the discarded design unnecessary. Retained lifecycles still need the full simplicity assessment. If local inspection disproves a system assumption, revise that conclusion.
 
-- On `REDESIGN`, stop that branch.
-- On `SPLIT`, review each child sequentially through this same gate.
-- On `DESCEND`, retain only its compact handoff and continue.
+Keep the depth and coverage requirements of both reviews. Every in-scope entry point and state-changing lifecycle needs a trace through decisions, owners, transaction and external boundaries, relevant failure behavior and behavioral evidence. Every lifecycle needs a supported design conclusion; retained implementations need algorithm, ownership and relevant peer-consistency analysis. Decomposition alone does not complete the review.
 
-## 2. Review the surviving implementation
+Choose review order within those dependencies, tools, delegation and report structure to fit the work. `SPLIT` and `DESCEND` can express recursive examination without prescribing agent dispatch or separate report stages. Carry established contracts, invariants, source evidence and unresolved questions across review boundaries.
 
-For each `DESCEND` leaf, start a fresh context when available. Give it only the leaf scope, accepted interface, canonical state owners, load-bearing invariants, and fixed point. Read and apply [simplicity-review](../simplicity-review/SKILL.md) to that leaf.
+For metric-driven work, share [complexity measurements and their interpretation](../simplicity-review/references/complexity-measurement.md) across both reviews. Collect once for a matching snapshot and scope. Scores locate questions; the traced behavior and total cost of the proposed design decide the recommendation.
 
-Run leaves sequentially. Lower-level findings cannot reopen accepted system facts without evidence; when they expose a false system assumption, return that branch to the system gate.
-
-## Report
-
-Present the review tree first. Under each branch, show its system verdict and either:
-
-- the target system shape for `REDESIGN`;
-- its child branches for `SPLIT`; or
-- the implementation-level findings for `DESCEND`.
-
-The workflow is complete when every branch either stops at a justified redesign or reaches simplicity review with a bounded handoff. Do not merge local cleanup into a rejected branch.
+Present related system and implementation findings together when that clarifies one decision. Make proposed interfaces and material behavior changes concrete, with source evidence, preserved guarantees, tradeoffs and proof needed. Report actual coverage and unfinished work. A short report can contain a deep review; report length and prescribed verdict formatting are not evidence of depth.

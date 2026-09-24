@@ -28,3 +28,7 @@ Evidence: `../../evals/deep-code-design/cases/callable-interpretation/baseline.m
 Applied the module-boundary revision at the user's explicit request. It distinguishes semantic authority from derived data, private decomposition from new contracts, and shared policy from similar syntax. Concrete change and failure rehearsals account for coordination and runtime costs before choosing a split.
 
 Research rationale and observed failure cases: `../../evals/module-boundaries/DECISIONS.md`. Evaluation findings are limited and do not establish a universal improvement; the user requested activation without further model evaluations.
+
+## Bounded follow-up, 2026-09-11
+
+Added a conditional check for features that challenge the current model: compare repairing the assumption with another exception. Informed by the Anti-Slop wiki discussion of degradation across successive changes; this is a design heuristic, not a measured guarantee. Applied at the user's explicit request; local validation only.

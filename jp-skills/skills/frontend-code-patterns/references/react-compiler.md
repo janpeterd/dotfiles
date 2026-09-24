@@ -28,7 +28,7 @@ React 19 uses its built-in compiler runtime. React 17 and 18 require a matching 
 
 ## Code and verification
 
-Write components according to the Rules of React and let the compiler own ordinary memoization. Keep existing manual memoization unless the task includes measuring and safely removing it. Add `useMemo`, `useCallback`, or `memo` only when identity is part of a contract or profiling demonstrates a need the compiler does not cover.
+Write components according to the Rules of React.
 
 Keep the production compiler error threshold at its resilient default. Fix Rules of React violations that cause important components to be skipped. Use `"use no memo"` only as a temporary, documented compatibility escape hatch with a follow-up path.
 

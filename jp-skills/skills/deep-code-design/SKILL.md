@@ -5,6 +5,8 @@ description: Design a product workflow, algorithm or module boundary. Use when s
 
 # Deep software design
 
+After establishing scope and relevant versions, apply [bounded research](references/research-grounding.md) before technical recommendations or implementation. Reuse its brief and shared budget across composed skills and review branches.
+
 Design from the user's core job inward. The product surface, algorithm, data model, and module boundaries should tell one simple story.
 
 Match the requested deliverable: in review or planning mode, complete the design and verification plan with code sketches; implement and run behavior only when authorized.
@@ -33,7 +35,7 @@ Grounding is complete when every affected fact, transition, caller, and user-vis
 
 Write the zoomed-out algorithm in short pseudocode. Inventory representations, traversals, state transitions, and dominant access paths. Start with the smallest useful case. When the algorithm is uncertain, prototype that case before integrating it, and compare it with established algorithms or systems that solve the same problem.
 
-Add caching, persistence, lineage, placement, feature flags, and other capabilities around the same core. Each capability should extend or observe the core rather than create another execution path.
+Add caching, persistence, lineage, placement, feature flags, and other capabilities around the same core. Each capability should extend or observe the core rather than create another execution path. When a feature needs another special case, flag or parallel path, identify the assumption it challenges. Compare repairing that assumption with adding the exception, then choose using the required behavior and total change cost.
 
 ## 4. Choose the model and ownership
 
@@ -53,7 +55,7 @@ For extraction, deduplication, or metric-driven redesign, read [module boundarie
 
 Use dependencies through their documented public APIs first. Prefer the library's native configuration, composition, lifecycle, and extension points over wrappers, private internals, parallel state, or local reimplementations. Adapt at the application boundary only when the supported API cannot express a verified requirement.
 
-Ground dependency decisions in the installed version. Search official documentation, release notes, and versioned upstream source; inspect installed source when needed. Confirm semantics and edge cases rather than inferring capability from names or memory. Record the public API and source that justify building on it or replacing it.
+Use the bounded research brief to justify dependency decisions against the installed version and required semantics. Record the public API and source that justify building on it or replacing it.
 
 Use the deletion test: retain an abstraction when removing it forces substantial reasoning back into its callers. One caller can justify a complete private algorithm. Interchangeable adapters need concrete variation; use existing platform rules for precedence where they meet the contract.
 

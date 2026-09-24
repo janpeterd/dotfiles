@@ -5,6 +5,8 @@ description: Use when creating, changing, testing, or reviewing an Alembic datab
 
 # Migration patterns
 
+After establishing scope and relevant versions, apply [bounded research](../deep-code-design/references/research-grounding.md) before technical recommendations or implementation. Reuse its brief and shared budget across composed skills and review branches.
+
 Keep migration history append-only. Inspect the supported database engines, current heads, production revision, persistence format, writer behavior, and migration commands before editing.
 
 For a review, read repository `CONTEXT.md` and `CODING_STANDARDS.md` when present. Their absence is normal.

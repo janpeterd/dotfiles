@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # Product polish
 
+After establishing scope and relevant versions, apply [bounded research](../deep-code-design/references/research-grounding.md) before technical recommendations or implementation. Reuse its brief and shared budget across composed skills and review branches.
+
 Polish is convergence: every user-facing promise in the scoped product agrees with its behavior, vocabulary, peers, and documentation. Apply obvious fixes. Surface ambiguous behavior as a product decision.
 
 ## 1. Bound the product

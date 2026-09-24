@@ -11,7 +11,7 @@
     },
     {
       "id": "handoff",
-      "criterion": "The system stage returns DESCEND with the lifecycle invariants as a compact handoff."
+      "criterion": "The review supports retaining IncidentLifecycle and carries its invariants into implementation recommendations; a separate handoff or DESCEND label is optional."
     },
     {
       "id": "simplicity-second",
@@ -23,7 +23,7 @@
     },
     {
       "id": "sequential",
-      "criterion": "The two stages run sequentially and the simplicity reviewer receives only the accepted leaf scope and invariants."
+      "criterion": "The forwarding-module recommendation relies on a supported ownership conclusion and preserves its invariants. Separate stages, contexts and a particular execution order are not required."
     }
   ]
 }

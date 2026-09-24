@@ -7,7 +7,7 @@
   "rubric": [
     {
       "id": "system-first",
-      "criterion": "The system-design stage runs before implementation-level cleanup."
+      "criterion": "Implementation recommendations follow from the assessment of model and ownership rather than assuming the current shape must survive."
     },
     {
       "id": "redesign",
@@ -15,11 +15,11 @@
     },
     {
       "id": "prune",
-      "criterion": "The workflow stops that branch before simplicity review and does not make the unused formatting helper a primary recommendation."
+      "criterion": "The review prioritizes repairing parallel authority and avoids polishing implementation it proposes to replace. It does not make the unused formatting helper a primary recommendation."
     },
     {
       "id": "sequential",
-      "criterion": "No system and simplicity passes run in parallel."
+      "criterion": "The recommendation respects the dependency between system judgment and polishing the affected implementation. Assess reasoning, not agent scheduling."
     }
   ]
 }
