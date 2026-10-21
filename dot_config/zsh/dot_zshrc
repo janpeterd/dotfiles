@@ -6,10 +6,10 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$ZDOTDIR/ohmyzsh"
 
-export PATH="$PATH:/home/jp/Code/Projects/Android_bookmarks/flutter/bin"
+export PATH="$PATH:$HOME/Code/Projects/Android_bookmarks/flutter/bin"
 export PATH="$PATH:/usr/lib/jvm/default/bin"
 if [[ $(which jetbrains-toolbox) ]]; then
-    export PATH="$PATH:/home/jp/.local/share/JetBrains/Toolbox/scripts"
+    export PATH="$PATH:$HOME/.local/share/JetBrains/Toolbox/scripts"
 fi
 
 PROMPT_EOL_MARK=""

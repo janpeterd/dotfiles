@@ -1,0 +1,22 @@
+# Arch packages these dotfiles expect. run_onchange_before_10-install-packages
+# installs whichever are missing; it never removes anything.
+[packages]
+pacman = [
+  # shell and core tools
+  "zsh", "git", "chezmoi", "git-delta", "fzf", "zoxide", "direnv", "ripgrep",
+  "fd", "bat", "jq", "atuin", "lazygit", "lazydocker", "btop", "fastfetch",
+  "tmux", "nodejs", "npm",
+  # desktop: niri + DankMaterialShell
+  "niri", "dms-shell", "xwayland-satellite", "xdg-desktop-portal-gnome",
+  "wl-clipboard",
+  # terminals and editors
+  "kitty", "ghostty", "neovim", "emacs-wayland",
+  # yazi and its previewers
+  "yazi", "7zip", "unzip", "poppler", "resvg", "imagemagick", "chafa",
+  # media and documents
+  "mpv", "imv", "yt-dlp", "zathura", "zathura-pdf-poppler",
+]
+aur = [
+  "ttf-ioskeley-mono-unhinted",
+  "helium-browser-bin",
+]

@@ -1,0 +1,15 @@
+# Cloned once on a new machine; oh-my-zsh updates itself afterwards.
+[".config/zsh/ohmyzsh"]
+    type = "git-repo"
+    url = "https://github.com/ohmyzsh/ohmyzsh.git"
+    clone.args = ["--depth", "1"]
+
+[".config/zsh/ohmyzsh/custom/plugins/zsh-autosuggestions"]
+    type = "git-repo"
+    url = "https://github.com/zsh-users/zsh-autosuggestions.git"
+    clone.args = ["--depth", "1"]
+
+[".config/zsh/ohmyzsh/custom/plugins/zsh-syntax-highlighting"]
+    type = "git-repo"
+    url = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
+    clone.args = ["--depth", "1"]

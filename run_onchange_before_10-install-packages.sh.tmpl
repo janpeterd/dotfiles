@@ -1,0 +1,32 @@
+#!/bin/sh
+set -eu
+
+# Re-runs whenever .chezmoidata/packages.toml changes.
+{{- if ne .chezmoi.osRelease.id "arch" }}
+echo "Skipping packages: not an Arch Linux machine" >&2
+exit 0
+{{- end }}
+
+# `pacman -T` prints only the packages that are not installed.
+missing=$(pacman -T {{ .packages.pacman | join " " }} || true)
+if [ -n "$missing" ]; then
+  echo "Installing packages: $missing"
+  # shellcheck disable=SC2086
+  sudo pacman -S --needed $missing
+fi
+
+missing_aur=$(pacman -T {{ .packages.aur | join " " }} || true)
+if [ -n "$missing_aur" ]; then
+  helper=$(command -v paru || command -v yay || true)
+  if [ -n "$helper" ]; then
+    echo "Installing AUR packages: $missing_aur"
+    # shellcheck disable=SC2086
+    "$helper" -S --needed $missing_aur
+  else
+    echo "Install an AUR helper (paru) and then: $missing_aur" >&2
+  fi
+fi
+
+if ! command -v herdr >/dev/null 2>&1; then
+  echo "herdr is not installed; see https://herdr.dev for its installer" >&2
+fi

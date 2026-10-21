@@ -1,8 +1,8 @@
 [user]
-  email = {{ default "janpeter.dhalle@gmail.com" (get .user "email") }}
-  name  = {{ default "Jan-Peter Dhallé" (get .user "fullName") }}
+  email = {{ default "janpeter.dhalle@gmail.com" (dig "user" "email" "" .) }}
+  name  = {{ default "Jan-Peter Dhallé" (dig "user" "fullName" "" .) }}
 [init]
-  defaultBranch = {{ default "main" (get .git "defaultBranch") }}
+  defaultBranch = {{ default "main" (dig "git" "defaultBranch" "" .) }}
 
 [credential "http://jpserv:3000"]
 	provider = generic
@@ -28,6 +28,11 @@
 
 [commit]
   verbose = true
+
+# Drop Claude Code's Co-Authored-By/Claude-Session lines from every commit; skipped where the script is absent.
+[hook "strip-claude-footers"]
+  event = commit-msg
+  command = "f=\"$HOME/.local/bin/scripts/strip-claude-footers\"; [ ! -x \"$f\" ] || \"$f\" \"$1\""
 
 [branch]
   sort = -committerdate

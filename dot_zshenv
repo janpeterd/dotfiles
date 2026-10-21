@@ -8,6 +8,7 @@ PATH="$HOME/.local/bin:$PATH"
 PATH="$HOME/.yarn/bin:$PATH"
 PATH="$HOME/Code/scripts/bin:$PATH"
 PATH="$HOME/.config/emacs/bin:$PATH"
+PATH="$HOME/.bend/bin:$PATH"
 XDG_CONFIG_HOME="$HOME/.config"
 XDG_DATA_HOME="$HOME/.local/share"
 XDG_CACHE_HOME="$HOME/.cache"
@@ -19,6 +20,14 @@ export JP_ENV_ROOT="$XDG_CONFIG_HOME/jpserv/env"
 PATH="$HOME/.nub/bin:$PATH"
 XDG_SESSION_TYPE=wayland
 ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+# VITO
+export VAULT_ADDR=https://vault.int.vito.be
+# vpn-jumphost routing proxy: VITO domains via VPN, everything else direct.
+# Go tools (bao) ignore ALL_PROXY, hence https_proxy too.
+# export ALL_PROXY=socks5h://127.0.0.1:1081
+# export https_proxy=socks5h://127.0.0.1:1081
+# export no_proxy=localhost,127.0.0.1,::1
 
 # pnpm's system package lives under /usr, but pnpm globals should stay user-writable.
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
@@ -57,5 +66,8 @@ export NPM_CONFIG_USERCONFIG="$XDG_CONFIG_HOME/npm/npmrc"
 MOZ_ENABLE_WAYLAND=1
 _JAVA_AWT_WM_NONREPARENTING=1
 JAVA_HOME="/usr/lib/jvm/default"
-DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
+DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$UID/bus"
+# Machine-local tokens and overrides (see .chezmoiignore).
+[[ -r "$HOME/.zshenv.local" ]] && source "$HOME/.zshenv.local"
+
 # vim:ft=zsh

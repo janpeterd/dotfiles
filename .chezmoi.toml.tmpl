@@ -1,0 +1,13 @@
+{{- /* Asked once by `chezmoi init`; answers are kept in ~/.config/chezmoi/chezmoi.toml. */ -}}
+{{- $email := promptStringOnce . "user.email" "Git email for this machine" "janpeter.dhalle@gmail.com" -}}
+{{- $branch := promptStringOnce . "git.defaultBranch" "Default branch for new repositories" "main" -}}
+{{- $profile := promptChoiceOnce . "nvim.profile" "Neovim profile" (list "minimal" "dev" "native") "dev" -}}
+
+[data.user]
+email = {{ $email | quote }}
+
+[data.git]
+defaultBranch = {{ $branch | quote }}
+
+[data.nvim]
+profile = {{ $profile | quote }}
