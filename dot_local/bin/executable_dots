@@ -1,0 +1,32 @@
+#!/bin/sh
+# Two-way sync between this machine and the chezmoi dotfiles repository.
+#
+#   dots          capture local edits, pull other machines' commits, apply
+#   dots status   show what differs, without changing anything
+set -eu
+
+source_dir=$(chezmoi source-path)
+
+case "${1:-sync}" in
+  status)
+    chezmoi status
+    git -C "$source_dir" status --short --branch
+    ;;
+  sync)
+    # Plain files edited in place (or rewritten by their app) flow back into
+    # the source first, so pulling never asks to overwrite local work.
+    # Templates are skipped: edit those with `chezmoi edit`.
+    chezmoi re-add
+    git -C "$source_dir" pull --rebase --autostash
+    chezmoi apply
+    git -C "$source_dir" status --short --branch
+    if [ -n "$(chezmoi status)" ]; then
+      echo "Still differs (templates or deliberate local edits):" >&2
+      chezmoi status >&2
+    fi
+    ;;
+  *)
+    echo "usage: dots [sync|status]" >&2
+    exit 2
+    ;;
+esac
