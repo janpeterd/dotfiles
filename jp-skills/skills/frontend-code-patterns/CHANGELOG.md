@@ -21,3 +21,17 @@
 - Required preservation of TanStack file-based routing after the Geoflow refactor replaced it with a centralized manual route registry. Strengthened the existing route-owner eval beside the instruction.
 - Added completion audits for every changed live component and screen after the Geoflow refactor retained thousand-line component collections, card-led project and run views, and supplied screenshots only for an unrelated trivial route. Strengthened the existing page-shape and visual-design eval criteria beside the instruction.
 - Generalized shared-control guidance to library-native public APIs after the Geoflow refactor rebuilt installed control behavior and styling. Strengthened the existing controls eval beside the instruction.
+
+## Session-feedback candidate (2026-10-11)
+
+Unpromoted. Each change answers corrections the owner made across real projects, not a matched skill-absent run. Evidence for every item: `../../evals/frontend-code-patterns/session-feedback.md`.
+
+- Added scope discipline after repeated "only that", "dont overdo it" and restyle corrections.
+- Added reuse of the existing instance of a UI kind, with fixes landing in every instance, after 54 consistency corrections across five projects.
+- Extended the status map to entity icons and the inputs that set them.
+- Added conditional i18n coverage without inline default text after 31 corrections in the IOW and WaterprotectEU frontends.
+- Added large-data rendering and lag measurement to completion after repeated lag and "load ALL data" corrections in the Geoflow web app.
+- Added switchable variants for open visual problems, width caps and content-sized controls, decoded structured values, layout stability through selection and refresh, and two-theme checks of brand marks and dark surfaces to the visual-design reference.
+- Added motion tokens, a framework default pointed at them, and reduced motion that fades, after the 2026-10-10 polish branch fixed five motion defects that were all token drift.
+- Added motion by frequency, with `emil-design-eng` for choosing values, after repeated "too slow, mainly the close" corrections and the owner's frequency rule.
+- Added `scripts/token-audit.py` and a consistency hill climb to completion, after the owner named consistency a hill climb. Calibrated on the Geoflow polish branch and the IOW shadcn worktree; extended to TSX timing props after the polish branch hid duplicated hover delays there.

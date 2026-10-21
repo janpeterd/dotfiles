@@ -65,11 +65,11 @@ Model absence and failure explicitly. A fallback is valid only when the substitu
 
 ## 6. Compare whole shapes
 
-For consequential or novel designs, compare materially different shapes, including a repair within the current owner. Rehearse the same concrete requirement and failure case on each. Show caller usage, typed interfaces, core pseudocode and affected callers so the choice is reviewable. Account for added glue, representations, ordering obligations and verification cost. Choose the benefit that justifies the tradeoff; keep uncertain claims paired with an experiment. A local obvious change needs no design arena.
+For consequential or novel designs, compare materially different shapes, including a repair within the current owner. Rehearse the same concrete requirement and failure case on each. Show caller usage, typed interfaces, core pseudocode and affected callers so the choice is reviewable. Account for added glue, representations, ordering obligations and verification cost. Choose the benefit that justifies the tradeoff; keep uncertain claims paired with an experiment. Explain the choice in plain, concrete words and define each new term. A local obvious change needs no design arena.
 
 ## 7. Make one coherent change
 
-Move behavior to its owner, migrate every caller, and delete the superseded path in the same change. Reuse existing domain models and standard machinery. Keep the main path readable without forwarding modules, parallel implementations, or speculative extension points.
+Move behavior to its owner, migrate every caller, and delete the superseded path in the same change. When that breaks tests pinned to the old shape, rewrite them against the new behavior or delete them; keep no shim, re-export or alias for a test. Reuse existing domain models and standard machinery. Keep the main path readable without forwarding modules, parallel implementations, or speculative extension points.
 
 ## 8. Verify the design
 

@@ -9,6 +9,8 @@ After establishing scope and relevant versions, apply [bounded research](../deep
 
 Inspect the repository's installed packages, shared components, theme tokens, API contracts and types when present, and check commands before editing.
 
+Change only what the request names. When adding behavior or motion to an existing component, keep its styling.
+
 Require React Compiler for every React application. Verify that the active build path compiles application components, not merely that a compiler package is installed. When creating a React app or finding the compiler disconnected, read [React Compiler](references/react-compiler.md).
 
 Use a maintained community package already aligned with the stack for solved infrastructure. Prefer an established package such as `react-error-boundary` over a local error-boundary class. Add a dependency only when the task permits it and the repository has no suitable installed abstraction.
@@ -45,9 +47,13 @@ Preserve inference across API types when present, schemas, hooks, pages, and com
 
 ## Consistency
 
-Define each backend status, kind, or type in one exhaustive map that owns its label, icon, semantic tone, and optional presentation metadata. Render all occurrences from that definition.
+Before building a header, control, table, form, or list, find the application's existing instance of that kind. Reuse its component, or copy its structure and treatment when no shared component exists. A fix to a shared pattern lands in every instance of it.
 
-Use semantic theme tokens and the shared spacing and sizing scale. Literal colors, CSS length literals, and arbitrary Tailwind values require an existing external constraint that cannot use the design system. Keep ordinary text in natural case. Reserve all caps for conventions such as units, language codes, and standards.
+Define each backend status, kind, or type in one exhaustive map that owns its label, icon, semantic tone, and optional presentation metadata. Render all occurrences from that definition, including the inputs that set the value.
+
+In an application with i18n, route every visible string through it, with a real key in every locale. Do not pass inline default text as a fallback.
+
+Use semantic theme tokens and the shared spacing and sizing scale. Motion is tokenized too: one duration per interaction role, with exits shorter than enters, and named easing curves. Point the framework's default transition, such as Tailwind's `--default-transition-duration`, at those tokens, and let reduced motion fade briefly instead of freezing. Literal colors, CSS length literals, durations, easing curves, and arbitrary Tailwind values require an existing external constraint that cannot use the design system. Keep ordinary text in natural case. Reserve all caps for conventions such as units, language codes, and standards.
 
 Make the repository formatter own Tailwind class ordering. Configure its Tailwind v4 stylesheet and every class helper used by the codebase, such as `cn`, `cva`, or `clsx`. Keep one format command and one format-check command. Do not hand-sort classes or add a second formatter.
 
@@ -67,7 +73,11 @@ Let the compiler own ordinary memoization. Add `useMemo`, `useCallback`, or `mem
 
 Before finishing, cut from your change: dead code and unused exports, one-use wrappers, checks the types already guarantee, comments that restate the code, names that repeat their context, convoluted conditionals, and helpers that duplicate the repository's shared utilities such as `src/lib`.
 
+Consistency stacks, so hill-climb it. Run [token audit](scripts/token-audit.py) over the frontend sources before and after the change. It counts undefined variables, literal durations, easings and colors, `transition-all`, and arbitrary values. Leave the count lower than you found it, and name each exception that remains.
+
 Run the repository's focused format, lint, typecheck, and test commands. Before finishing, inspect every changed live route and component against the route-to-component shape and one-component-per-file rule. Render every materially changed live screen at narrow and wide widths when a runnable application is available; evidence from an unrelated or trivial route does not cover it.
+
+When a view can hold large data, such as long lists, big graphs, or large files, render it with a realistically large dataset. Measure and fix lag in layout, scrolling, and interaction. Load heavy content on explicit request.
 
 Run a production build after changing React Compiler configuration and verify that a representative component was compiled.
 

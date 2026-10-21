@@ -44,3 +44,11 @@ Keep concrete lifecycle and evidence coverage while allowing the reviewer to cho
 ## Cleanup rules, 2026-09-24
 
 Extended the hygiene list with unused exports, checks the types already guarantee, names that repeat their context, and flattenable conditionals. Library capability now covers helpers that reimplement the repository's shared modules. Applied at the user's explicit request from a general cleanup rule list; no failure case was supplied and no bakeoff has run. The frontend authoring side is recorded in `../../evals/frontend-code-patterns/lean-completion.md`.
+
+## Session-feedback candidate (2026-10-11)
+
+Unpromoted. Evidence: `../../research/session-feedback-code-design.md`.
+
+- Made compatibility surfaces without a named external consumer and removal condition a `CUT`, after 57 hard-switch corrections across five projects.
+- Counted the standard library as a library capability and required a named gap for hand-written OS access, after the derived-stages review missed registry, process-table and raw-descriptor code.
+- Added vague umbrella names to the hygiene costs after 21 naming corrections.

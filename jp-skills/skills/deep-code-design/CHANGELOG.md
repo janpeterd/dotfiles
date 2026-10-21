@@ -32,3 +32,10 @@ Research rationale and observed failure cases: `../../evals/module-boundaries/DE
 ## Bounded follow-up, 2026-09-11
 
 Added a conditional check for features that challenge the current model: compare repairing the assumption with another exception. Informed by the Anti-Slop wiki discussion of degradation across successive changes; this is a design heuristic, not a measured guarantee. Applied at the user's explicit request; local validation only.
+
+## Session-feedback candidate (2026-10-11)
+
+Unpromoted. Evidence: `../../research/session-feedback-code-design.md`.
+
+- Required rewriting or deleting tests that a hard replacement breaks, instead of keeping shims for them, after repeated corrections in Geoflow and IOW.
+- Required plain explanations that define new terms when comparing shapes, after 20 corrections about umbrella vocabulary and over-long answers.

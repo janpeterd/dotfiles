@@ -26,14 +26,18 @@ Cases include examples drawn from projects I work on, including Geoflow. The `so
 
 Temporary workspaces use `TMPDIR` when set, otherwise `/tmp`. Results are saved under the ignored `runs/` directory; `RUN_ROOT` overrides the output directory for `run-case`.
 
+## Mining session feedback
+
+`session-messages` (in `~/.local/bin/scripts`, not this repository) prints the owner's own messages from Claude Code, pi and Codex logs as JSON lines, with the end of the agent reply each message answered. It drops injected context, tool results, agent-started sessions, subagent briefs and replayed duplicates. Filter with `--cwd`, `--grep` and `--since`, split the result into chunks of about 400 KB, and have extraction subagents return rules with verbatim quotes. Merge the rules, compare them with the current skill text, and record each accepted change with its evidence, as in `research/session-feedback-code-design.md` and `evals/frontend-code-patterns/session-feedback.md`. Mined corrections are candidate evidence, not a bakeoff.
+
 ## Installation and editing
 
-Chezmoi manages links in `~/.agents/skills/` to this source directory. The links use `{{ .chezmoi.sourceDir }}` so each machine resolves its own dotfiles checkout. Skill installation is shared across agents and does not change agent-specific settings.
+Chezmoi manages links in `~/.agents/skills/` to this source directory. The links use `{{ .chezmoi.sourceDir }}` so each machine resolves its own dotfiles checkout. Claude Code reads only `~/.claude/skills/`, so chezmoi also links each skill there to its `~/.agents/skills/` entry. A new skill needs both links: `dot_agents/skills/symlink_<name>.tmpl` and `dot_claude/skills/symlink_<name>`.
 
-After pulling dotfiles, apply only the shared skills:
+After pulling dotfiles, apply only the skill links:
 
 ```bash
-chezmoi apply --include=dirs,symlinks ~/.agents/skills
+chezmoi apply --include=dirs,symlinks ~/.agents/skills ~/.claude/skills
 ```
 
 Edit the skills, evals, and scripts here and commit them in the parent dotfiles repository. The project is ignored by chezmoi deployment so eval fixtures and research stay in the source checkout. Git still tracks the complete project.

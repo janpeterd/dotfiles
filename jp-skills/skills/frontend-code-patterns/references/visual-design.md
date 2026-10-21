@@ -10,11 +10,15 @@ Choose geometry before components. Map importance, comparison, sequence, hierarc
 
 Compose the screen as one field, not a stack of interchangeable components. Give each reading moment one focal relationship and a small number of supporting objects. Vary density deliberately while keeping one alignment and spacing grammar.
 
+When the right composition is genuinely open, build switchable variants inside the real application on a throwaway route, let the user compare them, then implement the chosen one.
+
 Default page headers to one title and the actions that genuinely belong at page scope. Add orientation copy only when the title cannot explain an unfamiliar task or a material consequence. Generic subtitles, product breadcrumbs presented as decoration, and eyebrow labels dilute the first read.
 
 ## Establish hierarchy
 
 Use typography, spacing, alignment, and density before surfaces, borders, badges, icons, or color. A surface is earned by interaction, selection, warning, contrast, or grouping that spacing cannot express. Lists, filters, summary values, and ordinary page sections default to an open canvas with separators. Do not put a rounded box or background around them merely to make a container visible.
+
+Cap content width on wide screens. Size inputs, selects, and buttons to their content, not to the page width.
 
 Give each gap one owner. Let a parent stack or grid establish spacing for its children. Size gaps by relationship: tight within one control or datum, moderate within a group, and clearly larger between separate tasks. Repair the grouping rather than adding one-off margins.
 
@@ -30,7 +34,7 @@ Align comparable values and use tabular numerals when scanning numbers matters. 
 
 Do not lead with a stat or KPI strip by default. A summary value belongs only when it changes the user's next decision, and it sits beside the object it qualifies instead of occupying a ceremonial row. Counts that merely restate the visible collection stay subordinate near the collection title.
 
-Keep opaque machine identifiers out of the normal reading path. Show one only when users must distinguish, copy, audit, or search by it, and provide an explicit interaction for that job.
+Keep opaque machine identifiers and raw serialized objects out of the normal reading path. Show an identifier only when users must distinguish, copy, audit, or search by it, and provide an explicit interaction for that job. Render structured values decoded.
 
 Treat remote strings as adversarial layout input. Constrain single-line values through every flex or grid ancestor, truncate at the displayed boundary, and retain access to the complete value. Prefer reordering, stacking, or changing density before shrinking text.
 
@@ -40,11 +44,17 @@ Repeated scanning rows have a stable height. Prefer one-line truncation for the 
 
 Use morphing or shared-element transitions to show how connected steps in a flow relate. Keep frequently used controls fixed in position and hit area, animating surrounding content while keeping the next action available.
 
+Match motion to frequency. Actions repeated many times a day or started from the keyboard get no animation or the shortest token. Once one tooltip is open, its neighbours open at once. A hover popup waits briefly before its first appearance. Choose durations, easing, and interruptibility with the `emil-design-eng` skill when it is installed.
+
+Selection, tab switches, polling, and background refreshes keep layout and content in place, without jumps, flashes, or skeleton flicker. Shape loading placeholders like the loaded layout.
+
 ## Responsive themes
 
 Design desktop and mobile as equivalent compositions, not a wide layout and its compressed remainder. Reorder or stack around the same primary job. Keep controls reachable, values comparable, and rows actionable without horizontal page scrolling.
 
 Light and dark themes preserve the same hierarchy and state meaning. Use the application's semantic tokens so contrast, surfaces, separators, focus, and muted text remain intentional in both themes. Do not invent a page-specific accent palette when established product tokens already express the required meaning.
+
+Check brand marks, favicons, accents, and canvases in both themes. Give dark mode crisp separators where light mode uses elevation, and keep its surfaces off near-black.
 
 ## Render and revise
 
