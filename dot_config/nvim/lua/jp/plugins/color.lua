@@ -1,8 +1,17 @@
 ---@diagnostic disable: missing-fields
-Colorscheme = "gruvbox"
+Colorscheme = "flexoki"
 
 local function colorschemes()
   return {
+    {
+      "kepano/flexoki-neovim",
+      name = "flexoki",
+      colorscheme = "flexoki",
+      config = function()
+        require "jp.colors.flexoki"
+      end,
+    },
+
     {
       "rebelot/kanagawa.nvim",
       name = "kanagawa",

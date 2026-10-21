@@ -121,7 +121,7 @@ return {
 
         -- jedi_language_server = {},
 
-        marksman = {},
+        -- marksman = {},
 
         -- clangd = {
         --   -- TODO: Could include cmd, but not sure those were all relevant flags.

@@ -18,7 +18,7 @@ background-opacity = 0.95
 # background-blur = true
 
 # Theme is defined in ~/.config/ghostty/themes/moonfly
-theme = moonfly
+theme = Adwaita
 
 # ------------------------------------------------------------------------------
 # Scrollback

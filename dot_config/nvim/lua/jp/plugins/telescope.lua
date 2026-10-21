@@ -29,7 +29,7 @@ return {
         mode = "v",
         desc = "[S]earch [g]rep (rg with args)",
       },
-      { "<leader>sp", desc = "[S]earch [p]roject files (git)" },
+      { "<leader>gf", desc = "[S]earch [p]roject files (git)" },
       { "<leader>ss", desc = "[S]earch buffer lines" },
       {
         "<leader>ss",
@@ -315,7 +315,7 @@ return {
         "y<ESC>:Telescope live_grep default_text=<c-r>0<CR>",
         { desc = "[S]earch Ripgrep for selection" }
       )
-      set("n", "<leader>sp", "<cmd>Telescope git_files<cr>", { desc = "[S]earch [p]roject files (git)" }) -- Fuzzy search contents of project files (git)
+      set("n", "<leader>gf", "<cmd>Telescope git_files<cr>", { desc = "[S]earch [p]roject files (git)" }) -- Fuzzy search contents of project files (git)
       set("n", "<leader>ss", builtin.current_buffer_fuzzy_find, { desc = "[S]earch buffer lines" })
       set(
         "v",

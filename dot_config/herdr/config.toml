@@ -1,8 +1,9 @@
 onboarding = false
 
 [theme]
-name = "nord"
+name = "solarized"
 
+auto_switch = false
 [terminal]
 # Use your default shell (bash/zsh etc.)
 # default_shell = ""
@@ -111,6 +112,7 @@ description = "review the agent's last reply"
 agent_panel_scope = "all"
 show_agent_labels_on_pane_borders = true
 
+agent_panel_sort = "priority"
 [ui.toast]
 delivery = "herdr"
 

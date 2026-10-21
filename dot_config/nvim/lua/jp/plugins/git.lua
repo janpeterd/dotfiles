@@ -17,9 +17,28 @@ return {
       {
         "esmuellert/codediff.nvim",
         cmd = "CodeDiff",
+        opts = {
+          diff = { layout = "inline" },
+        },
       },
     },
     config = function()
+      -- Remove when Neogit adopts CodeDiff's current session schema:
+      -- https://github.com/NeogitOrg/neogit/issues/2008
+      local view = require "codediff.ui.view"
+      local path = require "codediff.core.path"
+      local create = view.create
+      view.create = function(session, filetype, on_ready)
+        if session.mode == "explorer" or session.mode == "standalone" then
+          session.original = session.original or path.make_ref(session.original_path, session.git_root)
+          session.modified = session.modified or path.make_ref(session.modified_path, session.git_root)
+          if session.mode == "explorer" and not session.panel then
+            session.panel = { name = "explorer", data = session.explorer_data or {} }
+          end
+        end
+        return create(session, filetype, on_ready)
+      end
+
       local neogit = require "neogit"
       neogit.setup {
         integrations = {
@@ -80,4 +99,23 @@ return {
     end,
   },
   -- { "akinsho/git-conflict.nvim", version = "*", config = true },
+  {
+    "georgeguimaraes/review.nvim",
+    version = "v*",
+    dependencies = {
+      "esmuellert/codediff.nvim",
+      "MunifTanjim/nui.nvim",
+    },
+    event = "VeryLazy",
+    keys = {
+      { "<leader>rr", "<cmd>Review<cr>", desc = "Review working tree" },
+      { "<leader>rc", "<cmd>Review commits<cr>", desc = "Review commits" },
+      { "<leader>rb", "<cmd>Review branch<cr>", desc = "Review branch" },
+      { "<leader>rn", ":Review note<cr>", mode = { "n", "v" }, desc = "Review: note here" },
+      { "<leader>re", "<cmd>Review edit<cr>", desc = "Review: edit comment" },
+      { "<leader>rd", "<cmd>Review delete<cr>", desc = "Review: delete comment" },
+      { "<leader>rx", "<cmd>Review export<cr>", desc = "Review: export" },
+    },
+    opts = {},
+  },
 }

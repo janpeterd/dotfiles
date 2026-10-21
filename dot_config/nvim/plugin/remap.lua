@@ -15,7 +15,7 @@ vim.keymap.set("n", "<leader>fn", ":find ", { desc = "[F]ind [N]ative)" })
 local last_press_time = 0
 local press_count = 0
 
-set("n", "<leader>gf", ":wincmd w || e <C-r><C-f><cr>") -- open the file under the cursor in the last used window
+set("n", "<leader>on", ":wincmd w || e <C-r><C-f><cr>") -- open the file under the cursor in the last used window
 set("i", "<C-l>", function()
   -- function that does the following:
   -- keymap is pressed once: center current line in the view

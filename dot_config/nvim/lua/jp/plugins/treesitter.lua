@@ -80,6 +80,7 @@ return {
         auto_install = true,
         highlight = {
           enable = true,
+          disable = { "kulala_http" },
           additional_vim_regex_highlighting = { "org", "csv" },
         },
 

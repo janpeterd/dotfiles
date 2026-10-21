@@ -60,7 +60,7 @@
     },
   },
   {
-    "context": "Workspace",
+    "context": "Workspace && vim_mode == normal && !VimWaiting && !menu",
     "bindings": {
       "space o t": "workspace::NewTerminal",
       "space f f": "file_finder::Toggle",
