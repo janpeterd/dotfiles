@@ -1,0 +1,31 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+  Pi rewrites settings.json itself: it records the last changelog it showed
+  and the model and thinking level last picked. Those keys are only seeded
+  here; the keys in .chezmoitemplates/pi-settings.json are enforced. The file
+  is left byte-for-byte alone while every enforced key already matches.
+*/ -}}
+{{- $managed := includeTemplate "pi-settings.json" . | fromJson -}}
+{{- $seeded := dict "defaultProvider" "openai-codex" "defaultModel" "gpt-5.6-sol" "defaultThinkingLevel" "medium" -}}
+{{- $live := dict -}}
+{{- if .chezmoi.stdin -}}
+{{-   $live = fromJson .chezmoi.stdin -}}
+{{- end -}}
+{{- $changed := false -}}
+{{- range $key, $value := $managed -}}
+{{-   if ne (toJson (get $live $key)) (toJson $value) -}}
+{{-     $_ := set $live $key $value -}}
+{{-     $changed = true -}}
+{{-   end -}}
+{{- end -}}
+{{- range $key, $value := $seeded -}}
+{{-   if not (hasKey $live $key) -}}
+{{-     $_ := set $live $key $value -}}
+{{-     $changed = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if $changed -}}
+{{    toPrettyJson $live }}
+{{- else -}}
+{{    .chezmoi.stdin }}
+{{- end -}}

@@ -1,8 +1,9 @@
 #!/bin/sh
 set -eu
 
-# Re-run whenever the managed Herdr plugin set changes.
+# Re-run whenever the managed Herdr plugin or integration set changes.
 # plugins: smarzban/herdr-file-viewer
+# integrations: pi
 
 if ! command -v herdr >/dev/null 2>&1; then
   echo "Skipping Herdr plugins: herdr is not installed" >&2
@@ -12,8 +13,16 @@ fi
 if herdr plugin list --plugin herdr-file-viewer --json \
   | grep -q '"plugin_id":"herdr-file-viewer"'; then
   echo "Herdr file viewer plugin is already installed"
-  exit 0
+else
+  echo "Installing Herdr file viewer plugin"
+  herdr plugin install smarzban/herdr-file-viewer --yes
 fi
 
-echo "Installing Herdr file viewer plugin"
-herdr plugin install smarzban/herdr-file-viewer --yes
+# Herdr owns ~/.pi/agent/extensions/herdr-agent-state.ts and rewrites it on
+# update, so it is installed here instead of tracked in chezmoi.
+if herdr integration status 2>/dev/null | grep -q '^pi: current'; then
+  echo "Herdr pi integration is current"
+else
+  echo "Installing Herdr pi integration"
+  herdr integration install pi
+fi

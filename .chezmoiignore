@@ -14,3 +14,30 @@
 # Skills project stays in the source checkout; shared skills link into it.
 jp-skills
 jp-skills/**
+
+# Repository-only files: they document and test the source, they are not dotfiles.
+docs
+docs/**
+tests
+tests/**
+
+# Machine-local shell secrets (tokens); sourced by ~/.zshenv when present.
+.zshenv.local
+
+# Lock files and generated state. Each machine resolves its own; keeping them
+# here only produced conflicts between machines.
+.config/nvim/lazy-lock.json
+.config/nvim/spell/*.add.spl
+.config/yazi/package.toml
+.config/yazi/plugins/*.yazi
+!.config/yazi/plugins/clipboard.yazi
+.config/yazi/flavors/*.yazi
+
+# Written by DankMaterialShell's theme generator.
+.config/ghostty/themes/dankcolors
+.config/zed/themes/dank-zed-theme.json
+.config/niri/dms
+.config/niri/dms/**
+
+# Written by `herdr integration install pi` (see run_onchange_after_30).
+.pi/agent/extensions/herdr-agent-state.ts
