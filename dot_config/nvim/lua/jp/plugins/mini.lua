@@ -8,8 +8,6 @@ return {
     end,
     config = function()
       -- require("mini.pick").setup()
-      require("mini.extra").setup()
-      require("mini.colors").setup()
       require("mini.bufremove").setup()
       require("mini.ai").setup()
       require("mini.notify").setup {

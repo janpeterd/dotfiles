@@ -21,7 +21,7 @@ set("i", "<C-l>", function()
   -- keymap is pressed once: center current line in the view
   -- keymap is pressed twice: set currentl line at the top of the view
   -- keymap is pressed for a third time: set currentl line at the bottom of the view
-  local current_time = vim.loop.now()
+  local current_time = vim.uv.now()
 
   -- Reset count if more than 500ms have passed since last keypress
   if current_time - last_press_time > 500 then
@@ -202,6 +202,7 @@ end, { desc = "[T]oggle [h]ighlight (hlsearch)" })
 set("n", "<leader>Td", function()
   vim.cmd [[ToggleDistractions]]
 end, { desc = "[T]oggle [d]istractions (usercmd)" })
+set("n", "<leader>Tu", "<cmd>Undotree<cr>", { desc = "[T]oggle [U]ndotree (built-in)" })
 
 ------------
 -- Terminal

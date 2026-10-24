@@ -48,7 +48,7 @@ require("github-theme").setup {
       },
       cmp = true,
       gitsigns = true,
-      telescope = true,
+      telescope = false,
       fidget = true,
       neogit = true,
       treesitter = true,

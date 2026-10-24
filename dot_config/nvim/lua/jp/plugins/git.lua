@@ -42,7 +42,7 @@ return {
       local neogit = require "neogit"
       neogit.setup {
         integrations = {
-          telescope = true,
+          snacks = true,
           codediff = true,
           auto_show_console_on = "always",
         },
@@ -84,18 +84,6 @@ return {
           )
         end,
       }
-    end,
-  },
-  {
-    "FabijanZulj/blame.nvim",
-    lazy = true,
-    cmd = "BlameToggle",
-    keys = {
-      { "<leader>gB", desc = "[G]it [b]lame" },
-    },
-    config = function()
-      require("blame").setup()
-      vim.keymap.set("n", "<leader>gB", "<cmd>BlameToggle<cr>", { desc = "[G]it [b]lame" })
     end,
   },
   -- { "akinsho/git-conflict.nvim", version = "*", config = true },
