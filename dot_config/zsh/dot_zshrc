@@ -172,6 +172,8 @@ export PATH="/home/jp/.bun/bin:$PATH"
 export PATH="$HOME/.nub/bin:$PATH"
 export PATH="/home/jp/.npm-global/bin:$PATH"
 export PATH="/home/jp/go/bin:$PATH"
+export PATH=/home/jp/.opencode/bin:$PATH
+
 
 # Pyenv python version manager
 # export PYENV_ROOT="$HOME/.pyenv"
