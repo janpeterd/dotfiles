@@ -6,16 +6,35 @@
 # Path to your oh-my-zsh installation.
 export ZSH="$ZDOTDIR/ohmyzsh"
 
-export PATH="$PATH:$HOME/Code/Projects/Android_bookmarks/flutter/bin"
-export PATH="$PATH:/usr/lib/jvm/default/bin"
-if [[ $(which jetbrains-toolbox) ]]; then
-    export PATH="$PATH:$HOME/.local/share/JetBrains/Toolbox/scripts"
-fi
-
 PROMPT_EOL_MARK=""
 ZSH_THEME="jnrowe"
 
 plugins=(zoxide zsh-autosuggestions fzf zsh-syntax-highlighting direnv)
+
+# Generated completion scripts are large (pixi alone is ~700 KB). Cache them
+# once and let compinit autoload them on demand instead of evaluating them in
+# every shell. Delete a cached file to regenerate it.
+_completion_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
+[[ -d "$_completion_cache" ]] || mkdir -p "$_completion_cache"
+_cache_completion() {
+  local name=$1
+  shift
+  (( $+commands[$name] )) || return 0
+  [[ -s "$_completion_cache/_$name" ]] && return 0
+  "$@" >| "$_completion_cache/_$name.tmp" 2>/dev/null &&
+    mv "$_completion_cache/_$name.tmp" "$_completion_cache/_$name"
+  rm -f "$_completion_cache/_$name.tmp"
+}
+_cache_completion pixi pixi completion --shell zsh
+_cache_completion atuin atuin gen-completions --shell zsh
+_cache_completion chezmoi chezmoi completion zsh
+_cache_completion opencode opencode --completions zsh
+unfunction _cache_completion
+
+# Custom completions live in the source tree; generated ones in the cache.
+typeset -U fpath
+fpath=("$ZDOTDIR/completions" "$_completion_cache" $fpath)
+unset _completion_cache
 
 # dont dump these files in my dotfiles!
 export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
@@ -164,54 +183,34 @@ bindkey '^X^o' fzf-file-widget
 
 source "$ZDOTDIR/aliases"
 
-# Add custom completion fucntions:
-export FPATH=$ZDOTDIR/completions:$FPATH
-
-
-export PATH="/home/jp/.bun/bin:$PATH"
-export PATH="$HOME/.nub/bin:$PATH"
-export PATH="/home/jp/.npm-global/bin:$PATH"
-export PATH="/home/jp/go/bin:$PATH"
-export PATH=/home/jp/.opencode/bin:$PATH
-
 
 # Pyenv python version manager
 # export PYENV_ROOT="$HOME/.pyenv"
 # [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 # eval "$(pyenv init - zsh)"
 
-# Atuin magical shell history
-eval "$(atuin init zsh)"
-
-eval "$(pixi completion --shell zsh)"
+# Atuin magical shell history. Its init costs ~70 ms; run it once ZLE is idle
+# so the first prompt is not blocked. Ctrl-R keeps working until it loads.
+source "$ZDOTDIR/zsh-defer/zsh-defer.plugin.zsh"
+_atuin_init() {
+  unfunction _atuin_init
+  (( $+commands[atuin] )) && eval "$(atuin init zsh)"
+}
+zsh-defer _atuin_init
 
 
 
 # Map Control + y to the accept-line widget for autosuggestions
 bindkey '^y' autosuggest-accept
 
-greeting() {
-  printf "| \e[31m%s\e[34m@\e[32m%s\e[38m (%s)\e[0m | \e[33m%s\e[0m | \e[35m%s\e[0m | \e[34m%s\e[0m | \e[33m%s\e[0m | \e[32m%s\e[0m | \e[36m%s\e[0m |\n" "$USER" "$(uname --nodename)" "$(uname --machine)" "$(date '+%H:%M')" "$(uptime -p)" "$(df -h --output=avail $HOME | tail -1 | xargs)" $(ip -4 -brief addr show $(ip route show | rg -r '$1' -wo 'default .*? dev (.*?)'))
-hour=$(date "+%H")
-  greeting=""
-  if [ $hour -gt 5 ] && [ $hour -lt 11 ]; then
-    greeting="Good Morning $USER!"
-  elif [ $hour -gt 10 ] && [ $hour -lt 18 ]; then
-    greeting="Good Day $USER!"
-  elif [ $hour -gt 17 ] && [ $hour -lt 22 ]; then
-    greeting="Good Evening $USER!"
-  else
-    greeting="Good Night $USER!"
-  fi
-  cowsay -f bud-frogs $greeting | lolcat
-}
-# greeting
 
-[ -f /opt/miniforge/etc/profile.d/conda.sh ] && source /opt/miniforge/etc/profile.d/conda.sh
 
-# Sdkman
-[ -f "$HOME/.sdkman/bin/sdkman-init.sh" ] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# Sdkman: the current java/maven are on PATH from .zshenv (agents need them
+# too). `sdk` loads the full init script (~190 ms) only on first use.
+if [[ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
+  sdk() {
+    unfunction sdk
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    sdk "$@"
+  }
+fi

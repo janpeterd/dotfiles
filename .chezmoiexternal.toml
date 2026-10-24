@@ -13,3 +13,9 @@
     type = "git-repo"
     url = "https://github.com/zsh-users/zsh-syntax-highlighting.git"
     clone.args = ["--depth", "1"]
+
+# Defer slow initialisation (atuin) until after the first prompt.
+[".config/zsh/zsh-defer"]
+    type = "git-repo"
+    url = "https://github.com/romkatv/zsh-defer.git"
+    clone.args = ["--depth", "1"]
